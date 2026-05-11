@@ -7,51 +7,69 @@ export default function Home() {
     <main
       style={{
         minHeight: "100vh",
+        background: "#f3f4f6",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        flexDirection: "column",
-        fontFamily: "Arial",
-        gap: "20px",
+        fontFamily: "sans-serif",
       }}
     >
-      <h1>Dental Clinic System</h1>
-
-      <Link href="/doctor">
-        <button
+      <div
+        style={{
+          background: "white",
+          padding: "40px",
+          borderRadius: "20px",
+          width: "400px",
+          boxShadow: "0 0 20px rgba(0,0,0,0.1)",
+          textAlign: "center",
+        }}
+      >
+        <h1
           style={{
-            padding: "15px",
-            width: "250px",
-            fontSize: "18px",
+            marginBottom: "30px",
+            color: "#2563eb",
           }}
         >
-          صفحة الطبيب
-        </button>
-      </Link>
+          Dental Clinic System
+        </h1>
 
-      <Link href="/secretary">
-        <button
+        <div
           style={{
-            padding: "15px",
-            width: "250px",
-            fontSize: "18px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px",
           }}
         >
-          صفحة السكرتيرة
-        </button>
-      </Link>
+          <Link href="/doctor">
+            <button style={buttonStyle}>
+              صفحة الطبيب
+            </button>
+          </Link>
 
-      <Link href="/reports">
-        <button
-          style={{
-            padding: "15px",
-            width: "250px",
-            fontSize: "18px",
-          }}
-        >
-          التقارير
-        </button>
-      </Link>
+          <Link href="/secretary">
+            <button style={buttonStyle}>
+              صفحة السكرتيرة
+            </button>
+          </Link>
+
+          <Link href="/reports">
+            <button style={buttonStyle}>
+              التقارير
+            </button>
+          </Link>
+        </div>
+      </div>
     </main>
   );
 }
+
+const buttonStyle = {
+  width: "100%",
+  padding: "15px",
+  fontSize: "18px",
+  border: "none",
+  borderRadius: "10px",
+  background: "#2563eb",
+  color: "white",
+  cursor: "pointer",
+};
