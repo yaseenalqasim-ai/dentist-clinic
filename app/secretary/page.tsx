@@ -21,7 +21,6 @@ export default function SecretaryPage() {
   const [date, setDate] = useState("");
   const [status, setStatus] = useState("مؤجل🟡");
 
-  // تحميل الحجوزات
   useEffect(() => {
     const savedPatients =
       JSON.parse(
@@ -31,7 +30,6 @@ export default function SecretaryPage() {
     setPatients(savedPatients);
   }, []);
 
-  // حفظ الحجوزات
   function savePatients(updatedPatients: any[]) {
     setPatients(updatedPatients);
 
@@ -41,7 +39,6 @@ export default function SecretaryPage() {
     );
   }
 
-  // إضافة أو تعديل
   function addBooking() {
     const newPatient = {
       name,
@@ -67,7 +64,6 @@ export default function SecretaryPage() {
     resetForm();
   }
 
-  // حذف
   function deleteBooking(index: number) {
     const updatedPatients = patients.filter(
       (_, i) => i !== index
@@ -76,13 +72,13 @@ export default function SecretaryPage() {
     savePatients(updatedPatients);
   }
 
-  // تعديل
   function editBooking(index: number) {
     const patient = patients[index];
 
     setName(patient.name);
     setPhone(patient.phone);
     setVisitType(patient.visitType);
+
     setFirstVisitType(
       patient.firstVisitType
     );
@@ -97,7 +93,6 @@ export default function SecretaryPage() {
     setShowForm(true);
   }
 
-  // تنظيف
   function resetForm() {
     setName("");
     setPhone("");
@@ -141,10 +136,8 @@ export default function SecretaryPage() {
         </button>
       )}
 
-      {/* الفورم */}
       {showForm && (
         <div style={cardStyle}>
-
           <button
             onClick={resetForm}
             style={{
@@ -166,7 +159,7 @@ export default function SecretaryPage() {
           />
 
           <input
-            placeholder="📞 رقم المريض (واتساب)"
+            placeholder="📞 رقم المريض"
             value={phone}
             onChange={(e) =>
               setPhone(e.target.value)
@@ -264,7 +257,6 @@ export default function SecretaryPage() {
             style={inputStyle}
           />
 
-          {/* حالة الحجز */}
           <select
             value={status}
             onChange={(e) =>
@@ -350,6 +342,26 @@ export default function SecretaryPage() {
                 marginTop: "20px",
               }}
             >
+
+              {/* واتساب */}
+              <a
+                href={`https://wa.me/${patient.phone}`}
+                target="_blank"
+                style={{
+                  flex: 1,
+                  background: "#25D366",
+                  color: "white",
+                  textDecoration: "none",
+                  borderRadius: "10px",
+                  padding: "12px",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                واتساب 💬
+              </a>
+
+              {/* تعديل */}
               <button
                 onClick={() =>
                   editBooking(index)
@@ -363,6 +375,7 @@ export default function SecretaryPage() {
                 تعديل
               </button>
 
+              {/* حذف */}
               <button
                 onClick={() =>
                   deleteBooking(index)
@@ -407,6 +420,6 @@ const cardStyle = {
   padding: "20px",
   borderRadius: "15px",
   marginTop: "20px",
-  maxWidth: "650px",
+  maxWidth: "700px",
   boxShadow: "0 0 10px rgba(0,0,0,0.1)",
 };
