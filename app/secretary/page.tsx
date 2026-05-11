@@ -7,14 +7,19 @@ export default function SecretaryPage() {
 
   const [patients, setPatients] = useState<any[]>([]);
 
+  const [editingIndex, setEditingIndex] =
+    useState<number | null>(null);
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [visitType, setVisitType] = useState("");
   const [firstVisitType, setFirstVisitType] =
     useState("");
+
   const [disease, setDisease] = useState("");
   const [complaint, setComplaint] = useState("");
   const [date, setDate] = useState("");
+  const [status, setStatus] = useState("مؤجل🟡");
 
   // تحميل الحجوزات
   useEffect(() => {
@@ -26,7 +31,17 @@ export default function SecretaryPage() {
     setPatients(savedPatients);
   }, []);
 
-  // إضافة حجز
+  // حفظ الحجوزات
+  function savePatients(updatedPatients: any[]) {
+    setPatients(updatedPatients);
+
+    localStorage.setItem(
+      "patients",
+      JSON.stringify(updatedPatients)
+    );
+  }
+
+  // إضافة أو تعديل
   function addBooking() {
     const newPatient = {
       name,
@@ -36,22 +51,54 @@ export default function SecretaryPage() {
       disease,
       complaint,
       date,
+      status,
     };
 
-    const updatedPatients = [
-      ...patients,
-      newPatient,
-    ];
+    let updatedPatients = [...patients];
 
-    setPatients(updatedPatients);
+    if (editingIndex !== null) {
+      updatedPatients[editingIndex] = newPatient;
+    } else {
+      updatedPatients.push(newPatient);
+    }
 
-    // حفظ دائم
-    localStorage.setItem(
-      "patients",
-      JSON.stringify(updatedPatients)
+    savePatients(updatedPatients);
+
+    resetForm();
+  }
+
+  // حذف
+  function deleteBooking(index: number) {
+    const updatedPatients = patients.filter(
+      (_, i) => i !== index
     );
 
-    // تنظيف الحقول
+    savePatients(updatedPatients);
+  }
+
+  // تعديل
+  function editBooking(index: number) {
+    const patient = patients[index];
+
+    setName(patient.name);
+    setPhone(patient.phone);
+    setVisitType(patient.visitType);
+    setFirstVisitType(
+      patient.firstVisitType
+    );
+
+    setDisease(patient.disease);
+    setComplaint(patient.complaint);
+    setDate(patient.date);
+    setStatus(patient.status);
+
+    setEditingIndex(index);
+
+    setShowForm(true);
+  }
+
+  // تنظيف
+  function resetForm() {
     setName("");
     setPhone("");
     setVisitType("");
@@ -59,6 +106,9 @@ export default function SecretaryPage() {
     setDisease("");
     setComplaint("");
     setDate("");
+    setStatus("مؤجل🟡");
+
+    setEditingIndex(null);
 
     setShowForm(false);
   }
@@ -82,16 +132,30 @@ export default function SecretaryPage() {
         واجهة السكرتيرة
       </h1>
 
-      <button
-        onClick={() => setShowForm(true)}
-        style={buttonStyle}
-      >
-        + إضافة حجز
-      </button>
+      {!showForm && (
+        <button
+          onClick={() => setShowForm(true)}
+          style={buttonStyle}
+        >
+          + إضافة حجز
+        </button>
+      )}
 
       {/* الفورم */}
       {showForm && (
         <div style={cardStyle}>
+
+          <button
+            onClick={resetForm}
+            style={{
+              ...buttonStyle,
+              background: "#6b7280",
+              marginBottom: "20px",
+            }}
+          >
+            ← رجوع
+          </button>
+
           <input
             placeholder="👤 اسم المريض"
             value={name}
@@ -169,6 +233,7 @@ export default function SecretaryPage() {
             <option>ضغط</option>
             <option>أمراض قلب</option>
             <option>مميعات دم</option>
+
             <option>
               حساسية بنج أو بنسلين
             </option>
@@ -199,6 +264,20 @@ export default function SecretaryPage() {
             style={inputStyle}
           />
 
+          {/* حالة الحجز */}
+          <select
+            value={status}
+            onChange={(e) =>
+              setStatus(e.target.value)
+            }
+            style={inputStyle}
+          >
+            <option>مؤجل🟡</option>
+            <option>ملغي❌</option>
+            <option>تم الوصول☑️</option>
+            <option>تم التنفيذ✅</option>
+          </select>
+
           <button
             onClick={addBooking}
             style={{
@@ -207,7 +286,9 @@ export default function SecretaryPage() {
               width: "100%",
             }}
           >
-            حفظ الحجز
+            {editingIndex !== null
+              ? "حفظ التعديلات"
+              : "حفظ الحجز"}
           </button>
         </div>
       )}
@@ -255,6 +336,46 @@ export default function SecretaryPage() {
               <strong>🗓️ الموعد:</strong>{" "}
               {patient.date}
             </p>
+
+            <p>
+              <strong>📌 الحالة:</strong>{" "}
+              {patient.status}
+            </p>
+
+            {/* الأزرار */}
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                marginTop: "20px",
+              }}
+            >
+              <button
+                onClick={() =>
+                  editBooking(index)
+                }
+                style={{
+                  ...buttonStyle,
+                  background: "#2563eb",
+                  flex: 1,
+                }}
+              >
+                تعديل
+              </button>
+
+              <button
+                onClick={() =>
+                  deleteBooking(index)
+                }
+                style={{
+                  ...buttonStyle,
+                  background: "red",
+                  flex: 1,
+                }}
+              >
+                حذف
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -286,6 +407,6 @@ const cardStyle = {
   padding: "20px",
   borderRadius: "15px",
   marginTop: "20px",
-  maxWidth: "600px",
+  maxWidth: "650px",
   boxShadow: "0 0 10px rgba(0,0,0,0.1)",
 };
