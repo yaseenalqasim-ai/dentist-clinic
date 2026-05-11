@@ -1,55 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [type, setType] = useState("");
+  const [service, setService] = useState("");
   const [day, setDay] = useState("");
   const [time, setTime] = useState("");
 
-  // معلومات العيادة
-  const [doctorName, setDoctorName] =
-    useState("الدكتور أحمد محمد");
+  const [appointments, setAppointments] = useState<any[]>([]);
 
-  const [specialty, setSpecialty] =
-    useState("أخصائي تجميل الأسنان");
-
-  const [address, setAddress] =
-    useState("عنوان العيادة");
-
-  const [website, setWebsite] =
-    useState("");
-
-  const [avatar, setAvatar] =
-    useState<string | null>(null);
-
-  const [banner, setBanner] =
-    useState<string | null>(null);
-
-  // تحميل إعدادات العيادة
   useEffect(() => {
-    const settings =
-      JSON.parse(localStorage.getItem("clinicSettings") || "{}");
+    setMounted(true);
 
-    setDoctorName(
-      settings.doctorName || "الدكتور أحمد محمد"
-    );
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("appointments");
 
-    setSpecialty(
-      settings.specialty || "أخصائي تجميل الأسنان"
-    );
-
-    setAddress(
-      settings.address || "عنوان العيادة"
-    );
-
-    setWebsite(settings.website || "");
-
-    setAvatar(settings.avatar || null);
-
-    setBanner(settings.banner || null);
+      if (saved) {
+        setAppointments(JSON.parse(saved));
+      }
+    }
   }, []);
 
   const services = [
@@ -70,129 +43,99 @@ export default function Home() {
     "الخميس",
   ];
 
-  const allTimes = [
+  const times = [
     "09:00 صباحًا",
     "10:00 صباحًا",
     "11:00 صباحًا",
+    "12:00 ظهرًا",
     "01:00 ظهرًا",
     "02:00 ظهرًا",
   ];
 
-  // منع تضارب المواعيد
-  const availableTimes = useMemo(() => {
-    const saved =
-      JSON.parse(localStorage.getItem("appointments") || "[]");
-
-    const bookedTimes = saved
-      .filter((a: any) => a.day === day)
-      .map((a: any) => a.time);
-
-    return allTimes.filter(
-      (time) => !bookedTimes.includes(time)
+  const availableTimes = times.filter((t) => {
+    return !appointments.some(
+      (a) => a.day === day && a.time === t
     );
-  }, [day]);
+  });
 
-  function send() {
-    if (!name || !phone || !type || !day || !time) {
-      alert("يرجى تعبئة جميع الحقول");
+  function bookAppointment() {
+    if (!name || !phone || !service || !day || !time) {
+      alert("يرجى ملء جميع الحقول");
       return;
     }
 
     const newAppointment = {
       name,
       phone,
-      type,
+      service,
       day,
       time,
-      status: "جديد",
     };
 
-    const oldAppointments =
-      JSON.parse(localStorage.getItem("appointments") || "[]");
+    const updated = [...appointments, newAppointment];
 
-    oldAppointments.push(newAppointment);
+    setAppointments(updated);
 
-    localStorage.setItem(
-      "appointments",
-      JSON.stringify(oldAppointments)
-    );
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "appointments",
+        JSON.stringify(updated)
+      );
+    }
 
     alert("✅ تم حجز الموعد بنجاح");
 
     setName("");
     setPhone("");
-    setType("");
+    setService("");
     setDay("");
     setTime("");
   }
 
+  if (!mounted) return null;
+
   return (
-    <div style={{ ...styles.page, direction: "rtl" }}>
+    <div style={styles.container}>
+      <div style={styles.card}>
 
-      {/* البانر */}
-      {banner && (
-        <img src={banner} style={styles.banner} />
-      )}
+        <div style={styles.avatar}>
+          👨‍⚕️
+        </div>
 
-      {/* بطاقة الدكتور */}
-      <div style={styles.header}>
+        <h1 style={styles.title}>
+          الدكتور أحمد محمد
+        </h1>
 
-        {avatar ? (
-          <img src={avatar} style={styles.avatar} />
-        ) : (
-          <div style={styles.avatarPlaceholder}>
-            👨‍⚕️
-          </div>
-        )}
-
-        <h2>{doctorName}</h2>
-
-        <p>{specialty}</p>
-
-        <p style={styles.address}>
-          📍 {address}
+        <p style={styles.specialty}>
+          أخصائي تجميل الأسنان
         </p>
 
-        {website && (
-          <a
-            href={website}
-            target="_blank"
-            style={styles.website}
-          >
-            🌐 موقع العيادة
-          </a>
-        )}
-
-      </div>
-
-      {/* العنوان */}
-      <p style={styles.title}>
-        املأ استمارة الحجز عبر إدخال معلوماتك:
-      </p>
-
-      {/* النموذج */}
-      <div style={styles.form}>
+        <p style={styles.text}>
+          املأ استمارة الحجز عبر إدخال معلوماتك:
+        </p>
 
         <input
-          placeholder="👤 الاسم"
           style={styles.input}
+          placeholder="👤 الاسم"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <input
-          placeholder="📞 الرقم"
           style={styles.input}
+          placeholder="📞 الرقم"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
 
         <select
           style={styles.input}
-          value={type}
-          onChange={(e) => setType(e.target.value)}
+          value={service}
+          onChange={(e) => setService(e.target.value)}
         >
-          <option value="">🦷 نوع الحجز</option>
+          <option value="">
+            🦷 نوع الحجز
+          </option>
 
           {services.map((s, i) => (
             <option key={i}>{s}</option>
@@ -207,7 +150,9 @@ export default function Home() {
             setTime("");
           }}
         >
-          <option value="">🗓️ اليوم</option>
+          <option value="">
+            🗓️ اليوم
+          </option>
 
           {days.map((d, i) => (
             <option key={i}>{d}</option>
@@ -219,120 +164,94 @@ export default function Home() {
           value={time}
           onChange={(e) => setTime(e.target.value)}
         >
-          <option value="">⏰ الوقت المتاح</option>
+          <option value="">
+            ⏰ الوقت
+          </option>
 
           {availableTimes.map((t, i) => (
             <option key={i}>{t}</option>
           ))}
         </select>
 
-        {day && availableTimes.length === 0 && (
-          <div style={styles.fullBox}>
-            ❌ لا توجد أوقات متاحة بهذا اليوم
-          </div>
-        )}
-
-        <button style={styles.button} onClick={send}>
+        <button
+          style={styles.button}
+          onClick={bookAppointment}
+        >
           تأكيد الحجز
         </button>
 
       </div>
-
     </div>
   );
 }
 
 const styles: any = {
-  page: {
+  container: {
     minHeight: "100vh",
-    background: "#dff5eb",
+    background: "#dff7ea",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     padding: "20px",
+    direction: "rtl",
     fontFamily: "Arial",
   },
 
-  banner: {
+  card: {
     width: "100%",
-    height: "180px",
-    objectFit: "cover",
-    borderRadius: "18px",
-    marginBottom: "20px",
-  },
-
-  header: {
+    maxWidth: "450px",
     background: "white",
-    padding: "20px",
-    borderRadius: "20px",
+    borderRadius: "25px",
+    padding: "25px",
+    boxShadow: "0 0 20px rgba(0,0,0,0.1)",
     textAlign: "center",
-    marginBottom: "15px",
   },
 
   avatar: {
     width: "100px",
     height: "100px",
     borderRadius: "50%",
-    objectFit: "cover",
-    marginBottom: "10px",
-  },
-
-  avatarPlaceholder: {
-    width: "100px",
-    height: "100px",
-    borderRadius: "50%",
-    background: "#d1d5db",
+    background: "#bbf7d0",
+    margin: "auto",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "40px",
-    margin: "auto",
-    marginBottom: "10px",
-  },
-
-  address: {
-    color: "#4b5563",
-  },
-
-  website: {
-    color: "#16a34a",
-    textDecoration: "none",
-    fontWeight: "bold",
+    fontSize: "45px",
+    marginBottom: "15px",
   },
 
   title: {
-    fontWeight: "bold",
-    marginBottom: "10px",
-    color: "#14532d",
+    margin: 0,
+    color: "#166534",
   },
 
-  form: {
-    background: "white",
-    padding: "20px",
-    borderRadius: "20px",
+  specialty: {
+    color: "#4b5563",
+    marginBottom: "20px",
+  },
+
+  text: {
+    marginBottom: "15px",
+    fontWeight: "bold",
   },
 
   input: {
     width: "100%",
-    padding: "12px",
-    marginBottom: "10px",
-    borderRadius: "10px",
+    padding: "14px",
+    marginBottom: "12px",
+    borderRadius: "12px",
     border: "1px solid #ddd",
+    fontSize: "15px",
   },
 
   button: {
     width: "100%",
-    padding: "12px",
+    padding: "14px",
+    borderRadius: "12px",
+    border: "none",
     background: "#22c55e",
     color: "white",
-    border: "none",
-    borderRadius: "10px",
+    fontSize: "16px",
     cursor: "pointer",
-  },
-
-  fullBox: {
-    background: "#fee2e2",
-    color: "#991b1b",
-    padding: "12px",
-    borderRadius: "10px",
-    marginBottom: "10px",
-    textAlign: "center",
   },
 };
