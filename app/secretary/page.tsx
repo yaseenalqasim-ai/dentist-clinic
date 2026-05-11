@@ -1,20 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function SecretaryPage() {
   const [showForm, setShowForm] = useState(false);
 
+  const [patients, setPatients] = useState<any[]>([]);
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [visitType, setVisitType] = useState("");
-  const [firstVisitType, setFirstVisitType] = useState("");
+  const [firstVisitType, setFirstVisitType] =
+    useState("");
   const [disease, setDisease] = useState("");
   const [complaint, setComplaint] = useState("");
   const [date, setDate] = useState("");
 
-  const [patients, setPatients] = useState<any[]>([]);
+  // تحميل الحجوزات
+  useEffect(() => {
+    const savedPatients =
+      JSON.parse(
+        localStorage.getItem("patients") || "[]"
+      );
 
+    setPatients(savedPatients);
+  }, []);
+
+  // إضافة حجز
   function addBooking() {
     const newPatient = {
       name,
@@ -26,8 +38,20 @@ export default function SecretaryPage() {
       date,
     };
 
-    setPatients([...patients, newPatient]);
+    const updatedPatients = [
+      ...patients,
+      newPatient,
+    ];
 
+    setPatients(updatedPatients);
+
+    // حفظ دائم
+    localStorage.setItem(
+      "patients",
+      JSON.stringify(updatedPatients)
+    );
+
+    // تنظيف الحقول
     setName("");
     setPhone("");
     setVisitType("");
@@ -65,25 +89,32 @@ export default function SecretaryPage() {
         + إضافة حجز
       </button>
 
+      {/* الفورم */}
       {showForm && (
         <div style={cardStyle}>
           <input
             placeholder="👤 اسم المريض"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) =>
+              setName(e.target.value)
+            }
             style={inputStyle}
           />
 
           <input
             placeholder="📞 رقم المريض (واتساب)"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) =>
+              setPhone(e.target.value)
+            }
             style={inputStyle}
           />
 
           <select
             value={visitType}
-            onChange={(e) => setVisitType(e.target.value)}
+            onChange={(e) =>
+              setVisitType(e.target.value)
+            }
             style={inputStyle}
           >
             <option value="">
@@ -102,7 +133,9 @@ export default function SecretaryPage() {
             <select
               value={firstVisitType}
               onChange={(e) =>
-                setFirstVisitType(e.target.value)
+                setFirstVisitType(
+                  e.target.value
+                )
               }
               style={inputStyle}
             >
@@ -122,7 +155,9 @@ export default function SecretaryPage() {
 
           <select
             value={disease}
-            onChange={(e) => setDisease(e.target.value)}
+            onChange={(e) =>
+              setDisease(e.target.value)
+            }
             style={inputStyle}
           >
             <option value="">
@@ -134,8 +169,12 @@ export default function SecretaryPage() {
             <option>ضغط</option>
             <option>أمراض قلب</option>
             <option>مميعات دم</option>
-            <option>حساسية بنج أو بنسلين</option>
+            <option>
+              حساسية بنج أو بنسلين
+            </option>
+
             <option>حمل</option>
+
             <option>أخرى</option>
           </select>
 
@@ -154,7 +193,9 @@ export default function SecretaryPage() {
           <input
             type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) =>
+              setDate(e.target.value)
+            }
             style={inputStyle}
           />
 
@@ -171,6 +212,7 @@ export default function SecretaryPage() {
         </div>
       )}
 
+      {/* الحجوزات */}
       <div
         style={{
           marginTop: "40px",
@@ -193,7 +235,8 @@ export default function SecretaryPage() {
 
             <p>
               <strong>🦷 المراجعة:</strong>{" "}
-              {patient.visitType === "زيارة أولى"
+              {patient.visitType ===
+              "زيارة أولى"
                 ? `زيارة أولى ← ${patient.firstVisitType}`
                 : patient.visitType}
             </p>
