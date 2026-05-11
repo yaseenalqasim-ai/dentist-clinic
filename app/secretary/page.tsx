@@ -1,303 +1,258 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-export default function SecretaryPage() {
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [search, setSearch] = useState("");
+export default function Home() {
+  const [mounted, setMounted] = useState(false);
 
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [type, setType] = useState("");
+  const [day, setDay] = useState("");
+  const [time, setTime] = useState("");
+
+  // معلومات العيادة
+  const [doctorName, setDoctorName] =
+    useState("الدكتور أحمد محمد");
+
+  const [specialty, setSpecialty] =
+    useState("أخصائي تجميل الأسنان");
+
+  const [address, setAddress] =
+    useState("عنوان العيادة");
+
+  const [website, setWebsite] =
+    useState("");
+
+  const [avatar, setAvatar] =
+    useState<string | null>(null);
+
+  const [banner, setBanner] =
+    useState<string | null>(null);
+
+  // منع أخطاء Vercel
   useEffect(() => {
-    loadAppointments();
-  }, []);
+    setMounted(true);
 
-  function loadAppointments() {
-    const saved =
-      JSON.parse(localStorage.getItem("appointments") || "[]");
+    const settings =
+      JSON.parse(
+        localStorage.getItem("clinicSettings") || "{}"
+      );
 
-    saved.sort((a: any, b: any) =>
-      a.time.localeCompare(b.time)
+    setDoctorName(
+      settings.doctorName || "الدكتور أحمد محمد"
     );
 
-    setAppointments(saved);
-  }
+    setSpecialty(
+      settings.specialty || "أخصائي تجميل الأسنان"
+    );
 
-  // حفظ
-  function save(updated: any[]) {
-    setAppointments(updated);
+    setAddress(
+      settings.address || "عنوان العيادة"
+    );
+
+    setWebsite(settings.website || "");
+
+    setAvatar(settings.avatar || null);
+
+    setBanner(settings.banner || null);
+  }, []);
+
+  const services = [
+    "فحص أسنان",
+    "تنظيف أسنان",
+    "حشوة عادية",
+    "حشوة عصب",
+    "خلع سن / ضرس",
+    "تقويم أسنان",
+    "تبييض أسنان",
+  ];
+
+  const days = [
+    "الأحد",
+    "الإثنين",
+    "الثلاثاء",
+    "الأربعاء",
+    "الخميس",
+  ];
+
+  const allTimes = [
+    "09:00 صباحًا",
+    "10:00 صباحًا",
+    "11:00 صباحًا",
+    "01:00 ظهرًا",
+    "02:00 ظهرًا",
+  ];
+
+  // الأوقات المتاحة
+  const availableTimes = useMemo(() => {
+    if (!mounted) return [];
+
+    const saved =
+      JSON.parse(
+        localStorage.getItem("appointments") || "[]"
+      );
+
+    const bookedTimes = saved
+      .filter((a: any) => a.day === day)
+      .map((a: any) => a.time);
+
+    return allTimes.filter(
+      (time) => !bookedTimes.includes(time)
+    );
+  }, [day, mounted]);
+
+  // إرسال الحجز
+  function send() {
+    if (!name || !phone || !type || !day || !time) {
+      alert("يرجى تعبئة جميع الحقول");
+      return;
+    }
+
+    const newAppointment = {
+      name,
+      phone,
+      type,
+      day,
+      time,
+      status: "جديد",
+    };
+
+    const oldAppointments =
+      JSON.parse(
+        localStorage.getItem("appointments") || "[]"
+      );
+
+    oldAppointments.push(newAppointment);
 
     localStorage.setItem(
       "appointments",
-      JSON.stringify(updated)
+      JSON.stringify(oldAppointments)
     );
+
+    alert("✅ تم حجز الموعد بنجاح");
+
+    setName("");
+    setPhone("");
+    setType("");
+    setDay("");
+    setTime("");
   }
 
-  // حذف
-  function deleteAppointment(index: number) {
-    const updated = [...appointments];
-
-    updated.splice(index, 1);
-
-    save(updated);
-  }
-
-  // تغيير الحالة
-  function changeStatus(index: number, status: string) {
-    const updated = [...appointments];
-
-    updated[index].status = status;
-
-    save(updated);
-  }
-
-  // تحديث السعر
-  function updatePrice(index: number, value: string) {
-    const updated = [...appointments];
-
-    updated[index].price = value;
-
-    save(updated);
-  }
-
-  // تحديث المدفوع
-  function updatePaid(index: number, value: string) {
-    const updated = [...appointments];
-
-    updated[index].paid = value;
-
-    save(updated);
-  }
-
-  // البحث
-  const filteredAppointments = appointments.filter((a) =>
-    a.name.includes(search)
-  );
-
-  // لون الحالة
-  function getStatusColor(status: string) {
-    switch (status) {
-      case "مؤكد":
-        return "#22c55e";
-
-      case "حضر":
-        return "#3b82f6";
-
-      case "ملغي":
-        return "#ef4444";
-
-      default:
-        return "#eab308";
-    }
+  // لا تعرض الصفحة قبل تحميل المتصفح
+  if (!mounted) {
+    return null;
   }
 
   return (
-    <div style={styles.page}>
+    <div style={{ ...styles.page, direction: "rtl" }}>
 
-      {/* العنوان */}
-      <div style={styles.header}>
-        <h1 style={styles.title}>
-          🦷 لوحة السكرتيرة
-        </h1>
-
-        <p style={styles.subtitle}>
-          إدارة الحجوزات والفواتير
-        </p>
-      </div>
-
-      {/* البحث */}
-      <div style={styles.searchBox}>
-        <input
-          placeholder="🔎 بحث عن مريض"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={styles.input}
-        />
-      </div>
-
-      {/* لا توجد حجوزات */}
-      {filteredAppointments.length === 0 && (
-        <div style={styles.empty}>
-          لا توجد حجوزات حالياً
-        </div>
+      {/* البانر */}
+      {banner && (
+        <img src={banner} style={styles.banner} />
       )}
 
-      {/* الجدول */}
-      <div style={styles.timeline}>
+      {/* بطاقة الدكتور */}
+      <div style={styles.header}>
 
-        {filteredAppointments.map((appointment, index) => {
-          const price =
-            Number(appointment.price || 0);
+        {avatar ? (
+          <img src={avatar} style={styles.avatar} />
+        ) : (
+          <div style={styles.avatarPlaceholder}>
+            👨‍⚕️
+          </div>
+        )}
 
-          const paid =
-            Number(appointment.paid || 0);
+        <h2>{doctorName}</h2>
 
-          const remaining = price - paid;
+        <p>{specialty}</p>
 
-          return (
-            <div key={index} style={styles.timelineCard}>
+        <p style={styles.address}>
+          📍 {address}
+        </p>
 
-              {/* الوقت */}
-              <div style={styles.leftSide}>
-                <div style={styles.time}>
-                  {appointment.time}
-                </div>
+        {website && (
+          <a
+            href={website}
+            target="_blank"
+            style={styles.website}
+          >
+            🌐 موقع العيادة
+          </a>
+        )}
 
-                <div
-                  style={{
-                    ...styles.statusDot,
-                    background:
-                      getStatusColor(
-                        appointment.status
-                      ),
-                  }}
-                />
-              </div>
+      </div>
 
-              {/* البطاقة */}
-              <div style={styles.card}>
+      {/* العنوان */}
+      <p style={styles.title}>
+        املأ استمارة الحجز عبر إدخال معلوماتك:
+      </p>
 
-                <div style={styles.topRow}>
+      {/* النموذج */}
+      <div style={styles.form}>
 
-                  <h3 style={styles.name}>
-                    👤 {appointment.name}
-                  </h3>
+        <input
+          placeholder="👤 الاسم"
+          style={styles.input}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-                  <div
-                    style={{
-                      ...styles.status,
-                      background:
-                        getStatusColor(
-                          appointment.status
-                        ),
-                    }}
-                  >
-                    {appointment.status || "جديد"}
-                  </div>
+        <input
+          placeholder="📞 الرقم"
+          style={styles.input}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
 
-                </div>
+        <select
+          style={styles.input}
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        >
+          <option value="">🦷 نوع الحجز</option>
 
-                <p style={styles.info}>
-                  📞 {appointment.phone}
-                </p>
+          {services.map((s, i) => (
+            <option key={i}>{s}</option>
+          ))}
+        </select>
 
-                <p style={styles.info}>
-                  🦷 {appointment.type}
-                </p>
+        <select
+          style={styles.input}
+          value={day}
+          onChange={(e) => {
+            setDay(e.target.value);
+            setTime("");
+          }}
+        >
+          <option value="">🗓️ اليوم</option>
 
-                <p style={styles.info}>
-                  🗓️ {appointment.day}
-                </p>
+          {days.map((d, i) => (
+            <option key={i}>{d}</option>
+          ))}
+        </select>
 
-                {/* الدفع */}
-                <div style={styles.paymentBox}>
+        <select
+          style={styles.input}
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+        >
+          <option value="">⏰ الوقت المتاح</option>
 
-                  <input
-                    type="number"
-                    placeholder="💰 السعر الكامل"
-                    value={appointment.price || ""}
-                    onChange={(e) =>
-                      updatePrice(
-                        index,
-                        e.target.value
-                      )
-                    }
-                    style={styles.paymentInput}
-                  />
+          {availableTimes.map((t, i) => (
+            <option key={i}>{t}</option>
+          ))}
+        </select>
 
-                  <input
-                    type="number"
-                    placeholder="💵 المدفوع"
-                    value={appointment.paid || ""}
-                    onChange={(e) =>
-                      updatePaid(
-                        index,
-                        e.target.value
-                      )
-                    }
-                    style={styles.paymentInput}
-                  />
+        {day && availableTimes.length === 0 && (
+          <div style={styles.fullBox}>
+            ❌ لا توجد أوقات متاحة بهذا اليوم
+          </div>
+        )}
 
-                  <div style={styles.remaining}>
-                    المتبقي: {remaining} د.ع
-                  </div>
-
-                </div>
-
-                {/* الاتصال */}
-                <div style={styles.actions}>
-
-                  <a
-                    href={`tel:${appointment.phone}`}
-                    style={styles.callBtn}
-                  >
-                    📞 اتصال
-                  </a>
-
-                  <a
-                    href={`https://wa.me/${appointment.phone}`}
-                    target="_blank"
-                    style={styles.whatsappBtn}
-                  >
-                    🟢 واتساب
-                  </a>
-
-                </div>
-
-                {/* الحالات */}
-                <div style={styles.statusButtons}>
-
-                  <button
-                    style={styles.confirmBtn}
-                    onClick={() =>
-                      changeStatus(
-                        index,
-                        "مؤكد"
-                      )
-                    }
-                  >
-                    تأكيد
-                  </button>
-
-                  <button
-                    style={styles.arrivedBtn}
-                    onClick={() =>
-                      changeStatus(
-                        index,
-                        "حضر"
-                      )
-                    }
-                  >
-                    حضر
-                  </button>
-
-                  <button
-                    style={styles.cancelBtn}
-                    onClick={() =>
-                      changeStatus(
-                        index,
-                        "ملغي"
-                      )
-                    }
-                  >
-                    إلغاء
-                  </button>
-
-                </div>
-
-                {/* حذف */}
-                <button
-                  style={styles.deleteBtn}
-                  onClick={() =>
-                    deleteAppointment(index)
-                  }
-                >
-                  🗑️ حذف الموعد
-                </button>
-
-              </div>
-
-            </div>
-          );
-        })}
+        <button style={styles.button} onClick={send}>
+          تأكيد الحجز
+        </button>
 
       </div>
 
@@ -308,191 +263,95 @@ export default function SecretaryPage() {
 const styles: any = {
   page: {
     minHeight: "100vh",
-    background: "#ecfdf5",
+    background: "#dff5eb",
     padding: "20px",
-    direction: "rtl",
     fontFamily: "Arial",
   },
 
-  header: {
+  banner: {
+    width: "100%",
+    height: "180px",
+    objectFit: "cover",
+    borderRadius: "18px",
     marginBottom: "20px",
   },
 
-  title: {
-    color: "#14532d",
+  header: {
+    background: "white",
+    padding: "20px",
+    borderRadius: "20px",
+    textAlign: "center",
+    marginBottom: "15px",
   },
 
-  subtitle: {
+  avatar: {
+    width: "100px",
+    height: "100px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    marginBottom: "10px",
+  },
+
+  avatarPlaceholder: {
+    width: "100px",
+    height: "100px",
+    borderRadius: "50%",
+    background: "#d1d5db",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "40px",
+    margin: "auto",
+    marginBottom: "10px",
+  },
+
+  address: {
     color: "#4b5563",
   },
 
-  searchBox: {
+  website: {
+    color: "#16a34a",
+    textDecoration: "none",
+    fontWeight: "bold",
+  },
+
+  title: {
+    fontWeight: "bold",
+    marginBottom: "10px",
+    color: "#14532d",
+    textAlign: "right",
+  },
+
+  form: {
     background: "white",
-    padding: "15px",
-    borderRadius: "16px",
-    marginBottom: "20px",
+    padding: "20px",
+    borderRadius: "20px",
   },
 
   input: {
     width: "100%",
     padding: "12px",
+    marginBottom: "10px",
     borderRadius: "10px",
     border: "1px solid #ddd",
   },
 
-  empty: {
-    background: "white",
-    padding: "20px",
-    borderRadius: "16px",
-    textAlign: "center",
-  },
-
-  timeline: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-  },
-
-  timelineCard: {
-    display: "flex",
-    gap: "15px",
-    alignItems: "flex-start",
-  },
-
-  leftSide: {
-    width: "90px",
-    textAlign: "center",
-  },
-
-  time: {
-    fontWeight: "bold",
-    color: "#14532d",
-    marginBottom: "8px",
-  },
-
-  statusDot: {
-    width: "14px",
-    height: "14px",
-    borderRadius: "50%",
-    margin: "auto",
-  },
-
-  card: {
-    flex: 1,
-    background: "white",
-    borderRadius: "18px",
-    padding: "15px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-  },
-
-  topRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "10px",
-  },
-
-  status: {
-    color: "white",
-    padding: "5px 10px",
-    borderRadius: "8px",
-    fontSize: "13px",
-  },
-
-  name: {
-    margin: 0,
-  },
-
-  info: {
-    color: "#4b5563",
-    marginBottom: "5px",
-  },
-
-  paymentBox: {
-    background: "#f0fdf4",
-    padding: "12px",
-    borderRadius: "12px",
-    marginTop: "15px",
-  },
-
-  paymentInput: {
+  button: {
     width: "100%",
-    padding: "10px",
-    marginBottom: "10px",
-    borderRadius: "8px",
-    border: "1px solid #ddd",
-  },
-
-  remaining: {
-    fontWeight: "bold",
-    color: "#14532d",
-  },
-
-  actions: {
-    display: "flex",
-    gap: "10px",
-    marginTop: "15px",
-  },
-
-  callBtn: {
-    flex: 1,
-    background: "#16a34a",
-    color: "white",
-    textDecoration: "none",
-    padding: "10px",
-    borderRadius: "10px",
-    textAlign: "center",
-  },
-
-  whatsappBtn: {
-    flex: 1,
-    background: "#25D366",
-    color: "white",
-    textDecoration: "none",
-    padding: "10px",
-    borderRadius: "10px",
-    textAlign: "center",
-  },
-
-  statusButtons: {
-    display: "flex",
-    gap: "8px",
-    marginTop: "15px",
-  },
-
-  confirmBtn: {
-    flex: 1,
+    padding: "12px",
     background: "#22c55e",
     color: "white",
     border: "none",
-    borderRadius: "8px",
-    padding: "8px",
-  },
-
-  arrivedBtn: {
-    flex: 1,
-    background: "#3b82f6",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    padding: "8px",
-  },
-
-  cancelBtn: {
-    flex: 1,
-    background: "#ef4444",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    padding: "8px",
-  },
-
-  deleteBtn: {
-    width: "100%",
-    marginTop: "12px",
-    padding: "10px",
     borderRadius: "10px",
-    border: "none",
-    background: "#111827",
-    color: "white",
+    cursor: "pointer",
+  },
+
+  fullBox: {
+    background: "#fee2e2",
+    color: "#991b1b",
+    padding: "12px",
+    borderRadius: "10px",
+    marginBottom: "10px",
+    textAlign: "center",
   },
 };
