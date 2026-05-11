@@ -1,43 +1,91 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function SecretaryPage() {
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [patients, setPatients] = useState<string[]>([]);
+  const [name, setName] = useState("");
 
-  useEffect(() => {
-    const data =
-      JSON.parse(localStorage.getItem("appointments") || "[]");
+  function addPatient() {
+    if (!name) return;
 
-    setAppointments(data);
-  }, []);
+    setPatients([...patients, name]);
+    setName("");
+  }
 
   return (
     <main
       style={{
         padding: "40px",
-        fontFamily: "Arial",
+        fontFamily: "sans-serif",
+        background: "#f3f4f6",
+        minHeight: "100vh",
       }}
     >
-      <h1>صفحة السكرتيرة</h1>
+      <h1
+        style={{
+          color: "#2563eb",
+          marginBottom: "30px",
+        }}
+      >
+        صفحة السكرتيرة
+      </h1>
 
-      {appointments.length === 0 ? (
-        <p>لا توجد حجوزات</p>
-      ) : (
-        appointments.map((item, index) => (
-          <div
-            key={index}
-            style={{
-              border: "1px solid gray",
-              padding: "15px",
-              marginTop: "15px",
-            }}
-          >
-            <p>اسم المريض: {item.name}</p>
-            <p>وقت الحجز: {item.time}</p>
-          </div>
-        ))
-      )}
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "15px",
+          maxWidth: "500px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+        }}
+      >
+        <input
+          type="text"
+          placeholder="اسم المريض"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "15px",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+          }}
+        />
+
+        <button
+          onClick={addPatient}
+          style={{
+            padding: "12px 20px",
+            background: "#2563eb",
+            color: "white",
+            border: "none",
+            borderRadius: "10px",
+            cursor: "pointer",
+          }}
+        >
+          إضافة مريض
+        </button>
+
+        <div style={{ marginTop: "30px" }}>
+          <h2>المرضى:</h2>
+
+          {patients.map((patient, index) => (
+            <div
+              key={index}
+              style={{
+                background: "#e5e7eb",
+                padding: "10px",
+                borderRadius: "10px",
+                marginTop: "10px",
+              }}
+            >
+              {patient}
+            </div>
+          ))}
+        </div>
+      </div>
     </main>
   );
 }
