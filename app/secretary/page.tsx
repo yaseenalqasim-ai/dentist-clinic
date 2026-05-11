@@ -193,15 +193,10 @@ export default function SecretaryPage() {
 
             <p>
               <strong>🦷 المراجعة:</strong>{" "}
-              {patient.visitType}
+              {patient.visitType === "زيارة أولى"
+                ? `زيارة أولى ← ${patient.firstVisitType}`
+                : patient.visitType}
             </p>
-
-            {patient.firstVisitType && (
-              <p>
-                <strong>📌 نوع الزيارة:</strong>{" "}
-                {patient.firstVisitType}
-              </p>
-            )}
 
             <p>
               <strong>🚨 الأمراض:</strong>{" "}
