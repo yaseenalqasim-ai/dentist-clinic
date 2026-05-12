@@ -7,20 +7,14 @@ export default function DoctorPage() {
   const [darkMode, setDarkMode] =
     useState(false);
 
-  const [showNotes, setShowNotes] =
-    useState(false);
+  const [patients, setPatients] =
+    useState<any[]>([]);
 
-  const [patientName, setPatientName] =
+  const [selectedPatient, setSelectedPatient] =
+    useState<any>(null);
+
+  const [doctorNote, setDoctorNote] =
     useState("");
-
-  const [patientPhone, setPatientPhone] =
-    useState("");
-
-  const [note, setNote] =
-    useState("");
-
-  const [status, setStatus] =
-    useState("🔵 حجز مُثبّت");
 
   useEffect(() => {
 
@@ -29,6 +23,17 @@ export default function DoctorPage() {
 
     if (savedMode === "true") {
       setDarkMode(true);
+    }
+
+    const savedPatients =
+      localStorage.getItem("patients");
+
+    if (savedPatients) {
+
+      setPatients(
+        JSON.parse(savedPatients)
+      );
+
     }
 
   }, []);
@@ -42,6 +47,56 @@ export default function DoctorPage() {
 
   }, [darkMode]);
 
+  const savePatients = (
+    updatedPatients: any[]
+  ) => {
+
+    setPatients(updatedPatients);
+
+    localStorage.setItem(
+      "patients",
+      JSON.stringify(updatedPatients)
+    );
+
+  };
+
+  const updatePatientStatus = (
+    index: number,
+    newStatus: string
+  ) => {
+
+    const updated =
+      [...patients];
+
+    updated[index].status =
+      newStatus;
+
+    savePatients(updated);
+
+  };
+
+  const saveDoctorNote = () => {
+
+    if (!selectedPatient) return;
+
+    const updated =
+      [...patients];
+
+    updated[selectedPatient.index]
+      .doctorNote = doctorNote;
+
+    savePatients(updated);
+
+    alert(
+      "تم حفظ الملاحظة بنجاح ✅"
+    );
+
+    setSelectedPatient(null);
+
+    setDoctorNote("");
+
+  };
+
   return (
 
     <main
@@ -50,9 +105,9 @@ export default function DoctorPage() {
         minHeight: "100vh",
         background:
           darkMode ? "#111827" : "#f3f4f6",
+        padding: "25px",
         color:
           darkMode ? "white" : "black",
-        padding: "25px",
         transition: "0.3s"
       }}
     >
@@ -60,7 +115,8 @@ export default function DoctorPage() {
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent:
+            "space-between",
           alignItems: "center",
           marginBottom: "30px"
         }}
@@ -68,7 +124,7 @@ export default function DoctorPage() {
 
         <h1
           style={{
-            fontSize: "35px",
+            fontSize: "40px",
             fontWeight: "bold"
           }}
         >
@@ -99,155 +155,185 @@ export default function DoctorPage() {
 
       <div
         style={{
-          background:
-            darkMode ? "#1f2937" : "white",
-          borderRadius: "25px",
-          padding: "25px",
-          maxWidth: "750px",
-          margin: "auto",
-          boxShadow:
-            "0 0 20px rgba(0,0,0,0.1)"
+          display: "grid",
+          gap: "20px"
         }}
       >
 
-        <div
-          style={{
-            marginBottom: "20px"
-          }}
-        >
+        {patients.map(
+          (
+            patient,
+            index
+          ) => (
 
-          <div
-            style={{
-              marginBottom: "10px",
-              fontWeight: "bold",
-              fontSize: "20px"
-            }}
-          >
-            حالة الحجز
-          </div>
+            <div
+              key={index}
+              style={{
+                background:
+                  darkMode
+                    ? "#1f2937"
+                    : "white",
+                borderRadius: "25px",
+                padding: "25px",
+                boxShadow:
+                  "0 0 20px rgba(0,0,0,0.1)"
+              }}
+            >
 
-          <select
-            value={status}
-            onChange={(e) =>
-              setStatus(e.target.value)
-            }
-            style={{
-              width: "100%",
-              padding: "15px",
-              borderRadius: "15px",
-              border: "1px solid #ccc",
-              fontSize: "18px",
-              background:
-                darkMode
-                  ? "#374151"
-                  : "white",
-              color:
-                darkMode
-                  ? "white"
-                  : "black"
-            }}
-          >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent:
+                    "space-between",
+                  alignItems: "center",
+                  marginBottom: "20px",
+                  flexWrap: "wrap",
+                  gap: "10px"
+                }}
+              >
 
-            <option>
-              🔵 حجز مُثبّت
-            </option>
+                <div
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "bold"
+                  }}
+                >
+                  👤 {patient.name}
+                </div>
 
-            <option>
-              📍 تم الوصول
-            </option>
+                <select
+                  value={
+                    patient.status
+                  }
+                  onChange={(e) =>
+                    updatePatientStatus(
+                      index,
+                      e.target.value
+                    )
+                  }
+                  style={{
+                    padding: "10px",
+                    borderRadius:
+                      "12px",
+                    fontSize: "16px"
+                  }}
+                >
 
-            <option>
-              🟡 حجز مؤجّل
-            </option>
+                  <option>
+                    🔵 حجز مُثبّت
+                  </option>
 
-            <option>
-              🔴 حجز ملغي
-            </option>
+                  <option>
+                    📍 تم الوصول
+                  </option>
 
-            <option>
-              🟢 تم التنفيذ
-            </option>
+                  <option>
+                    🟡 حجز مؤجّل
+                  </option>
 
-          </select>
+                  <option>
+                    🔴 حجز ملغي
+                  </option>
 
-        </div>
+                  <option>
+                    🟢 تم التنفيذ
+                  </option>
 
-        <input
-          type="text"
-          placeholder="👤 اسم المريض"
-          value={patientName}
-          onChange={(e) =>
-            setPatientName(
-              e.target.value
-            )
-          }
-          style={{
-            width: "100%",
-            padding: "15px",
-            borderRadius: "15px",
-            border: "1px solid #ccc",
-            marginBottom: "20px",
-            fontSize: "18px",
-            background:
-              darkMode
-                ? "#374151"
-                : "white",
-            color:
-              darkMode
-                ? "white"
-                : "black"
-          }}
-        />
+                </select>
 
-        <input
-          type="text"
-          placeholder="📞 رقم المريض"
-          value={patientPhone}
-          onChange={(e) =>
-            setPatientPhone(
-              e.target.value
-            )
-          }
-          style={{
-            width: "100%",
-            padding: "15px",
-            borderRadius: "15px",
-            border: "1px solid #ccc",
-            marginBottom: "25px",
-            fontSize: "18px",
-            background:
-              darkMode
-                ? "#374151"
-                : "white",
-            color:
-              darkMode
-                ? "white"
-                : "black"
-          }}
-        />
+              </div>
 
-        <button
-          onClick={() =>
-            setShowNotes(true)
-          }
-          style={{
-            width: "100%",
-            padding: "18px",
-            borderRadius: "18px",
-            border: "none",
-            background: "#8b5cf6",
-            color: "white",
-            fontSize: "22px",
-            cursor: "pointer",
-            fontWeight: "bold"
-          }}
-        >
-          📝 إدخال ملاحظة
-        </button>
+              <div
+                style={{
+                  lineHeight: "2",
+                  fontSize: "18px"
+                }}
+              >
+
+                <div>
+                  📞 {patient.phone}
+                </div>
+
+                <div>
+                  🦷 {patient.visit}
+                </div>
+
+                <div>
+                  🚨 {patient.disease}
+                </div>
+
+                <div>
+                  ❗ {patient.problem}
+                </div>
+
+                <div>
+                  📅 {patient.date}
+                </div>
+
+              </div>
+
+              {patient.doctorNote && (
+
+                <div
+                  style={{
+                    marginTop: "20px",
+                    background:
+                      darkMode
+                        ? "#374151"
+                        : "#ede9fe",
+                    padding: "15px",
+                    borderRadius:
+                      "15px"
+                  }}
+                >
+                  📝 ملاحظة الدكتور:
+                  <br />
+                  {
+                    patient.doctorNote
+                  }
+                </div>
+
+              )}
+
+              <button
+                onClick={() => {
+
+                  setSelectedPatient({
+                    ...patient,
+                    index
+                  });
+
+                  setDoctorNote(
+                    patient.doctorNote ||
+                    ""
+                  );
+
+                }}
+                style={{
+                  width: "100%",
+                  marginTop: "20px",
+                  padding: "15px",
+                  borderRadius: "15px",
+                  border: "none",
+                  background:
+                    "#8b5cf6",
+                  color: "white",
+                  fontSize: "20px",
+                  cursor: "pointer",
+                  fontWeight: "bold"
+                }}
+              >
+                📝 إدخال ملاحظة
+              </button>
+
+            </div>
+
+          )
+        )}
 
       </div>
 
-      {showNotes && (
+      {selectedPatient && (
 
         <div
           style={{
@@ -256,7 +342,8 @@ export default function DoctorPage() {
             background:
               "rgba(0,0,0,0.5)",
             display: "flex",
-            justifyContent: "center",
+            justifyContent:
+              "center",
             alignItems: "center",
             zIndex: 1000
           }}
@@ -296,10 +383,13 @@ export default function DoctorPage() {
 
               <button
                 onClick={() =>
-                  setShowNotes(false)
+                  setSelectedPatient(
+                    null
+                  )
                 }
                 style={{
-                  background: "none",
+                  background:
+                    "none",
                   border: "none",
                   fontSize: "35px",
                   cursor: "pointer",
@@ -316,9 +406,9 @@ export default function DoctorPage() {
 
             <textarea
               placeholder="اكتب رسالتك هنا..."
-              value={note}
+              value={doctorNote}
               onChange={(e) =>
-                setNote(
+                setDoctorNote(
                   e.target.value
                 )
               }
@@ -356,7 +446,7 @@ export default function DoctorPage() {
 
               <div
                 style={{
-                  fontSize: "55px",
+                  fontSize: "50px",
                   marginBottom: "15px"
                 }}
               >
@@ -393,58 +483,25 @@ export default function DoctorPage() {
 
             </div>
 
-            <div
+            <button
+              onClick={
+                saveDoctorNote
+              }
               style={{
-                display: "flex",
-                gap: "15px"
+                width: "100%",
+                padding: "18px",
+                borderRadius: "18px",
+                border: "none",
+                background:
+                  "#2563eb",
+                color: "white",
+                fontSize: "22px",
+                cursor: "pointer",
+                fontWeight: "bold"
               }}
             >
-
-              <button
-                onClick={() => {
-
-                  alert(
-                    "تم حفظ الملاحظة بنجاح ✅"
-                  );
-
-                  setShowNotes(false);
-
-                }}
-                style={{
-                  flex: 1,
-                  padding: "18px",
-                  borderRadius: "18px",
-                  border: "none",
-                  background: "#2563eb",
-                  color: "white",
-                  fontSize: "22px",
-                  cursor: "pointer",
-                  fontWeight: "bold"
-                }}
-              >
-                حفظ
-              </button>
-
-              <button
-                onClick={() =>
-                  setShowNotes(false)
-                }
-                style={{
-                  flex: 1,
-                  padding: "18px",
-                  borderRadius: "18px",
-                  border: "none",
-                  background: "#ef4444",
-                  color: "white",
-                  fontSize: "22px",
-                  cursor: "pointer",
-                  fontWeight: "bold"
-                }}
-              >
-                إلغاء
-              </button>
-
-            </div>
+              حفظ الملاحظة
+            </button>
 
           </div>
 
