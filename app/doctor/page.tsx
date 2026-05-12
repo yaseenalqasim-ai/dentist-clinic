@@ -10,6 +10,18 @@ export default function DoctorPage() {
   const [darkMode, setDarkMode] =
     useState(false);
 
+  const [selectedPatient, setSelectedPatient] =
+    useState<any>(null);
+
+  const [doctorNotes, setDoctorNotes] =
+    useState("");
+
+  const [treatmentPlan, setTreatmentPlan] =
+    useState("");
+
+  const [medicine, setMedicine] =
+    useState("");
+
   useEffect(() => {
 
     const savedPatients =
@@ -27,6 +39,56 @@ export default function DoctorPage() {
         p.status !== "🟢 تم التنفيذ" &&
         p.status !== "🔴 حجز ملغي"
     );
+
+  function openPatient(patient: any) {
+
+    setSelectedPatient(patient);
+
+    setDoctorNotes(
+      patient.doctorNotes || ""
+    );
+
+    setTreatmentPlan(
+      patient.treatmentPlan || ""
+    );
+
+    setMedicine(
+      patient.medicine || ""
+    );
+  }
+
+  function saveMedicalData() {
+
+    const updatedPatients =
+      patients.map((p) => {
+
+        if (
+          p.phone === selectedPatient.phone
+        ) {
+          return {
+            ...p,
+
+            doctorNotes,
+
+            treatmentPlan,
+
+            medicine,
+          };
+        }
+
+        return p;
+      });
+
+    setPatients(updatedPatients);
+
+    localStorage.setItem(
+      "patients",
+      JSON.stringify(updatedPatients)
+    );
+
+    alert("تم حفظ الملف الطبي");
+
+  }
 
   return (
     <main
@@ -88,7 +150,7 @@ export default function DoctorPage() {
         </button>
       </div>
 
-      {/* عدد المرضى */}
+      {/* عدد الحجوزات */}
       <div
         style={{
           marginTop: "20px",
@@ -218,7 +280,7 @@ export default function DoctorPage() {
                 {patient.date}
               </p>
 
-              {/* أزرار */}
+              {/* الأزرار */}
               <div
                 style={{
                   display: "flex",
@@ -258,8 +320,12 @@ export default function DoctorPage() {
                   واتساب 💬
                 </a>
 
-                {/* بدء العلاج */}
+                {/* الملف الطبي */}
                 <button
+                  onClick={() =>
+                    openPatient(patient)
+                  }
+
                   style={{
                     flex: 1,
 
@@ -278,7 +344,7 @@ export default function DoctorPage() {
                     fontWeight: "bold",
                   }}
                 >
-                  بدء العلاج
+                  الملف الطبي
                 </button>
 
               </div>
@@ -308,6 +374,125 @@ export default function DoctorPage() {
         )}
 
       </div>
+
+      {/* الملف الطبي */}
+      {selectedPatient && (
+        <div
+          style={{
+            marginTop: "40px",
+
+            background: darkMode
+              ? "#1f2937"
+              : "white",
+
+            padding: "25px",
+
+            borderRadius: "20px",
+
+            boxShadow:
+              "0 0 10px rgba(0,0,0,0.1)",
+          }}
+        >
+
+          <h2
+            style={{
+              marginBottom: "20px",
+            }}
+          >
+            الملف الطبي:
+            {" "}
+            {selectedPatient.name}
+          </h2>
+
+          <textarea
+            placeholder="ملاحظات الطبيب"
+
+            value={doctorNotes}
+
+            onChange={(e) =>
+              setDoctorNotes(
+                e.target.value
+              )
+            }
+
+            style={textareaStyle}
+          />
+
+          <textarea
+            placeholder="الخطة العلاجية"
+
+            value={treatmentPlan}
+
+            onChange={(e) =>
+              setTreatmentPlan(
+                e.target.value
+              )
+            }
+
+            style={textareaStyle}
+          />
+
+          <textarea
+            placeholder="الوصفة الطبية"
+
+            value={medicine}
+
+            onChange={(e) =>
+              setMedicine(
+                e.target.value
+              )
+            }
+
+            style={textareaStyle}
+          />
+
+          <button
+            onClick={saveMedicalData}
+
+            style={{
+              background: "green",
+
+              color: "white",
+
+              border: "none",
+
+              padding: "15px",
+
+              borderRadius: "10px",
+
+              cursor: "pointer",
+
+              width: "100%",
+
+              fontWeight: "bold",
+
+              marginTop: "10px",
+            }}
+          >
+            حفظ الملف الطبي
+          </button>
+
+        </div>
+      )}
+
     </main>
   );
 }
+
+const textareaStyle = {
+  width: "100%",
+
+  minHeight: "120px",
+
+  marginTop: "15px",
+
+  borderRadius: "10px",
+
+  border: "1px solid #ccc",
+
+  padding: "15px",
+
+  fontSize: "16px",
+
+  color: "black",
+};
