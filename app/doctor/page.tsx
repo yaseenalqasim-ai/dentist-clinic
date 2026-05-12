@@ -22,6 +22,12 @@ export default function DoctorPage() {
   const [medicine, setMedicine] =
     useState("");
 
+  const [status, setStatus] =
+    useState("");
+
+  const [image, setImage] =
+    useState<string | null>(null);
+
   useEffect(() => {
 
     const savedPatients =
@@ -36,7 +42,6 @@ export default function DoctorPage() {
   const activePatients =
     patients.filter(
       (p) =>
-        p.status !== "🟢 تم التنفيذ" &&
         p.status !== "🔴 حجز ملغي"
     );
 
@@ -55,6 +60,37 @@ export default function DoctorPage() {
     setMedicine(
       patient.medicine || ""
     );
+
+    setStatus(
+      patient.status || "🔵 حجز مُثبّت"
+    );
+
+    setImage(
+      patient.image || null
+    );
+  }
+
+  function handleImage(
+    e: any
+  ) {
+
+    const file =
+      e.target.files[0];
+
+    if (!file) return;
+
+    const reader =
+      new FileReader();
+
+    reader.onloadend = () => {
+
+      setImage(
+        reader.result as string
+      );
+
+    };
+
+    reader.readAsDataURL(file);
   }
 
   function saveMedicalData() {
@@ -63,7 +99,8 @@ export default function DoctorPage() {
       patients.map((p) => {
 
         if (
-          p.phone === selectedPatient.phone
+          p.phone ===
+          selectedPatient.phone
         ) {
           return {
             ...p,
@@ -73,6 +110,10 @@ export default function DoctorPage() {
             treatmentPlan,
 
             medicine,
+
+            status,
+
+            image,
           };
         }
 
@@ -88,11 +129,15 @@ export default function DoctorPage() {
 
     alert("تم حفظ الملف الطبي");
 
+    // إغلاق الملف بعد الحفظ
+    setSelectedPatient(null);
+
   }
 
   return (
     <main
       dir="rtl"
+
       style={{
         minHeight: "100vh",
 
@@ -139,7 +184,8 @@ export default function DoctorPage() {
           style={{
             border: "none",
 
-            background: "transparent",
+            background:
+              "transparent",
 
             fontSize: "30px",
 
@@ -148,30 +194,6 @@ export default function DoctorPage() {
         >
           {darkMode ? "☀️" : "🌙"}
         </button>
-      </div>
-
-      {/* عدد الحجوزات */}
-      <div
-        style={{
-          marginTop: "20px",
-
-          background: darkMode
-            ? "#1f2937"
-            : "white",
-
-          padding: "20px",
-
-          borderRadius: "15px",
-
-          boxShadow:
-            "0 0 10px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h2>
-          عدد الحجوزات الحالية:
-          {" "}
-          {activePatients.length}
-        </h2>
       </div>
 
       {/* المرضى */}
@@ -209,21 +231,25 @@ export default function DoctorPage() {
               {/* الحالة */}
               <div
                 style={{
-                  position: "absolute",
+                  position:
+                    "absolute",
 
                   top: "20px",
 
                   left: "20px",
 
-                  background: "#e5e7eb",
+                  background:
+                    "#e5e7eb",
 
                   padding: "10px",
 
-                  borderRadius: "10px",
+                  borderRadius:
+                    "10px",
 
                   color: "black",
 
-                  fontWeight: "bold",
+                  fontWeight:
+                    "bold",
                 }}
               >
                 {patient.status}
@@ -258,14 +284,6 @@ export default function DoctorPage() {
 
               <p>
                 <strong>
-                  🚨 الأمراض:
-                </strong>{" "}
-
-                {patient.disease}
-              </p>
-
-              <p>
-                <strong>
                   ❗️ الشكوى:
                 </strong>{" "}
 
@@ -280,7 +298,6 @@ export default function DoctorPage() {
                 {patient.date}
               </p>
 
-              {/* الأزرار */}
               <div
                 style={{
                   display: "flex",
@@ -288,12 +305,9 @@ export default function DoctorPage() {
                   gap: "10px",
 
                   marginTop: "20px",
-
-                  flexWrap: "wrap",
                 }}
               >
 
-                {/* واتساب */}
                 <a
                   href={`https://wa.me/${patient.phone}`}
 
@@ -302,25 +316,30 @@ export default function DoctorPage() {
                   style={{
                     flex: 1,
 
-                    background: "#25D366",
+                    background:
+                      "#25D366",
 
                     color: "white",
 
-                    textDecoration: "none",
+                    textDecoration:
+                      "none",
 
-                    borderRadius: "10px",
+                    borderRadius:
+                      "10px",
 
-                    padding: "12px",
+                    padding:
+                      "12px",
 
-                    textAlign: "center",
+                    textAlign:
+                      "center",
 
-                    fontWeight: "bold",
+                    fontWeight:
+                      "bold",
                   }}
                 >
                   واتساب 💬
                 </a>
 
-                {/* الملف الطبي */}
                 <button
                   onClick={() =>
                     openPatient(patient)
@@ -329,19 +348,23 @@ export default function DoctorPage() {
                   style={{
                     flex: 1,
 
-                    background: "#2563eb",
+                    background:
+                      "#2563eb",
 
                     color: "white",
 
                     border: "none",
 
-                    borderRadius: "10px",
+                    borderRadius:
+                      "10px",
 
-                    padding: "12px",
+                    padding:
+                      "12px",
 
                     cursor: "pointer",
 
-                    fontWeight: "bold",
+                    fontWeight:
+                      "bold",
                   }}
                 >
                   الملف الطبي
@@ -350,27 +373,6 @@ export default function DoctorPage() {
               </div>
             </div>
           )
-        )}
-
-        {activePatients.length === 0 && (
-          <div
-            style={{
-              background: darkMode
-                ? "#1f2937"
-                : "white",
-
-              padding: "25px",
-
-              borderRadius: "15px",
-
-              textAlign: "center",
-
-              boxShadow:
-                "0 0 10px rgba(0,0,0,0.1)",
-            }}
-          >
-            لا توجد حجوزات حالية
-          </div>
         )}
 
       </div>
@@ -394,15 +396,44 @@ export default function DoctorPage() {
           }}
         >
 
-          <h2
-            style={{
-              marginBottom: "20px",
-            }}
-          >
+          <h2>
             الملف الطبي:
             {" "}
             {selectedPatient.name}
           </h2>
+
+          {/* تغيير الحالة */}
+          <select
+            value={status}
+
+            onChange={(e) =>
+              setStatus(
+                e.target.value
+              )
+            }
+
+            style={inputStyle}
+          >
+            <option>
+              🔵 حجز مُثبّت
+            </option>
+
+            <option>
+              📍 تم الوصول
+            </option>
+
+            <option>
+              🟡 حجز مؤجّل
+            </option>
+
+            <option>
+              🔴 حجز ملغي
+            </option>
+
+            <option>
+              🟢 تم التنفيذ
+            </option>
+          </select>
 
           <textarea
             placeholder="ملاحظات الطبيب"
@@ -446,11 +477,42 @@ export default function DoctorPage() {
             style={textareaStyle}
           />
 
+          {/* رفع صورة */}
+          <input
+            type="file"
+
+            accept="image/*"
+
+            capture="environment"
+
+            onChange={handleImage}
+
+            style={{
+              marginTop: "20px",
+            }}
+          />
+
+          {/* عرض الصورة */}
+          {image && (
+            <img
+              src={image}
+
+              style={{
+                width: "100%",
+
+                marginTop: "20px",
+
+                borderRadius: "15px",
+              }}
+            />
+          )}
+
           <button
             onClick={saveMedicalData}
 
             style={{
-              background: "green",
+              background:
+                "green",
 
               color: "white",
 
@@ -458,15 +520,17 @@ export default function DoctorPage() {
 
               padding: "15px",
 
-              borderRadius: "10px",
+              borderRadius:
+                "10px",
 
               cursor: "pointer",
 
               width: "100%",
 
-              fontWeight: "bold",
+              fontWeight:
+                "bold",
 
-              marginTop: "10px",
+              marginTop: "20px",
             }}
           >
             حفظ الملف الطبي
@@ -491,6 +555,22 @@ const textareaStyle = {
   border: "1px solid #ccc",
 
   padding: "15px",
+
+  fontSize: "16px",
+
+  color: "black",
+};
+
+const inputStyle = {
+  width: "100%",
+
+  padding: "14px",
+
+  marginTop: "15px",
+
+  borderRadius: "10px",
+
+  border: "1px solid #ccc",
 
   fontSize: "16px",
 
