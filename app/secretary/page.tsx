@@ -10,25 +10,41 @@ import {
   getFirestore,
   collection,
   addDoc,
-  getDocs,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,
+  onSnapshot
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCIZdUmSX15w0CACuW4vfz9npsUi-L3lbg",
-  authDomain: "dentist-clinic-476ac.firebaseapp.com",
-  projectId: "dentist-clinic-476ac",
-  storageBucket: "dentist-clinic-476ac.firebasestorage.app",
-  messagingSenderId: "1013681862841",
-  appId: "1:1013681862841:web:86643c3f3fa926389a8368",
-  measurementId: "G-FW5T2FJ29R"
+
+  apiKey:
+    "AIzaSyCIZdUmSX15w0CACuW4vfz9npsUi-L3lbg",
+
+  authDomain:
+    "dentist-clinic-476ac.firebaseapp.com",
+
+  projectId:
+    "dentist-clinic-476ac",
+
+  storageBucket:
+    "dentist-clinic-476ac.firebasestorage.app",
+
+  messagingSenderId:
+    "1013681862841",
+
+  appId:
+    "1:1013681862841:web:86643c3f3fa926389a8368",
+
+  measurementId:
+    "G-FW5T2FJ29R"
 };
 
-const app = initializeApp(firebaseConfig);
+const app =
+  initializeApp(firebaseConfig);
 
-const db = getFirestore(app);
+const db =
+  getFirestore(app);
 
 export default function SecretaryPage() {
 
@@ -48,13 +64,22 @@ export default function SecretaryPage() {
     useState("");
 
   const [form, setForm] = useState({
+
     name: "",
+
     phone: "",
+
     review: "",
+
     disease: "",
+
     complaint: "",
+
     date: "",
-    status: "🔵 حجز مُثبت",
+
+    status:
+      "🔵 حجز مُثبت",
+
     notes: ""
   });
 
@@ -92,25 +117,41 @@ export default function SecretaryPage() {
 
   }, [darkMode]);
 
-  async function loadPatients() {
+  function loadPatients() {
 
-    const querySnapshot =
-      await getDocs(
-        collection(db, "bookings")
-      );
+    onSnapshot(
+      collection(db, "bookings"),
+      (snapshot) => {
 
-    const data: any[] = [];
+        const data: any[] = [];
 
-    querySnapshot.forEach((docItem) => {
+        snapshot.forEach((docItem) => {
 
-      data.push({
-        id: docItem.id,
-        ...docItem.data()
-      });
+          data.push({
+            id: docItem.id,
+            ...docItem.data()
+          });
 
-    });
+        });
 
-    setPatients(data);
+        if (
+          data.length >
+          patients.length
+        ) {
+
+          const audio =
+            new Audio(
+              "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"
+            );
+
+          audio.play();
+        }
+
+        setPatients(data);
+
+      }
+    );
+
   }
 
   async function savePatient() {
@@ -118,27 +159,43 @@ export default function SecretaryPage() {
     if (editingId) {
 
       await updateDoc(
-        doc(db, "bookings", editingId),
+        doc(
+          db,
+          "bookings",
+          editingId
+        ),
         form
       );
 
     } else {
 
       await addDoc(
-        collection(db, "bookings"),
+        collection(
+          db,
+          "bookings"
+        ),
         form
       );
 
     }
 
     setForm({
+
       name: "",
+
       phone: "",
+
       review: "",
+
       disease: "",
+
       complaint: "",
+
       date: "",
-      status: "🔵 حجز مُثبت",
+
+      status:
+        "🔵 حجز مُثبت",
+
       notes: ""
     });
 
@@ -146,42 +203,59 @@ export default function SecretaryPage() {
 
     setShowForm(false);
 
-    loadPatients();
   }
 
-  async function deletePatient(id: string) {
+  async function deletePatient(
+    id: string
+  ) {
 
     await deleteDoc(
       doc(db, "bookings", id)
     );
 
-    loadPatients();
   }
 
-  function editPatient(patient: any) {
+  function editPatient(
+    patient: any
+  ) {
 
     setForm(patient);
 
     setEditingId(patient.id);
 
     setShowForm(true);
+
   }
 
   function logout() {
 
-    localStorage.removeItem("role");
+    localStorage.removeItem(
+      "role"
+    );
 
     window.location.href =
       "/login";
+
   }
 
   const filteredPatients =
     patients.filter((patient) => {
 
       return (
-        patient.name?.includes(search) ||
-        patient.phone?.includes(search) ||
-        patient.review?.includes(search)
+
+        patient.name
+          ?.includes(search)
+
+        ||
+
+        patient.phone
+          ?.includes(search)
+
+        ||
+
+        patient.review
+          ?.includes(search)
+
       );
 
     });
@@ -193,23 +267,29 @@ export default function SecretaryPage() {
 
       style={{
         minHeight: "100vh",
+
         background:
           darkMode
             ? "#071739"
             : "#f3f3f3",
+
         color:
           darkMode
             ? "white"
             : "black",
+
         padding: "20px"
       }}
     >
 
+      {/* الأعلى */}
       <div
         style={{
           display: "flex",
+
           justifyContent:
             "space-between",
+
           alignItems: "center"
         }}
       >
@@ -232,10 +312,16 @@ export default function SecretaryPage() {
 
             style={{
               width: "60px",
+
               height: "60px",
-              borderRadius: "50%",
+
+              borderRadius:
+                "50%",
+
               border: "none",
+
               fontSize: "24px",
+
               cursor: "pointer"
             }}
           >
@@ -247,10 +333,16 @@ export default function SecretaryPage() {
 
             style={{
               background: "red",
+
               color: "white",
+
               border: "none",
+
               padding: "12px",
-              borderRadius: "12px",
+
+              borderRadius:
+                "12px",
+
               cursor: "pointer"
             }}
           >
@@ -261,10 +353,13 @@ export default function SecretaryPage() {
 
       </div>
 
+      {/* البحث والإضافة */}
       <div
         style={{
           display: "flex",
+
           gap: "10px",
+
           marginTop: "20px"
         }}
       >
@@ -275,12 +370,20 @@ export default function SecretaryPage() {
           }
 
           style={{
-            background: "#2563eb",
+            background:
+              "#2563eb",
+
             color: "white",
+
             border: "none",
+
             padding: "15px",
-            borderRadius: "12px",
+
+            borderRadius:
+              "12px",
+
             fontSize: "20px",
+
             cursor: "pointer"
           }}
         >
@@ -288,46 +391,66 @@ export default function SecretaryPage() {
         </button>
 
         <input
-          placeholder="البحث عن حجز.."
+          placeholder=
+            "البحث عن حجز.."
 
           value={search}
 
           onChange={(e) =>
-            setSearch(e.target.value)
+            setSearch(
+              e.target.value
+            )
           }
 
           style={{
             flex: 1,
+
             padding: "15px",
-            borderRadius: "12px",
-            border: "1px solid #ccc",
+
+            borderRadius:
+              "12px",
+
+            border:
+              "1px solid #ccc",
+
             fontSize: "18px",
+
             color: "black"
           }}
         />
 
       </div>
 
+      {/* الفورم */}
       {showForm && (
 
         <div
           style={{
             marginTop: "20px",
+
             background:
               darkMode
                 ? "#102542"
                 : "white",
+
             padding: "20px",
-            borderRadius: "20px"
+
+            borderRadius:
+              "20px"
           }}
         >
 
           {[
             ["👤 اسم المريض", "name"],
+
             ["📞 رقم المريض", "phone"],
+
             ["🦷 المراجعة", "review"],
+
             ["🚨 الأمراض", "disease"],
+
             ["❗ الشكوى", "complaint"],
+
             ["🗓️ الموعد", "date"]
           ].map(([label, key]) => (
 
@@ -336,11 +459,15 @@ export default function SecretaryPage() {
 
               placeholder={label}
 
-              value={(form as any)[key]}
+              value={
+                (form as any)[key]
+              }
 
               onChange={(e) =>
                 setForm({
+
                   ...form,
+
                   [key]:
                     e.target.value
                 })
@@ -348,10 +475,18 @@ export default function SecretaryPage() {
 
               style={{
                 width: "100%",
-                marginBottom: "15px",
+
+                marginBottom:
+                  "15px",
+
                 padding: "15px",
-                borderRadius: "12px",
-                border: "1px solid #ccc",
+
+                borderRadius:
+                  "12px",
+
+                border:
+                  "1px solid #ccc",
+
                 fontSize: "18px"
               }}
             />
@@ -363,11 +498,19 @@ export default function SecretaryPage() {
 
             style={{
               width: "100%",
-              background: "#7c3aed",
+
+              background:
+                "#7c3aed",
+
               color: "white",
+
               border: "none",
+
               padding: "18px",
-              borderRadius: "14px",
+
+              borderRadius:
+                "14px",
+
               fontSize: "20px"
             }}
           >
@@ -378,107 +521,152 @@ export default function SecretaryPage() {
 
       )}
 
+      {/* الحجوزات */}
       <div
         style={{
           marginTop: "30px"
         }}
       >
 
-        {filteredPatients.map((patient) => (
-
-          <div
-            key={patient.id}
-
-            style={{
-              background:
-                darkMode
-                  ? "#102542"
-                  : "white",
-              padding: "20px",
-              borderRadius: "20px",
-              marginBottom: "20px"
-            }}
-          >
-
-            <h2>
-              👤 {patient.name}
-            </h2>
-
-            <h2>
-              📞 {patient.phone}
-            </h2>
-
-            <h2>
-              🦷 {patient.review}
-            </h2>
-
-            <h2>
-              🗓️ {patient.date}
-            </h2>
+        {filteredPatients.map(
+          (patient) => (
 
             <div
+              key={patient.id}
+
               style={{
-                display: "flex",
-                gap: "10px",
-                marginTop: "20px"
+                background:
+                  darkMode
+                    ? "#102542"
+                    : "white",
+
+                padding: "20px",
+
+                borderRadius:
+                  "20px",
+
+                marginBottom:
+                  "20px"
               }}
             >
 
-              <a
-                href={`https://wa.me/${patient.phone}`}
+              <h2>
+                👤
+                {" "}
+                {patient.name}
+              </h2>
 
-                target="_blank"
+              <h2>
+                📞
+                {" "}
+                {patient.phone}
+              </h2>
 
+              <h2>
+                🦷
+                {" "}
+                {patient.review}
+              </h2>
+
+              <h2>
+                🗓️
+                {" "}
+                {patient.date}
+              </h2>
+
+              <div
                 style={{
-                  flex: 1,
-                  background: "#22c55e",
-                  color: "white",
-                  padding: "15px",
-                  borderRadius: "12px",
-                  textAlign: "center",
-                  textDecoration: "none"
+                  display: "flex",
+
+                  gap: "10px",
+
+                  marginTop: "20px"
                 }}
               >
-                واتساب
-              </a>
 
-              <button
-                onClick={() =>
-                  editPatient(patient)
-                }
+                <a
+                  href={`https://wa.me/${patient.phone}`}
 
-                style={{
-                  flex: 1,
-                  background: "#2563eb",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "12px"
-                }}
-              >
-                تعديل
-              </button>
+                  target="_blank"
 
-              <button
-                onClick={() =>
-                  deletePatient(patient.id)
-                }
+                  style={{
+                    flex: 1,
 
-                style={{
-                  flex: 1,
-                  background: "red",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "12px"
-                }}
-              >
-                حذف
-              </button>
+                    background:
+                      "#22c55e",
+
+                    color: "white",
+
+                    padding:
+                      "15px",
+
+                    borderRadius:
+                      "12px",
+
+                    textAlign:
+                      "center",
+
+                    textDecoration:
+                      "none"
+                  }}
+                >
+                  واتساب
+                </a>
+
+                <button
+                  onClick={() =>
+                    editPatient(
+                      patient
+                    )
+                  }
+
+                  style={{
+                    flex: 1,
+
+                    background:
+                      "#2563eb",
+
+                    color: "white",
+
+                    border: "none",
+
+                    borderRadius:
+                      "12px"
+                  }}
+                >
+                  تعديل
+                </button>
+
+                <button
+                  onClick={() =>
+                    deletePatient(
+                      patient.id
+                    )
+                  }
+
+                  style={{
+                    flex: 1,
+
+                    background:
+                      "red",
+
+                    color: "white",
+
+                    border: "none",
+
+                    borderRadius:
+                      "12px"
+                  }}
+                >
+                  حذف
+                </button>
+
+              </div>
 
             </div>
 
-          </div>
-
-        ))}
+          )
+        )}
 
       </div>
 
