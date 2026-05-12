@@ -3,53 +3,70 @@
 import { useEffect, useState } from "react";
 
 export default function DoctorPage() {
+  const [patients, setPatients] = useState<any[]>([]);
+  const [darkMode, setDarkMode] = useState(false);
 
-  const [darkMode, setDarkMode] =
-    useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
-  const [patients, setPatients] =
-    useState<any[]>([]);
-
-  const [selectedPatient, setSelectedPatient] =
-    useState<any>(null);
-
-  const [doctorNote, setDoctorNote] =
-    useState("");
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editVisit, setEditVisit] = useState("");
+  const [editDisease, setEditDisease] = useState("");
+  const [editComplaint, setEditComplaint] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [editNote, setEditNote] = useState("");
 
   useEffect(() => {
-
-    const savedMode =
-      localStorage.getItem("doctorDarkMode");
-
-    if (savedMode === "true") {
-      setDarkMode(true);
-    }
-
-    const savedPatients =
-      localStorage.getItem("patients");
+    const savedPatients = localStorage.getItem("patients");
 
     if (savedPatients) {
-
-      setPatients(
-        JSON.parse(savedPatients)
-      );
-
+      setPatients(JSON.parse(savedPatients));
     }
 
+    const savedTheme = localStorage.getItem("doctor-theme");
+
+    if (savedTheme === "dark") {
+      setDarkMode(true);
+    }
   }, []);
 
   useEffect(() => {
-
     localStorage.setItem(
-      "doctorDarkMode",
-      String(darkMode)
+      "doctor-theme",
+      darkMode ? "dark" : "light"
     );
-
   }, [darkMode]);
 
-  const savePatients = (
-    updatedPatients: any[]
-  ) => {
+  const openModal = (patient: any, index: number) => {
+    setSelectedIndex(index);
+
+    setEditName(patient.name || "");
+    setEditPhone(patient.phone || "");
+    setEditVisit(patient.visitType || "");
+    setEditDisease(patient.disease || "");
+    setEditComplaint(patient.complaint || "");
+    setEditDate(patient.date || "");
+    setEditNote(patient.note || "");
+
+    setShowModal(true);
+  };
+
+  const savePatient = () => {
+    if (selectedIndex === null) return;
+
+    const updatedPatients = [...patients];
+
+    updatedPatients[selectedIndex] = {
+      ...updatedPatients[selectedIndex],
+      name: editName,
+      phone: editPhone,
+      visitType: editVisit,
+      disease: editDisease,
+      complaint: editComplaint,
+      date: editDate,
+      note: editNote,
+    };
 
     setPatients(updatedPatients);
 
@@ -58,459 +75,359 @@ export default function DoctorPage() {
       JSON.stringify(updatedPatients)
     );
 
+    setShowModal(false);
   };
 
-  const updatePatientStatus = (
-    index: number,
-    newStatus: string
-  ) => {
+  const changeStatus = (index: number, status: string) => {
+    const updatedPatients = [...patients];
 
-    const updated =
-      [...patients];
+    updatedPatients[index].status = status;
 
-    updated[index].status =
-      newStatus;
+    setPatients(updatedPatients);
 
-    savePatients(updated);
-
-  };
-
-  const saveDoctorNote = () => {
-
-    if (!selectedPatient) return;
-
-    const updated =
-      [...patients];
-
-    updated[selectedPatient.index]
-      .doctorNote = doctorNote;
-
-    savePatients(updated);
-
-    alert(
-      "تم حفظ الملاحظة بنجاح ✅"
+    localStorage.setItem(
+      "patients",
+      JSON.stringify(updatedPatients)
     );
-
-    setSelectedPatient(null);
-
-    setDoctorNote("");
-
   };
 
   return (
-
     <main
-      dir="rtl"
       style={{
         minHeight: "100vh",
-        background:
-          darkMode ? "#111827" : "#f3f4f6",
+        background: darkMode ? "#0f172a" : "#f1f5f9",
         padding: "25px",
-        color:
-          darkMode ? "white" : "black",
-        transition: "0.3s"
+        direction: "rtl",
+        transition: "0.3s",
       }}
     >
-
       <div
         style={{
           display: "flex",
-          justifyContent:
-            "space-between",
+          justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "30px"
+          marginBottom: "30px",
         }}
       >
-
         <h1
           style={{
-            fontSize: "40px",
-            fontWeight: "bold"
+            color: darkMode ? "white" : "black",
+            fontSize: "55px",
+            fontWeight: "bold",
           }}
         >
           واجهة الدكتور
         </h1>
 
         <button
-          onClick={() =>
-            setDarkMode(!darkMode)
-          }
+          onClick={() => setDarkMode(!darkMode)}
           style={{
-            width: "55px",
-            height: "55px",
+            width: "70px",
+            height: "70px",
             borderRadius: "50%",
             border: "none",
+            fontSize: "30px",
             cursor: "pointer",
-            fontSize: "22px",
-            background:
-              darkMode ? "#facc15" : "#111827",
-            color:
-              darkMode ? "black" : "white"
+            background: darkMode ? "#facc15" : "#111827",
+            color: darkMode ? "#000" : "#fff",
           }}
         >
           {darkMode ? "☀️" : "🌙"}
         </button>
-
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gap: "20px"
-        }}
-      >
-
-        {patients.map(
-          (
-            patient,
-            index
-          ) => (
-
+      {patients.length === 0 ? (
+        <div
+          style={{
+            color: darkMode ? "white" : "black",
+            textAlign: "center",
+            fontSize: "30px",
+            marginTop: "100px",
+          }}
+        >
+          لا توجد حجوزات حالياً
+        </div>
+      ) : (
+        patients.map((patient, index) => (
+          <div
+            key={index}
+            style={{
+              background: darkMode ? "#1e293b" : "#ffffff",
+              color: darkMode ? "#ffffff" : "#000000",
+              padding: "25px",
+              borderRadius: "30px",
+              marginBottom: "25px",
+              boxShadow: "0 0 25px rgba(0,0,0,0.15)",
+              border: darkMode
+                ? "1px solid rgba(255,255,255,0.1)"
+                : "1px solid #ddd",
+            }}
+          >
             <div
-              key={index}
               style={{
-                background:
-                  darkMode
-                    ? "#1f2937"
-                    : "white",
-                borderRadius: "25px",
-                padding: "25px",
-                boxShadow:
-                  "0 0 20px rgba(0,0,0,0.1)"
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
               }}
             >
-
-              <div
+              <select
+                value={patient.status}
+                onChange={(e) =>
+                  changeStatus(index, e.target.value)
+                }
                 style={{
-                  display: "flex",
-                  justifyContent:
-                    "space-between",
-                  alignItems: "center",
-                  marginBottom: "20px",
-                  flexWrap: "wrap",
-                  gap: "10px"
-                }}
-              >
-
-                <div
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: "bold"
-                  }}
-                >
-                  👤 {patient.name}
-                </div>
-
-                <select
-                  value={
-                    patient.status
-                  }
-                  onChange={(e) =>
-                    updatePatientStatus(
-                      index,
-                      e.target.value
-                    )
-                  }
-                  style={{
-                    padding: "10px",
-                    borderRadius:
-                      "12px",
-                    fontSize: "16px"
-                  }}
-                >
-
-                  <option>
-                    🔵 حجز مُثبّت
-                  </option>
-
-                  <option>
-                    📍 تم الوصول
-                  </option>
-
-                  <option>
-                    🟡 حجز مؤجّل
-                  </option>
-
-                  <option>
-                    🔴 حجز ملغي
-                  </option>
-
-                  <option>
-                    🟢 تم التنفيذ
-                  </option>
-
-                </select>
-
-              </div>
-
-              <div
-                style={{
-                  lineHeight: "2",
-                  fontSize: "18px"
-                }}
-              >
-
-                <div>
-                  📞 {patient.phone}
-                </div>
-
-                <div>
-                  🦷 {patient.visit}
-                </div>
-
-                <div>
-                  🚨 {patient.disease}
-                </div>
-
-                <div>
-                  ❗ {patient.problem}
-                </div>
-
-                <div>
-                  📅 {patient.date}
-                </div>
-
-              </div>
-
-              {patient.doctorNote && (
-
-                <div
-                  style={{
-                    marginTop: "20px",
-                    background:
-                      darkMode
-                        ? "#374151"
-                        : "#ede9fe",
-                    padding: "15px",
-                    borderRadius:
-                      "15px"
-                  }}
-                >
-                  📝 ملاحظة الدكتور:
-                  <br />
-                  {
-                    patient.doctorNote
-                  }
-                </div>
-
-              )}
-
-              <button
-                onClick={() => {
-
-                  setSelectedPatient({
-                    ...patient,
-                    index
-                  });
-
-                  setDoctorNote(
-                    patient.doctorNote ||
-                    ""
-                  );
-
-                }}
-                style={{
-                  width: "100%",
-                  marginTop: "20px",
-                  padding: "15px",
-                  borderRadius: "15px",
+                  padding: "12px",
+                  borderRadius: "14px",
                   border: "none",
-                  background:
-                    "#8b5cf6",
-                  color: "white",
                   fontSize: "20px",
-                  cursor: "pointer",
-                  fontWeight: "bold"
+                  background: darkMode
+                    ? "#334155"
+                    : "#f3f4f6",
+                  color: darkMode ? "white" : "black",
                 }}
               >
-                📝 إدخال ملاحظة
-              </button>
+                <option>🔵 حجز مثبت</option>
+                <option>📍 تم الوصول</option>
+                <option>🟡 حجز مؤجل</option>
+                <option>🔴 حجز ملغي</option>
+                <option>🟢 تم التنفيذ</option>
+              </select>
 
+              <div
+                style={{
+                  fontSize: "24px",
+                  fontWeight: "bold",
+                }}
+              >
+                {patient.status}
+              </div>
             </div>
 
-          )
-        )}
+            <div
+              style={{
+                fontSize: "25px",
+                lineHeight: "2.3",
+                fontWeight: "bold",
+                color: darkMode ? "#ffffff" : "#000000",
+              }}
+            >
+              👤 الاسم: {patient.name}
+              <br />
 
-      </div>
+              📞 الرقم: {patient.phone}
+              <br />
 
-      {selectedPatient && (
+              🦷 المراجعة: {patient.visitType}
+              <br />
 
+              🚨 الأمراض: {patient.disease}
+              <br />
+
+              ❗️ الشكوى: {patient.complaint}
+              <br />
+
+              🗓️ الموعد: {patient.date}
+            </div>
+
+            {patient.note && (
+              <div
+                style={{
+                  marginTop: "20px",
+                  background: darkMode
+                    ? "#334155"
+                    : "#f8fafc",
+                  padding: "20px",
+                  borderRadius: "20px",
+                  fontSize: "22px",
+                  color: darkMode ? "white" : "black",
+                }}
+              >
+                📝 ملاحظة الدكتور:
+                <br />
+                {patient.note}
+              </div>
+            )}
+
+            <button
+              onClick={() => openModal(patient, index)}
+              style={{
+                marginTop: "25px",
+                width: "100%",
+                padding: "18px",
+                border: "none",
+                borderRadius: "18px",
+                background:
+                  "linear-gradient(to left,#9333ea,#a855f7)",
+                color: "white",
+                fontSize: "24px",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              📝 إدخال ملاحظة
+            </button>
+          </div>
+        ))
+      )}
+
+      {showModal && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            background:
-              "rgba(0,0,0,0.5)",
+            background: "rgba(0,0,0,0.65)",
             display: "flex",
-            justifyContent:
-              "center",
+            justifyContent: "center",
             alignItems: "center",
-            zIndex: 1000
+            padding: "20px",
+            zIndex: 999,
           }}
         >
-
           <div
             style={{
-              width: "95%",
-              maxWidth: "700px",
-              background:
-                darkMode
-                  ? "#1f2937"
-                  : "white",
+              background: darkMode ? "#1e293b" : "#ffffff",
+              width: "100%",
+              maxWidth: "750px",
               borderRadius: "30px",
-              padding: "25px"
+              padding: "30px",
+              maxHeight: "90vh",
+              overflowY: "auto",
             }}
           >
-
-            <div
+            <h2
               style={{
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems: "center",
-                marginBottom: "20px"
+                color: darkMode ? "white" : "black",
+                fontSize: "40px",
+                marginBottom: "25px",
               }}
             >
+              📝 إدخال ملاحظة
+            </h2>
 
-              <h2
-                style={{
-                  fontSize: "35px",
-                  fontWeight: "bold"
-                }}
-              >
-                ملاحظات الدكتور
-              </h2>
+            <input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="اسم المريض"
+              style={inputStyle(darkMode)}
+            />
 
-              <button
-                onClick={() =>
-                  setSelectedPatient(
-                    null
-                  )
-                }
-                style={{
-                  background:
-                    "none",
-                  border: "none",
-                  fontSize: "35px",
-                  cursor: "pointer",
-                  color:
-                    darkMode
-                      ? "white"
-                      : "black"
-                }}
-              >
-                ×
-              </button>
+            <input
+              value={editPhone}
+              onChange={(e) => setEditPhone(e.target.value)}
+              placeholder="رقم المريض"
+              style={inputStyle(darkMode)}
+            />
 
-            </div>
+            <input
+              value={editVisit}
+              onChange={(e) => setEditVisit(e.target.value)}
+              placeholder="نوع المراجعة"
+              style={inputStyle(darkMode)}
+            />
+
+            <input
+              value={editDisease}
+              onChange={(e) => setEditDisease(e.target.value)}
+              placeholder="الأمراض المزمنة"
+              style={inputStyle(darkMode)}
+            />
+
+            <input
+              value={editComplaint}
+              onChange={(e) =>
+                setEditComplaint(e.target.value)
+              }
+              placeholder="الشكوى الرئيسية"
+              style={inputStyle(darkMode)}
+            />
+
+            <input
+              value={editDate}
+              onChange={(e) => setEditDate(e.target.value)}
+              placeholder="موعد الحجز"
+              style={inputStyle(darkMode)}
+            />
 
             <textarea
-              placeholder="اكتب رسالتك هنا..."
-              value={doctorNote}
-              onChange={(e) =>
-                setDoctorNote(
-                  e.target.value
-                )
-              }
+              value={editNote}
+              onChange={(e) => setEditNote(e.target.value)}
+              placeholder="اكتب ملاحظة الدكتور هنا..."
               style={{
                 width: "100%",
                 height: "220px",
-                borderRadius: "25px",
-                border:
-                  "2px solid #8b5cf6",
+                borderRadius: "20px",
                 padding: "20px",
                 fontSize: "22px",
                 resize: "none",
-                marginBottom: "25px",
-                background:
-                  darkMode
-                    ? "#374151"
-                    : "#f5f3ff",
-                color:
-                  darkMode
-                    ? "white"
-                    : "black"
+                border: "2px solid #9333ea",
+                background: darkMode
+                  ? "#334155"
+                  : "#f8fafc",
+                color: darkMode ? "white" : "black",
+                direction: "rtl",
+                marginTop: "15px",
               }}
             />
 
             <div
               style={{
-                border:
-                  "3px dashed #8b5cf6",
-                borderRadius: "25px",
-                padding: "40px",
-                textAlign: "center",
-                marginBottom: "25px"
+                display: "flex",
+                gap: "15px",
+                marginTop: "25px",
               }}
             >
-
-              <div
+              <button
+                onClick={savePatient}
                 style={{
-                  fontSize: "50px",
-                  marginBottom: "15px"
-                }}
-              >
-                ☁️
-              </div>
-
-              <div
-                style={{
-                  fontSize: "28px",
+                  flex: 1,
+                  padding: "18px",
+                  borderRadius: "18px",
+                  border: "none",
+                  background: "#22c55e",
+                  color: "white",
+                  fontSize: "22px",
                   fontWeight: "bold",
-                  marginBottom: "10px"
+                  cursor: "pointer",
                 }}
               >
-                اسحب الملفات هنا
-                أو اضغط للاختيار
-              </div>
+                💾 حفظ
+              </button>
 
-              <div
+              <button
+                onClick={() => setShowModal(false)}
                 style={{
-                  opacity: 0.7,
-                  fontSize: "18px"
+                  flex: 1,
+                  padding: "18px",
+                  borderRadius: "18px",
+                  border: "none",
+                  background: "#ef4444",
+                  color: "white",
+                  fontSize: "22px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
                 }}
               >
-                JPG, PNG, PDF
-              </div>
-
-              <input
-                type="file"
-                multiple
-                style={{
-                  marginTop: "20px"
-                }}
-              />
-
+                ❌ إغلاق
+              </button>
             </div>
-
-            <button
-              onClick={
-                saveDoctorNote
-              }
-              style={{
-                width: "100%",
-                padding: "18px",
-                borderRadius: "18px",
-                border: "none",
-                background:
-                  "#2563eb",
-                color: "white",
-                fontSize: "22px",
-                cursor: "pointer",
-                fontWeight: "bold"
-              }}
-            >
-              حفظ الملاحظة
-            </button>
-
           </div>
-
         </div>
-
       )}
-
     </main>
-
   );
+}
 
+function inputStyle(darkMode: boolean) {
+  return {
+    width: "100%",
+    padding: "18px",
+    marginBottom: "15px",
+    borderRadius: "18px",
+    border: "2px solid #cbd5e1",
+    fontSize: "22px",
+    background: darkMode ? "#334155" : "#ffffff",
+    color: darkMode ? "#ffffff" : "#000000",
+    direction: "rtl" as const,
+  };
 }
