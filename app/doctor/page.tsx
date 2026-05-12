@@ -5,24 +5,33 @@ import { useEffect, useState } from "react";
 export default function DoctorPage() {
 
   const [patients, setPatients] =
-    useState<any[]>([]);
-
-  const [darkMode, setDarkMode] =
-    useState(false);
+    useState<any[]>([];
 
   const [selectedPatient, setSelectedPatient] =
     useState<any>(null);
 
-  const [doctorNotes, setDoctorNotes] =
+  const [darkMode, setDarkMode] =
+    useState(false);
+
+  const [name, setName] =
     useState("");
 
-  const [treatmentPlan, setTreatmentPlan] =
+  const [phone, setPhone] =
     useState("");
 
-  const [medicine, setMedicine] =
+  const [visitType, setVisitType] =
+    useState("");
+
+  const [complaint, setComplaint] =
+    useState("");
+
+  const [date, setDate] =
     useState("");
 
   const [status, setStatus] =
+    useState("");
+
+  const [doctorNotes, setDoctorNotes] =
     useState("");
 
   const [image, setImage] =
@@ -39,30 +48,32 @@ export default function DoctorPage() {
 
   }, []);
 
-  const activePatients =
-    patients.filter(
-      (p) =>
-        p.status !== "🔴 حجز ملغي"
-    );
-
   function openPatient(patient: any) {
 
     setSelectedPatient(patient);
 
-    setDoctorNotes(
-      patient.doctorNotes || ""
+    setName(patient.name || "");
+
+    setPhone(patient.phone || "");
+
+    setVisitType(
+      patient.visitType === "زيارة أولى"
+        ? `زيارة أولى ← ${patient.firstVisitType}`
+        : patient.visitType
     );
 
-    setTreatmentPlan(
-      patient.treatmentPlan || ""
+    setComplaint(
+      patient.complaint || ""
     );
 
-    setMedicine(
-      patient.medicine || ""
-    );
+    setDate(patient.date || "");
 
     setStatus(
-      patient.status || "🔵 حجز مُثبّت"
+      patient.status || ""
+    );
+
+    setDoctorNotes(
+      patient.doctorNotes || ""
     );
 
     setImage(
@@ -93,7 +104,7 @@ export default function DoctorPage() {
     reader.readAsDataURL(file);
   }
 
-  function saveMedicalData() {
+  function savePatient() {
 
     const updatedPatients =
       patients.map((p) => {
@@ -102,16 +113,23 @@ export default function DoctorPage() {
           p.phone ===
           selectedPatient.phone
         ) {
+
           return {
             ...p,
 
-            doctorNotes,
+            name,
 
-            treatmentPlan,
+            phone,
 
-            medicine,
+            visitType,
+
+            complaint,
+
+            date,
 
             status,
+
+            doctorNotes,
 
             image,
           };
@@ -127,9 +145,10 @@ export default function DoctorPage() {
       JSON.stringify(updatedPatients)
     );
 
-    alert("تم حفظ الملف الطبي");
+    alert(
+      "تم حفظ الملاحظات والتعديلات"
+    );
 
-    // إغلاق الملف بعد الحفظ
     setSelectedPatient(null);
 
   }
@@ -149,7 +168,7 @@ export default function DoctorPage() {
           ? "white"
           : "black",
 
-        padding: "25px",
+        padding: "20px",
 
         fontFamily: "sans-serif",
       }}
@@ -175,7 +194,6 @@ export default function DoctorPage() {
           واجهة الدكتور
         </h1>
 
-        {/* الثيم */}
         <button
           onClick={() =>
             setDarkMode(!darkMode)
@@ -187,13 +205,14 @@ export default function DoctorPage() {
             background:
               "transparent",
 
-            fontSize: "30px",
+            fontSize: "28px",
 
             cursor: "pointer",
           }}
         >
           {darkMode ? "☀️" : "🌙"}
         </button>
+
       </div>
 
       {/* المرضى */}
@@ -207,8 +226,9 @@ export default function DoctorPage() {
         }}
       >
 
-        {activePatients.map(
+        {patients.map(
           (patient, index) => (
+
             <div
               key={index}
 
@@ -219,7 +239,7 @@ export default function DoctorPage() {
 
                 padding: "20px",
 
-                borderRadius: "15px",
+                borderRadius: "20px",
 
                 boxShadow:
                   "0 0 10px rgba(0,0,0,0.1)",
@@ -239,14 +259,15 @@ export default function DoctorPage() {
                   left: "20px",
 
                   background:
-                    "#e5e7eb",
+                    "#2563eb",
 
-                  padding: "10px",
+                  color: "white",
+
+                  padding:
+                    "8px 15px",
 
                   borderRadius:
                     "10px",
-
-                  color: "black",
 
                   fontWeight:
                     "bold",
@@ -256,46 +277,23 @@ export default function DoctorPage() {
               </div>
 
               <p>
-                <strong>
-                  👤 الاسم:
-                </strong>{" "}
-
-                {patient.name}
+                👤 {patient.name}
               </p>
 
               <p>
-                <strong>
-                  📞 الرقم:
-                </strong>{" "}
-
-                {patient.phone}
+                📞 {patient.phone}
               </p>
 
               <p>
-                <strong>
-                  🦷 المراجعة:
-                </strong>{" "}
-
-                {patient.visitType ===
-                "زيارة أولى"
-                  ? `زيارة أولى ← ${patient.firstVisitType}`
-                  : patient.visitType}
+                🦷 {patient.visitType}
               </p>
 
               <p>
-                <strong>
-                  ❗️ الشكوى:
-                </strong>{" "}
-
-                {patient.complaint}
+                ❗ {patient.complaint}
               </p>
 
               <p>
-                <strong>
-                  🗓️ الموعد:
-                </strong>{" "}
-
-                {patient.date}
+                🗓️ {patient.date}
               </p>
 
               <div
@@ -308,6 +306,7 @@ export default function DoctorPage() {
                 }}
               >
 
+                {/* واتساب */}
                 <a
                   href={`https://wa.me/${patient.phone}`}
 
@@ -325,10 +324,10 @@ export default function DoctorPage() {
                       "none",
 
                     borderRadius:
-                      "10px",
+                      "12px",
 
                     padding:
-                      "12px",
+                      "14px",
 
                     textAlign:
                       "center",
@@ -340,6 +339,7 @@ export default function DoctorPage() {
                   واتساب 💬
                 </a>
 
+                {/* الملاحظات */}
                 <button
                   onClick={() =>
                     openPatient(patient)
@@ -349,17 +349,17 @@ export default function DoctorPage() {
                     flex: 1,
 
                     background:
-                      "#2563eb",
+                      "#7c3aed",
 
                     color: "white",
 
                     border: "none",
 
                     borderRadius:
-                      "10px",
+                      "12px",
 
                     padding:
-                      "12px",
+                      "14px",
 
                     cursor: "pointer",
 
@@ -367,18 +367,20 @@ export default function DoctorPage() {
                       "bold",
                   }}
                 >
-                  الملف الطبي
+                  ادخال ملاحظة 📝
                 </button>
 
               </div>
+
             </div>
           )
         )}
 
       </div>
 
-      {/* الملف الطبي */}
+      {/* نافذة الملاحظات */}
       {selectedPatient && (
+
         <div
           style={{
             marginTop: "40px",
@@ -387,22 +389,96 @@ export default function DoctorPage() {
               ? "#1f2937"
               : "white",
 
+            borderRadius: "25px",
+
             padding: "25px",
 
-            borderRadius: "20px",
-
             boxShadow:
-              "0 0 10px rgba(0,0,0,0.1)",
+              "0 0 20px rgba(0,0,0,0.1)",
           }}
         >
 
-          <h2>
-            الملف الطبي:
-            {" "}
-            {selectedPatient.name}
+          <h2
+            style={{
+              marginBottom: "20px",
+
+              color: "#7c3aed",
+            }}
+          >
+            ملاحظات الدكتور 🦷
           </h2>
 
-          {/* تغيير الحالة */}
+          <input
+            value={name}
+
+            onChange={(e) =>
+              setName(
+                e.target.value
+              )
+            }
+
+            placeholder="اسم المريض"
+
+            style={inputStyle}
+          />
+
+          <input
+            value={phone}
+
+            onChange={(e) =>
+              setPhone(
+                e.target.value
+              )
+            }
+
+            placeholder="رقم المريض"
+
+            style={inputStyle}
+          />
+
+          <input
+            value={visitType}
+
+            onChange={(e) =>
+              setVisitType(
+                e.target.value
+              )
+            }
+
+            placeholder="نوع الزيارة"
+
+            style={inputStyle}
+          />
+
+          <input
+            value={complaint}
+
+            onChange={(e) =>
+              setComplaint(
+                e.target.value
+              )
+            }
+
+            placeholder="الشكوى"
+
+            style={inputStyle}
+          />
+
+          <input
+            value={date}
+
+            onChange={(e) =>
+              setDate(
+                e.target.value
+              )
+            }
+
+            placeholder="موعد الحجز"
+
+            style={inputStyle}
+          />
+
+          {/* الحالة */}
           <select
             value={status}
 
@@ -414,6 +490,7 @@ export default function DoctorPage() {
 
             style={inputStyle}
           >
+
             <option>
               🔵 حجز مُثبّت
             </option>
@@ -433,11 +510,11 @@ export default function DoctorPage() {
             <option>
               🟢 تم التنفيذ
             </option>
+
           </select>
 
+          {/* الملاحظات */}
           <textarea
-            placeholder="ملاحظات الطبيب"
-
             value={doctorNotes}
 
             onChange={(e) =>
@@ -446,94 +523,105 @@ export default function DoctorPage() {
               )
             }
 
-            style={textareaStyle}
-          />
-
-          <textarea
-            placeholder="الخطة العلاجية"
-
-            value={treatmentPlan}
-
-            onChange={(e) =>
-              setTreatmentPlan(
-                e.target.value
-              )
-            }
-
-            style={textareaStyle}
-          />
-
-          <textarea
-            placeholder="الوصفة الطبية"
-
-            value={medicine}
-
-            onChange={(e) =>
-              setMedicine(
-                e.target.value
-              )
-            }
-
-            style={textareaStyle}
-          />
-
-          {/* رفع صورة */}
-          <input
-            type="file"
-
-            accept="image/*"
-
-            capture="environment"
-
-            onChange={handleImage}
+            placeholder="اكتب رسالتك هنا..."
 
             style={{
+              width: "100%",
+
+              minHeight: "220px",
+
+              borderRadius:
+                "20px",
+
+              padding: "20px",
+
+              fontSize: "20px",
+
               marginTop: "20px",
+
+              border:
+                "2px solid #ddd",
+
+              color: "black",
             }}
           />
 
-          {/* عرض الصورة */}
-          {image && (
-            <img
-              src={image}
+          {/* رفع ملف */}
+          <div
+            style={{
+              marginTop: "30px",
+            }}
+          >
+
+            <h2
+              style={{
+                color: "#7c3aed",
+              }}
+            >
+              المرفقات 📎
+            </h2>
+
+            <input
+              type="file"
+
+              accept="image/*"
+
+              capture="environment"
+
+              onChange={handleImage}
 
               style={{
-                width: "100%",
-
-                marginTop: "20px",
-
-                borderRadius: "15px",
+                marginTop: "15px",
               }}
             />
-          )}
 
+            {image && (
+              <img
+                src={image}
+
+                style={{
+                  width: "100%",
+
+                  marginTop: "20px",
+
+                  borderRadius:
+                    "20px",
+                }}
+              />
+            )}
+
+          </div>
+
+          {/* حفظ */}
           <button
-            onClick={saveMedicalData}
+            onClick={savePatient}
 
             style={{
+              width: "100%",
+
               background:
-                "green",
+                "#16a34a",
 
               color: "white",
 
               border: "none",
 
-              padding: "15px",
+              padding: "18px",
 
               borderRadius:
-                "10px",
+                "15px",
 
-              cursor: "pointer",
-
-              width: "100%",
+              fontSize: "18px",
 
               fontWeight:
                 "bold",
 
-              marginTop: "20px",
+              marginTop: "30px",
+
+              cursor: "pointer",
             }}
           >
-            حفظ الملف الطبي
+            حفظ التعديلات ✅
           </button>
 
         </div>
@@ -543,36 +631,19 @@ export default function DoctorPage() {
   );
 }
 
-const textareaStyle = {
-  width: "100%",
-
-  minHeight: "120px",
-
-  marginTop: "15px",
-
-  borderRadius: "10px",
-
-  border: "1px solid #ccc",
-
-  padding: "15px",
-
-  fontSize: "16px",
-
-  color: "black",
-};
-
 const inputStyle = {
+
   width: "100%",
 
-  padding: "14px",
+  padding: "16px",
 
   marginTop: "15px",
 
-  borderRadius: "10px",
+  borderRadius: "15px",
 
-  border: "1px solid #ccc",
+  border: "2px solid #ddd",
 
-  fontSize: "16px",
+  fontSize: "17px",
 
   color: "black",
 };
