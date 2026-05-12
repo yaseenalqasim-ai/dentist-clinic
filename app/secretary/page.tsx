@@ -2,300 +2,249 @@
 
 import { useEffect, useState } from "react";
 
+import {
+  initializeApp
+} from "firebase/app";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc
+} from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCIZdUmSX15w0CACuW4vfz9npsUi-L3lbg",
+  authDomain: "dentist-clinic-476ac.firebaseapp.com",
+  projectId: "dentist-clinic-476ac",
+  storageBucket: "dentist-clinic-476ac.firebasestorage.app",
+  messagingSenderId: "1013681862841",
+  appId: "1:1013681862841:web:86643c3f3fa926389a8368",
+  measurementId: "G-FW5T2FJ29R"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
 export default function SecretaryPage() {
-
-  const [darkMode, setDarkMode] =
-    useState(false);
-
-  const [showForm, setShowForm] =
-    useState(false);
 
   const [patients, setPatients] =
     useState<any[]>([]);
 
+  const [showForm, setShowForm] =
+    useState(false);
+
+  const [darkMode, setDarkMode] =
+    useState(false);
+
   const [search, setSearch] =
+    useState("");
+
+  const [editingId, setEditingId] =
     useState("");
 
   const [error, setError] =
     useState("");
 
-  const [editingIndex, setEditingIndex] =
-    useState<number | null>(null);
-
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [visitType, setVisitType] =
-    useState("");
-
-  const [
-    firstVisitType,
-    setFirstVisitType,
-  ] = useState("");
-
-  const [disease, setDisease] =
-    useState("");
-
-  const [complaint, setComplaint] =
-    useState("");
-
-  const [date, setDate] = useState("");
-
-  const [status, setStatus] =
-    useState("🔵 حجز مُثبّت");
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    review: "",
+    disease: "",
+    complaint: "",
+    date: "",
+    status: "🔵 حجز مُثبت",
+    notes: ""
+  });
 
   useEffect(() => {
-    const savedPatients =
-      JSON.parse(
-        localStorage.getItem("patients") ||
-          "[]"
-      );
 
-    setPatients(savedPatients);
+    const savedTheme =
+      localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+      setDarkMode(true);
+    }
+
+    loadPatients();
+
   }, []);
 
-  function savePatients(
-    updatedPatients: any[]
-  ) {
-    setPatients(updatedPatients);
+  useEffect(() => {
 
     localStorage.setItem(
-      "patients",
-      JSON.stringify(updatedPatients)
+      "theme",
+      darkMode ? "dark" : "light"
     );
+
+  }, [darkMode]);
+
+  async function loadPatients() {
+
+    const querySnapshot =
+      await getDocs(
+        collection(db, "bookings")
+      );
+
+    const data: any[] = [];
+
+    querySnapshot.forEach((docItem) => {
+
+      data.push({
+        id: docItem.id,
+        ...docItem.data()
+      });
+
+    });
+
+    setPatients(data);
   }
 
-  function validateForm() {
+  async function savePatient() {
 
-    if (!name) {
-      setError(
-        "تركت الخانة (اسم المريض) فارغة"
-      );
-
-      return false;
+    if (!form.name) {
+      setError("تركت خانة اسم المريض فارغة");
+      return;
     }
 
-    if (!phone) {
-      setError(
-        "تركت الخانة (رقم المريض) فارغة"
-      );
-
-      return false;
+    if (!form.phone) {
+      setError("تركت خانة رقم المريض فارغة");
+      return;
     }
 
-    if (!visitType) {
-      setError(
-        "تركت الخانة (رقم المراجعة) فارغة"
-      );
-
-      return false;
+    if (!form.review) {
+      setError("تركت خانة المراجعة فارغة");
+      return;
     }
 
-    if (
-      visitType === "زيارة أولى" &&
-      !firstVisitType
-    ) {
-      setError(
-        "تركت الخانة (نوع الزيارة) فارغة"
-      );
-
-      return false;
-    }
-
-    if (!disease) {
-      setError(
-        "تركت الخانة (الأمراض المزمنة) فارغة"
-      );
-
-      return false;
-    }
-
-    if (!complaint) {
-      setError(
-        "تركت الخانة (الشكوى الرئيسية) فارغة"
-      );
-
-      return false;
-    }
-
-    if (!date) {
-      setError(
-        "تركت الخانة (موعد الحجز) فارغة"
-      );
-
-      return false;
+    if (!form.date) {
+      setError("تركت خانة الموعد فارغة");
+      return;
     }
 
     setError("");
 
-    return true;
-  }
+    if (editingId) {
 
-  function addBooking() {
+      await updateDoc(
+        doc(db, "bookings", editingId),
+        form
+      );
 
-    if (!validateForm()) return;
-
-    const newPatient = {
-      name,
-      phone,
-      visitType,
-      firstVisitType,
-      disease,
-      complaint,
-      date,
-      status,
-    };
-
-    let updatedPatients = [...patients];
-
-    if (editingIndex !== null) {
-      updatedPatients[editingIndex] =
-        newPatient;
     } else {
-      updatedPatients.push(newPatient);
-    }
 
-    savePatients(updatedPatients);
-
-    resetForm();
-  }
-
-  function deleteBooking(index: number) {
-
-    const updatedPatients =
-      patients.filter(
-        (_, i) => i !== index
+      await addDoc(
+        collection(db, "bookings"),
+        form
       );
 
-    savePatients(updatedPatients);
-  }
+    }
 
-  function editBooking(index: number) {
+    setForm({
+      name: "",
+      phone: "",
+      review: "",
+      disease: "",
+      complaint: "",
+      date: "",
+      status: "🔵 حجز مُثبت",
+      notes: ""
+    });
 
-    const patient = patients[index];
-
-    setName(patient.name);
-    setPhone(patient.phone);
-    setVisitType(patient.visitType);
-
-    setFirstVisitType(
-      patient.firstVisitType
-    );
-
-    setDisease(patient.disease);
-
-    setComplaint(patient.complaint);
-
-    setDate(patient.date);
-
-    setStatus(patient.status);
-
-    setEditingIndex(index);
-
-    setShowForm(true);
-  }
-
-  function resetForm() {
-
-    setName("");
-    setPhone("");
-    setVisitType("");
-    setFirstVisitType("");
-    setDisease("");
-    setComplaint("");
-    setDate("");
-
-    setStatus("🔵 حجز مُثبّت");
-
-    setEditingIndex(null);
-
-    setError("");
+    setEditingId("");
 
     setShowForm(false);
+
+    loadPatients();
+  }
+
+  async function deletePatient(id: string) {
+
+    await deleteDoc(
+      doc(db, "bookings", id)
+    );
+
+    loadPatients();
+  }
+
+  function editPatient(patient: any) {
+
+    setForm(patient);
+
+    setEditingId(patient.id);
+
+    setShowForm(true);
   }
 
   const filteredPatients =
     patients.filter((patient) => {
 
-      const text = `
-      ${patient.name}
-      ${patient.phone}
-      ${patient.visitType}
-      ${patient.firstVisitType}
-      ${patient.date}
-      `
-        .toLowerCase();
-
-      return text.includes(
-        search.toLowerCase()
+      return (
+        patient.name?.includes(search) ||
+        patient.phone?.includes(search) ||
+        patient.review?.includes(search) ||
+        patient.date?.includes(search)
       );
+
     });
 
   return (
+
     <main
       dir="rtl"
       style={{
         minHeight: "100vh",
-
-        background: darkMode
-          ? "#111827"
-          : "#f3f4f6",
-
-        color: darkMode
-          ? "white"
-          : "black",
-
-        padding: "25px",
-
-        fontFamily: "sans-serif",
+        background:
+          darkMode
+            ? "#071739"
+            : "#f3f3f3",
+        color:
+          darkMode
+            ? "white"
+            : "black",
+        padding: "20px"
       }}
     >
 
-      {/* العنوان */}
       <div
         style={{
           display: "flex",
-          justifyContent:
-            "space-between",
-
-          alignItems: "center",
+          justifyContent: "space-between",
+          alignItems: "center"
         }}
       >
 
-        <h1
-          style={{
-            color: "#2563eb",
-          }}
-        >
+        <h1>
           واجهة السكرتيرة
         </h1>
 
-        {/* الثيم */}
         <button
           onClick={() =>
             setDarkMode(!darkMode)
           }
-
           style={{
+            width: "60px",
+            height: "60px",
+            borderRadius: "50%",
             border: "none",
-            background: "transparent",
-
-            fontSize: "30px",
-            cursor: "pointer",
+            fontSize: "24px",
+            cursor: "pointer"
           }}
         >
           {darkMode ? "☀️" : "🌙"}
         </button>
+
       </div>
 
-      {/* البحث والإضافة */}
       <div
         style={{
           display: "flex",
           gap: "10px",
-
-          marginTop: "20px",
-
-          flexWrap: "wrap",
+          marginTop: "20px"
         }}
       >
 
@@ -303,562 +252,295 @@ export default function SecretaryPage() {
           onClick={() =>
             setShowForm(true)
           }
-
-          style={buttonStyle}
+          style={{
+            background: "#2563eb",
+            color: "white",
+            border: "none",
+            padding: "15px",
+            borderRadius: "12px",
+            fontSize: "20px",
+            cursor: "pointer"
+          }}
         >
           + إضافة حجز
         </button>
 
         <input
           placeholder="البحث عن حجز.."
-
           value={search}
-
           onChange={(e) =>
             setSearch(e.target.value)
           }
-
           style={{
-            ...inputStyle,
-
-            background: "white",
-
-            color: "black",
-
-            maxWidth: "300px",
+            flex: 1,
+            padding: "15px",
+            borderRadius: "12px",
+            border: "1px solid #ccc",
+            fontSize: "18px",
+            color: "black"
           }}
         />
+
       </div>
 
-      {/* الفورم */}
       {showForm && (
-        <div style={cardStyle}>
+
+        <div
+          style={{
+            marginTop: "20px",
+            background:
+              darkMode
+                ? "#102542"
+                : "white",
+            padding: "20px",
+            borderRadius: "20px"
+          }}
+        >
 
           <button
-            onClick={resetForm}
-
+            onClick={() =>
+              setShowForm(false)
+            }
             style={{
-              ...buttonStyle,
-
-              background: "#6b7280",
-
-              marginBottom: "20px",
+              marginBottom: "15px",
+              background: "red",
+              color: "white",
+              border: "none",
+              padding: "10px",
+              borderRadius: "10px"
             }}
           >
-            ← رجوع
+            رجوع
           </button>
 
-          {/* الأخطاء */}
           {error && (
+
             <div
               style={{
-                background: "#fee2e2",
-
-                color: "red",
-
-                padding: "12px",
-
+                background: "red",
+                color: "white",
+                padding: "10px",
                 borderRadius: "10px",
-
-                marginBottom: "15px",
-
-                fontWeight: "bold",
+                marginBottom: "15px"
               }}
             >
               {error}
             </div>
+
           )}
 
-          <input
-            placeholder="👤 اسم المريض"
+          {[
+            ["👤 اسم المريض", "name"],
+            ["📞 رقم المريض", "phone"],
+            ["🦷 المراجعة", "review"],
+            ["🚨 الأمراض", "disease"],
+            ["❗ الشكوى", "complaint"],
+            ["🗓️ الموعد", "date"]
+          ].map(([label, key]) => (
 
-            value={name}
-
-            onChange={(e) =>
-              setName(e.target.value)
-            }
-
-            style={inputStyle}
-          />
-
-          <input
-            placeholder="📞 رقم المريض"
-
-            value={phone}
-
-            onChange={(e) =>
-              setPhone(e.target.value)
-            }
-
-            style={inputStyle}
-          />
-
-          <select
-            value={visitType}
-
-            onChange={(e) =>
-              setVisitType(
-                e.target.value
-              )
-            }
-
-            style={inputStyle}
-          >
-            <option value="">
-              🦷 رقم المراجعة
-            </option>
-
-            <option>
-              زيارة أولى
-            </option>
-
-            <option>
-              مراجعة
-            </option>
-
-            <option>
-              إكمال علاج
-            </option>
-
-            <option>
-              طوارئ
-            </option>
-
-            <option>
-              مراجعة بعد قلع
-            </option>
-
-            <option>
-              جلسة تقويم
-            </option>
-          </select>
-
-          {visitType ===
-            "زيارة أولى" && (
-            <select
-              value={
-                firstVisitType
-              }
-
+            <input
+              key={key}
+              placeholder={label}
+              value={(form as any)[key]}
               onChange={(e) =>
-                setFirstVisitType(
-                  e.target.value
-                )
+                setForm({
+                  ...form,
+                  [key]: e.target.value
+                })
               }
+              style={{
+                width: "100%",
+                marginBottom: "15px",
+                padding: "15px",
+                borderRadius: "12px",
+                border: "1px solid #ccc",
+                fontSize: "18px"
+              }}
+            />
 
-              style={inputStyle}
-            >
-              <option value="">
-                🦷 نوع الزيارة
-              </option>
-
-              <option>كشف</option>
-
-              <option>
-                تنظيف
-              </option>
-
-              <option>قلع</option>
-
-              <option>
-                علاج عصب
-              </option>
-
-              <option>
-                تقويم
-              </option>
-
-              <option>
-                زراعة
-              </option>
-
-              <option>
-                تجميل
-              </option>
-            </select>
-          )}
-
-          <select
-            value={disease}
-
-            onChange={(e) =>
-              setDisease(
-                e.target.value
-              )
-            }
-
-            style={inputStyle}
-          >
-            <option value="">
-              🚨 الأمراض المزمنة
-            </option>
-
-            <option>
-              لا يوجد
-            </option>
-
-            <option>سكري</option>
-
-            <option>ضغط</option>
-
-            <option>
-              أمراض قلب
-            </option>
-
-            <option>
-              مميعات دم
-            </option>
-
-            <option>
-              حساسية بنج أو
-              بنسلين
-            </option>
-
-            <option>حمل</option>
-
-            <option>
-              أخرى
-            </option>
-          </select>
+          ))}
 
           <textarea
-            placeholder="❗️الشكوى الرئيسية"
-
-            value={complaint}
-
+            placeholder="📝 إدخال ملاحظة"
+            value={form.notes}
             onChange={(e) =>
-              setComplaint(
-                e.target.value
-              )
+              setForm({
+                ...form,
+                notes: e.target.value
+              })
             }
-
             style={{
-              ...inputStyle,
-
-              height: "100px",
+              width: "100%",
+              height: "120px",
+              padding: "15px",
+              borderRadius: "12px",
+              fontSize: "18px"
             }}
-          />
-
-          <input
-            type="date"
-
-            value={date}
-
-            onChange={(e) =>
-              setDate(
-                e.target.value
-              )
-            }
-
-            style={inputStyle}
           />
 
           <button
-            onClick={addBooking}
-
+            onClick={savePatient}
             style={{
-              ...buttonStyle,
-
-              background:
-                "green",
-
+              marginTop: "15px",
               width: "100%",
+              background: "#7c3aed",
+              color: "white",
+              border: "none",
+              padding: "18px",
+              borderRadius: "14px",
+              fontSize: "20px"
             }}
           >
-            {editingIndex !== null
-              ? "حفظ التعديلات"
-              : "حفظ الحجز"}
+            حفظ الحجز
           </button>
+
         </div>
+
       )}
 
-      {/* الحجوزات */}
       <div
         style={{
-          marginTop: "40px",
+          marginTop: "30px"
         }}
       >
 
-        {filteredPatients.map(
-          (
-            patient,
-            index
-          ) => (
+        {filteredPatients.map((patient) => (
+
+          <div
+            key={patient.id}
+            style={{
+              background:
+                darkMode
+                  ? "#102542"
+                  : "white",
+              padding: "20px",
+              borderRadius: "20px",
+              marginBottom: "20px"
+            }}
+          >
+
             <div
-              key={index}
-
               style={{
-                ...cardStyle,
+                marginBottom: "10px",
+                fontSize: "22px"
+              }}
+            >
+              {patient.status}
+            </div>
 
-                color: darkMode
-                  ? "white"
-                  : "black",
+            <h2>
+              👤 الاسم:
+              {patient.name}
+            </h2>
 
-                background:
-                  darkMode
-                    ? "#1f2937"
-                    : "white",
+            <h2>
+              📞 الرقم:
+              {patient.phone}
+            </h2>
 
-                position:
-                  "relative",
+            <h2>
+              🦷 المراجعة:
+              {patient.review}
+            </h2>
+
+            <h2>
+              🚨 الأمراض:
+              {patient.disease}
+            </h2>
+
+            <h2>
+              ❗ الشكوى:
+              {patient.complaint}
+            </h2>
+
+            <h2>
+              🗓️ الموعد:
+              {patient.date}
+            </h2>
+
+            {patient.notes && (
+
+              <div
+                style={{
+                  marginTop: "15px",
+                  background:
+                    darkMode
+                      ? "#1e293b"
+                      : "#f3f3f3",
+                  padding: "15px",
+                  borderRadius: "12px"
+                }}
+              >
+                📝 {patient.notes}
+              </div>
+
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                marginTop: "20px"
               }}
             >
 
-              {/* الحالة */}
-              <div
+              <a
+                href={`https://wa.me/${patient.phone}`}
+                target="_blank"
                 style={{
-                  position:
-                    "absolute",
-
-                  top: "20px",
-
-                  left: "20px",
+                  flex: 1,
+                  background: "#22c55e",
+                  color: "white",
+                  padding: "15px",
+                  borderRadius: "12px",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  fontSize: "20px"
                 }}
               >
-                <select
-                  value={
-                    patient.status
-                  }
+                واتساب
+              </a>
 
-                  onChange={(e) => {
-
-                    const updated =
-                      [
-                        ...patients,
-                      ];
-
-                    updated[
-                      index
-                    ].status =
-                      e.target.value;
-
-                    savePatients(
-                      updated
-                    );
-                  }}
-
-                  style={{
-                    padding:
-                      "10px",
-
-                    borderRadius:
-                      "10px",
-
-                    border:
-                      "none",
-
-                    background:
-                      "#e5e7eb",
-                  }}
-                >
-                  <option>
-                    🔵 حجز مُثبّت
-                  </option>
-
-                  <option>
-                    📍 تم الوصول
-                  </option>
-
-                  <option>
-                    🟡 حجز مؤجّل
-                  </option>
-
-                  <option>
-                    🔴 حجز ملغي
-                  </option>
-
-                  <option>
-                    🟢 تم التنفيذ
-                  </option>
-                </select>
-              </div>
-
-              <p>
-                <strong>
-                  👤 الاسم:
-                </strong>{" "}
-
-                {patient.name}
-              </p>
-
-              <p>
-                <strong>
-                  📞 الرقم:
-                </strong>{" "}
-
-                {patient.phone}
-              </p>
-
-              <p>
-                <strong>
-                  🦷 المراجعة:
-                </strong>{" "}
-
-                {patient.visitType ===
-                "زيارة أولى"
-                  ? `زيارة أولى ← ${patient.firstVisitType}`
-                  : patient.visitType}
-              </p>
-
-              <p>
-                <strong>
-                  🚨 الأمراض:
-                </strong>{" "}
-
-                {patient.disease}
-              </p>
-
-              <p>
-                <strong>
-                  ❗️الشكوى:
-                </strong>{" "}
-
-                {patient.complaint}
-              </p>
-
-              <p>
-                <strong>
-                  🗓️ الموعد:
-                </strong>{" "}
-
-                {patient.date}
-              </p>
-
-              {/* الأزرار */}
-              <div
+              <button
+                onClick={() =>
+                  editPatient(patient)
+                }
                 style={{
-                  display:
-                    "flex",
-
-                  gap: "10px",
-
-                  marginTop:
-                    "20px",
+                  flex: 1,
+                  background: "#2563eb",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontSize: "20px"
                 }}
               >
+                تعديل
+              </button>
 
-                <a
-                  href={`https://wa.me/${patient.phone}`}
+              <button
+                onClick={() =>
+                  deletePatient(patient.id)
+                }
+                style={{
+                  flex: 1,
+                  background: "red",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontSize: "20px"
+                }}
+              >
+                حذف
+              </button>
 
-                  target="_blank"
-
-                  style={{
-                    flex: 1,
-
-                    background:
-                      "#25D366",
-
-                    color:
-                      "white",
-
-                    textDecoration:
-                      "none",
-
-                    borderRadius:
-                      "10px",
-
-                    padding:
-                      "12px",
-
-                    textAlign:
-                      "center",
-
-                    fontWeight:
-                      "bold",
-                  }}
-                >
-                  واتساب 💬
-                </a>
-
-                <button
-                  onClick={() =>
-                    editBooking(
-                      index
-                    )
-                  }
-
-                  style={{
-                    ...buttonStyle,
-
-                    background:
-                      "#2563eb",
-
-                    flex: 1,
-                  }}
-                >
-                  تعديل
-                </button>
-
-                <button
-                  onClick={() =>
-                    deleteBooking(
-                      index
-                    )
-                  }
-
-                  style={{
-                    ...buttonStyle,
-
-                    background:
-                      "red",
-
-                    flex: 1,
-                  }}
-                >
-                  حذف
-                </button>
-              </div>
             </div>
-          )
-        )}
+
+          </div>
+
+        ))}
+
       </div>
+
     </main>
   );
 }
-
-const inputStyle = {
-  width: "100%",
-
-  padding: "14px",
-
-  marginTop: "15px",
-
-  borderRadius: "10px",
-
-  border: "1px solid #ccc",
-
-  fontSize: "16px",
-
-  color: "black",
-};
-
-const buttonStyle = {
-  padding: "14px 20px",
-
-  border: "none",
-
-  borderRadius: "10px",
-
-  background: "#2563eb",
-
-  color: "white",
-
-  fontSize: "16px",
-
-  cursor: "pointer",
-};
-
-const cardStyle = {
-  background: "white",
-
-  padding: "20px",
-
-  borderRadius: "15px",
-
-  marginTop: "20px",
-
-  maxWidth: "700px",
-
-  boxShadow:
-    "0 0 10px rgba(0,0,0,0.1)",
-};
