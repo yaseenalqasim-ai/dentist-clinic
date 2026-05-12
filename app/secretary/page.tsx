@@ -47,9 +47,6 @@ export default function SecretaryPage() {
   const [editingId, setEditingId] =
     useState("");
 
-  const [error, setError] =
-    useState("");
-
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -63,11 +60,23 @@ export default function SecretaryPage() {
 
   useEffect(() => {
 
+    const role =
+      localStorage.getItem("role");
+
+    if (role !== "secretary") {
+
+      window.location.href =
+        "/login";
+
+    }
+
     const savedTheme =
       localStorage.getItem("theme");
 
     if (savedTheme === "dark") {
+
       setDarkMode(true);
+
     }
 
     loadPatients();
@@ -105,28 +114,6 @@ export default function SecretaryPage() {
   }
 
   async function savePatient() {
-
-    if (!form.name) {
-      setError("تركت خانة اسم المريض فارغة");
-      return;
-    }
-
-    if (!form.phone) {
-      setError("تركت خانة رقم المريض فارغة");
-      return;
-    }
-
-    if (!form.review) {
-      setError("تركت خانة المراجعة فارغة");
-      return;
-    }
-
-    if (!form.date) {
-      setError("تركت خانة الموعد فارغة");
-      return;
-    }
-
-    setError("");
 
     if (editingId) {
 
@@ -180,14 +167,21 @@ export default function SecretaryPage() {
     setShowForm(true);
   }
 
+  function logout() {
+
+    localStorage.removeItem("role");
+
+    window.location.href =
+      "/login";
+  }
+
   const filteredPatients =
     patients.filter((patient) => {
 
       return (
         patient.name?.includes(search) ||
         patient.phone?.includes(search) ||
-        patient.review?.includes(search) ||
-        patient.date?.includes(search)
+        patient.review?.includes(search)
       );
 
     });
@@ -196,6 +190,7 @@ export default function SecretaryPage() {
 
     <main
       dir="rtl"
+
       style={{
         minHeight: "100vh",
         background:
@@ -213,7 +208,8 @@ export default function SecretaryPage() {
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent:
+            "space-between",
           alignItems: "center"
         }}
       >
@@ -222,21 +218,46 @@ export default function SecretaryPage() {
           واجهة السكرتيرة
         </h1>
 
-        <button
-          onClick={() =>
-            setDarkMode(!darkMode)
-          }
+        <div
           style={{
-            width: "60px",
-            height: "60px",
-            borderRadius: "50%",
-            border: "none",
-            fontSize: "24px",
-            cursor: "pointer"
+            display: "flex",
+            gap: "10px"
           }}
         >
-          {darkMode ? "☀️" : "🌙"}
-        </button>
+
+          <button
+            onClick={() =>
+              setDarkMode(!darkMode)
+            }
+
+            style={{
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              border: "none",
+              fontSize: "24px",
+              cursor: "pointer"
+            }}
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+
+          <button
+            onClick={logout}
+
+            style={{
+              background: "red",
+              color: "white",
+              border: "none",
+              padding: "12px",
+              borderRadius: "12px",
+              cursor: "pointer"
+            }}
+          >
+            تسجيل خروج
+          </button>
+
+        </div>
 
       </div>
 
@@ -252,6 +273,7 @@ export default function SecretaryPage() {
           onClick={() =>
             setShowForm(true)
           }
+
           style={{
             background: "#2563eb",
             color: "white",
@@ -267,10 +289,13 @@ export default function SecretaryPage() {
 
         <input
           placeholder="البحث عن حجز.."
+
           value={search}
+
           onChange={(e) =>
             setSearch(e.target.value)
           }
+
           style={{
             flex: 1,
             padding: "15px",
@@ -297,38 +322,6 @@ export default function SecretaryPage() {
           }}
         >
 
-          <button
-            onClick={() =>
-              setShowForm(false)
-            }
-            style={{
-              marginBottom: "15px",
-              background: "red",
-              color: "white",
-              border: "none",
-              padding: "10px",
-              borderRadius: "10px"
-            }}
-          >
-            رجوع
-          </button>
-
-          {error && (
-
-            <div
-              style={{
-                background: "red",
-                color: "white",
-                padding: "10px",
-                borderRadius: "10px",
-                marginBottom: "15px"
-              }}
-            >
-              {error}
-            </div>
-
-          )}
-
           {[
             ["👤 اسم المريض", "name"],
             ["📞 رقم المريض", "phone"],
@@ -340,14 +333,19 @@ export default function SecretaryPage() {
 
             <input
               key={key}
+
               placeholder={label}
+
               value={(form as any)[key]}
+
               onChange={(e) =>
                 setForm({
                   ...form,
-                  [key]: e.target.value
+                  [key]:
+                    e.target.value
                 })
               }
+
               style={{
                 width: "100%",
                 marginBottom: "15px",
@@ -360,28 +358,10 @@ export default function SecretaryPage() {
 
           ))}
 
-          <textarea
-            placeholder="📝 إدخال ملاحظة"
-            value={form.notes}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                notes: e.target.value
-              })
-            }
-            style={{
-              width: "100%",
-              height: "120px",
-              padding: "15px",
-              borderRadius: "12px",
-              fontSize: "18px"
-            }}
-          />
-
           <button
             onClick={savePatient}
+
             style={{
-              marginTop: "15px",
               width: "100%",
               background: "#7c3aed",
               color: "white",
@@ -408,6 +388,7 @@ export default function SecretaryPage() {
 
           <div
             key={patient.id}
+
             style={{
               background:
                 darkMode
@@ -419,62 +400,21 @@ export default function SecretaryPage() {
             }}
           >
 
-            <div
-              style={{
-                marginBottom: "10px",
-                fontSize: "22px"
-              }}
-            >
-              {patient.status}
-            </div>
-
             <h2>
-              👤 الاسم:
-              {patient.name}
+              👤 {patient.name}
             </h2>
 
             <h2>
-              📞 الرقم:
-              {patient.phone}
+              📞 {patient.phone}
             </h2>
 
             <h2>
-              🦷 المراجعة:
-              {patient.review}
+              🦷 {patient.review}
             </h2>
 
             <h2>
-              🚨 الأمراض:
-              {patient.disease}
+              🗓️ {patient.date}
             </h2>
-
-            <h2>
-              ❗ الشكوى:
-              {patient.complaint}
-            </h2>
-
-            <h2>
-              🗓️ الموعد:
-              {patient.date}
-            </h2>
-
-            {patient.notes && (
-
-              <div
-                style={{
-                  marginTop: "15px",
-                  background:
-                    darkMode
-                      ? "#1e293b"
-                      : "#f3f3f3",
-                  padding: "15px",
-                  borderRadius: "12px"
-                }}
-              >
-                📝 {patient.notes}
-              </div>
-
-            )}
 
             <div
               style={{
@@ -486,7 +426,9 @@ export default function SecretaryPage() {
 
               <a
                 href={`https://wa.me/${patient.phone}`}
+
                 target="_blank"
+
                 style={{
                   flex: 1,
                   background: "#22c55e",
@@ -494,8 +436,7 @@ export default function SecretaryPage() {
                   padding: "15px",
                   borderRadius: "12px",
                   textAlign: "center",
-                  textDecoration: "none",
-                  fontSize: "20px"
+                  textDecoration: "none"
                 }}
               >
                 واتساب
@@ -505,13 +446,13 @@ export default function SecretaryPage() {
                 onClick={() =>
                   editPatient(patient)
                 }
+
                 style={{
                   flex: 1,
                   background: "#2563eb",
                   color: "white",
                   border: "none",
-                  borderRadius: "12px",
-                  fontSize: "20px"
+                  borderRadius: "12px"
                 }}
               >
                 تعديل
@@ -521,13 +462,13 @@ export default function SecretaryPage() {
                 onClick={() =>
                   deletePatient(patient.id)
                 }
+
                 style={{
                   flex: 1,
                   background: "red",
                   color: "white",
                   border: "none",
-                  borderRadius: "12px",
-                  fontSize: "20px"
+                  borderRadius: "12px"
                 }}
               >
                 حذف
@@ -542,5 +483,7 @@ export default function SecretaryPage() {
       </div>
 
     </main>
+
   );
+
 }
