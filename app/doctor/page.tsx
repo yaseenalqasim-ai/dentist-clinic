@@ -63,13 +63,25 @@ export default function DoctorPage() {
 
   useEffect(() => {
 
+    const role =
+      localStorage.getItem("role");
+
+    if (role !== "doctor") {
+
+      window.location.href =
+        "/login";
+
+    }
+
     const savedTheme =
       localStorage.getItem(
         "doctor-theme"
       );
 
     if (savedTheme === "dark") {
+
       setDarkMode(true);
+
     }
 
     loadPatients();
@@ -140,10 +152,21 @@ export default function DoctorPage() {
     loadPatients();
   }
 
+  function logout() {
+
+    localStorage.removeItem(
+      "role"
+    );
+
+    window.location.href =
+      "/login";
+  }
+
   return (
 
     <main
       dir="rtl"
+
       style={{
         minHeight: "100vh",
 
@@ -179,27 +202,58 @@ export default function DoctorPage() {
           واجهة الدكتور
         </h1>
 
-        <button
-          onClick={() =>
-            setDarkMode(!darkMode)
-          }
-
+        <div
           style={{
-            width: "60px",
-
-            height: "60px",
-
-            borderRadius: "50%",
-
-            border: "none",
-
-            fontSize: "24px",
-
-            cursor: "pointer"
+            display: "flex",
+            gap: "10px"
           }}
         >
-          {darkMode ? "☀️" : "🌙"}
-        </button>
+
+          <button
+            onClick={() =>
+              setDarkMode(!darkMode)
+            }
+
+            style={{
+              width: "60px",
+
+              height: "60px",
+
+              borderRadius: "50%",
+
+              border: "none",
+
+              fontSize: "24px",
+
+              cursor: "pointer"
+            }}
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+
+          <button
+            onClick={logout}
+
+            style={{
+              background: "red",
+
+              color: "white",
+
+              border: "none",
+
+              padding: "12px",
+
+              borderRadius: "12px",
+
+              cursor: "pointer",
+
+              fontSize: "18px"
+            }}
+          >
+            تسجيل خروج
+          </button>
+
+        </div>
 
       </div>
 
@@ -223,7 +277,6 @@ export default function DoctorPage() {
           }}
         >
 
-          {/* الحالة */}
           <div
             style={{
               display: "flex",
@@ -289,7 +342,6 @@ export default function DoctorPage() {
 
           </div>
 
-          {/* المعلومات */}
           <div
             style={{
               lineHeight: "2.2",
@@ -334,7 +386,6 @@ export default function DoctorPage() {
 
           </div>
 
-          {/* الملاحظات */}
           {patient.notes && (
 
             <div
@@ -360,7 +411,6 @@ export default function DoctorPage() {
 
           )}
 
-          {/* واتساب */}
           <a
             href={`https://wa.me/${patient.phone}`}
 
@@ -391,7 +441,6 @@ export default function DoctorPage() {
 
           </a>
 
-          {/* زر الملاحظات */}
           <button
             onClick={() => {
 
@@ -437,7 +486,6 @@ export default function DoctorPage() {
 
       ))}
 
-      {/* نافذة الملاحظات */}
       {showModal && (
 
         <div
