@@ -1,75 +1,138 @@
 "use client";
 
-import Link from "next/link";
+export default function HomePage() {
 
-export default function Home() {
   return (
+
     <main
+      dir="rtl"
+
       style={{
         minHeight: "100vh",
-        background: "#f3f4f6",
+
+        background:
+          "linear-gradient(to bottom,#071739,#102542)",
+
         display: "flex",
+
         justifyContent: "center",
+
         alignItems: "center",
-        fontFamily: "sans-serif",
+
+        padding: "20px"
       }}
     >
+
       <div
         style={{
-          background: "white",
+          width: "100%",
+
+          maxWidth: "700px",
+
+          background:
+            "rgba(255,255,255,0.05)",
+
+          borderRadius: "30px",
+
           padding: "40px",
-          borderRadius: "20px",
-          width: "400px",
-          boxShadow: "0 0 20px rgba(0,0,0,0.1)",
+
+          backdropFilter:
+            "blur(10px)",
+
           textAlign: "center",
+
+          color: "white"
         }}
       >
+
         <h1
           style={{
-            marginBottom: "30px",
-            color: "#2563eb",
+            fontSize: "55px",
+
+            marginBottom: "20px"
           }}
         >
-          Dental Clinic System
+
+          🦷 نظام العيادة
+
         </h1>
+
+        <p
+          style={{
+            fontSize: "24px",
+
+            lineHeight: "2",
+
+            color: "#ddd"
+          }}
+        >
+
+          نظام متكامل لإدارة
+          الحجوزات والمرضى
+          والدكتور والسكرتير
+
+        </p>
 
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
+            display: "grid",
+
             gap: "20px",
+
+            marginTop: "40px"
           }}
         >
-          <Link href="/doctor">
-            <button style={buttonStyle}>
-              صفحة الطبيب
-            </button>
-          </Link>
 
-          <Link href="/secretary">
-            <button style={buttonStyle}>
-              صفحة السكرتيرة
-            </button>
-          </Link>
+          <a
+            href="/login"
 
-          <Link href="/reports">
-            <button style={buttonStyle}>
-              التقارير
-            </button>
-          </Link>
+            style={{
+              background: "#2563eb",
+
+              color: "white",
+
+              padding: "20px",
+
+              borderRadius: "18px",
+
+              textDecoration: "none",
+
+              fontSize: "24px"
+            }}
+          >
+
+            🔐 تسجيل الدخول
+
+          </a>
+
+          <a
+            href="/booking"
+
+            style={{
+              background: "#22c55e",
+
+              color: "white",
+
+              padding: "20px",
+
+              borderRadius: "18px",
+
+              textDecoration: "none",
+
+              fontSize: "24px"
+            }}
+          >
+
+            📅 حجز موعد
+
+          </a>
+
         </div>
-      </div>
-    </main>
-  );
-}
 
-const buttonStyle = {
-  width: "100%",
-  padding: "15px",
-  fontSize: "18px",
-  border: "none",
-  borderRadius: "10px",
-  background: "#2563eb",
-  color: "white",
-  cursor: "pointer",
-};
+      </div>
+
+    </main>
+
+  );
+
+}
