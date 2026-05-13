@@ -9,7 +9,7 @@ import {
 import {
   getFirestore,
   collection,
-  getDocs,
+  onSnapshot,
   updateDoc,
   doc
 } from "firebase/firestore";
@@ -97,25 +97,31 @@ export default function DoctorPage() {
 
   }, [darkMode]);
 
-  async function loadPatients() {
+  function loadPatients() {
 
-    const querySnapshot =
-      await getDocs(
-        collection(db, "bookings")
-      );
+    onSnapshot(
+      collection(db, "bookings"),
+      (snapshot) => {
 
-    const data: any[] = [];
+        const data: any[] = [];
 
-    querySnapshot.forEach((docItem) => {
+        snapshot.forEach((docItem) => {
 
-      data.push({
-        id: docItem.id,
-        ...docItem.data()
-      });
+          data.push({
+            id: docItem.id,
+            ...docItem.data()
+          });
 
-    });
+        });
 
-    setPatients(data);
+        data.sort((a, b) =>
+          a.date.localeCompare(b.date)
+        );
+
+        setPatients(data);
+
+      }
+    );
 
   }
 
@@ -131,7 +137,6 @@ export default function DoctorPage() {
       }
     );
 
-    loadPatients();
   }
 
   async function saveNote() {
@@ -149,7 +154,6 @@ export default function DoctorPage() {
 
     setShowModal(false);
 
-    loadPatients();
   }
 
   function logout() {
@@ -160,6 +164,7 @@ export default function DoctorPage() {
 
     window.location.href =
       "/login";
+
   }
 
   return (
@@ -199,7 +204,7 @@ export default function DoctorPage() {
       >
 
         <h1>
-          واجهة الدكتور
+          🦷 واجهة الدكتور
         </h1>
 
         <div
@@ -223,9 +228,7 @@ export default function DoctorPage() {
 
               border: "none",
 
-              fontSize: "24px",
-
-              cursor: "pointer"
+              fontSize: "24px"
             }}
           >
             {darkMode ? "☀️" : "🌙"}
@@ -243,11 +246,8 @@ export default function DoctorPage() {
 
               padding: "12px",
 
-              borderRadius: "12px",
-
-              cursor: "pointer",
-
-              fontSize: "18px"
+              borderRadius:
+                "12px"
             }}
           >
             تسجيل خروج
@@ -264,7 +264,30 @@ export default function DoctorPage() {
           key={patient.id}
 
           style={{
+
             background:
+
+              patient.status ===
+              "🟢 تم التنفيذ"
+
+                ? "#14532d"
+
+              :
+
+              patient.status ===
+              "🔴 حجز ملغي"
+
+                ? "#7f1d1d"
+
+              :
+
+              patient.status ===
+              "🟡 حجز مؤجل"
+
+                ? "#713f12"
+
+              :
+
               darkMode
                 ? "#102542"
                 : "white",
@@ -277,6 +300,7 @@ export default function DoctorPage() {
           }}
         >
 
+          {/* الحالة */}
           <div
             style={{
               display: "flex",
@@ -342,6 +366,7 @@ export default function DoctorPage() {
 
           </div>
 
+          {/* المعلومات */}
           <div
             style={{
               lineHeight: "2.2",
@@ -366,6 +391,9 @@ export default function DoctorPage() {
             {" "}
             {patient.review}
 
+            {patient.visitType &&
+              ` ← ${patient.visitType}`}
+
             <br />
 
             🚨 الأمراض:
@@ -386,6 +414,7 @@ export default function DoctorPage() {
 
           </div>
 
+          {/* الملاحظات */}
           {patient.notes && (
 
             <div
@@ -393,9 +422,7 @@ export default function DoctorPage() {
                 marginTop: "15px",
 
                 background:
-                  darkMode
-                    ? "#1e293b"
-                    : "#f3f3f3",
+                  "rgba(255,255,255,0.15)",
 
                 padding: "15px",
 
@@ -411,81 +438,89 @@ export default function DoctorPage() {
 
           )}
 
-          <a
-            href={`https://wa.me/${patient.phone}`}
-
-            target="_blank"
-
+          {/* الأزرار */}
+          <div
             style={{
-              display: "block",
+              display: "flex",
 
-              marginTop: "20px",
+              gap: "10px",
 
-              background: "#22c55e",
-
-              color: "white",
-
-              textAlign: "center",
-
-              padding: "15px",
-
-              borderRadius: "12px",
-
-              textDecoration: "none",
-
-              fontSize: "20px"
+              marginTop: "20px"
             }}
           >
 
-            واتساب
+            <a
+              href={`https://wa.me/${patient.phone}`}
 
-          </a>
+              target="_blank"
 
-          <button
-            onClick={() => {
+              style={{
+                flex: 1,
 
-              setEditingPatient(
-                patient
-              );
+                background: "#22c55e",
 
-              setNote(
-                patient.notes || ""
-              );
+                color: "white",
 
-              setShowModal(true);
+                textAlign: "center",
 
-            }}
+                padding: "15px",
 
-            style={{
-              width: "100%",
+                borderRadius: "12px",
 
-              marginTop: "15px",
+                textDecoration: "none",
 
-              background:
-                "#7c3aed",
+                fontSize: "18px"
+              }}
+            >
 
-              color: "white",
+              واتساب
 
-              border: "none",
+            </a>
 
-              padding: "15px",
+            <button
+              onClick={() => {
 
-              borderRadius: "12px",
+                setEditingPatient(
+                  patient
+                );
 
-              fontSize: "20px",
+                setNote(
+                  patient.notes || ""
+                );
 
-              cursor: "pointer"
-            }}
-          >
+                setShowModal(true);
 
-            📝 إدخال ملاحظة
+              }}
 
-          </button>
+              style={{
+                flex: 1,
+
+                background:
+                  "#7c3aed",
+
+                color: "white",
+
+                border: "none",
+
+                padding: "15px",
+
+                borderRadius: "12px",
+
+                fontSize: "18px"
+              }}
+            >
+
+              📝 ملاحظة
+
+            </button>
+
+          </div>
 
         </div>
 
       ))}
 
+      {/* نافذة الملاحظات */}
       {showModal && (
 
         <div
@@ -526,7 +561,7 @@ export default function DoctorPage() {
           >
 
             <h2>
-              إدخال ملاحظة
+              📝 إدخال ملاحظة
             </h2>
 
             <textarea
