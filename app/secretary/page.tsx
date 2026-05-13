@@ -74,6 +74,8 @@ export default function SecretaryPage() {
 
     review: "",
 
+    visitType: "",
+
     disease: "",
 
     complaint: "",
@@ -150,6 +152,21 @@ export default function SecretaryPage() {
 
   async function savePatient() {
 
+    if (
+      patients.some(
+        (p) =>
+          p.date === form.date &&
+          p.id !== editingId
+      )
+    ) {
+
+      alert(
+        "يوجد حجز بنفس الموعد"
+      );
+
+      return;
+    }
+
     if (editingId) {
 
       await updateDoc(
@@ -180,6 +197,8 @@ export default function SecretaryPage() {
       phone: "",
 
       review: "",
+
+      visitType: "",
 
       disease: "",
 
@@ -248,6 +267,11 @@ export default function SecretaryPage() {
         ||
 
         patient.review
+          ?.includes(search)
+
+        ||
+
+        patient.visitType
           ?.includes(search);
 
       const matchesDate =
@@ -288,7 +312,6 @@ export default function SecretaryPage() {
       }}
     >
 
-      {/* الأعلى */}
       <div
         style={{
           display: "flex",
@@ -355,7 +378,6 @@ export default function SecretaryPage() {
 
       </div>
 
-      {/* البحث والتاريخ */}
       <div
         style={{
           display: "grid",
@@ -445,7 +467,6 @@ export default function SecretaryPage() {
 
       </div>
 
-      {/* الفورم */}
       {showForm && (
 
         <div
@@ -464,59 +485,208 @@ export default function SecretaryPage() {
           }}
         >
 
-          {[
-            ["👤 اسم المريض", "name"],
+          <input
+            placeholder=
+              "👤 اسم المريض"
 
-            ["📞 رقم المريض", "phone"],
+            value={form.name}
 
-            ["🦷 المراجعة", "review"],
+            onChange={(e) =>
+              setForm({
+                ...form,
+                name:
+                  e.target.value
+              })
+            }
 
-            ["🚨 الأمراض", "disease"],
+            style={inputStyle}
+          />
 
-            ["❗ الشكوى", "complaint"]
-          ].map(([label, key]) => (
+          <input
+            placeholder=
+              "📞 رقم المريض"
 
-            <input
-              key={key}
+            value={form.phone}
 
-              placeholder={label}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                phone:
+                  e.target.value
+              })
+            }
 
-              value={
-                (form as any)[key]
-              }
+            style={inputStyle}
+          />
+
+          <select
+            value={form.review}
+
+            onChange={(e) =>
+              setForm({
+                ...form,
+                review:
+                  e.target.value
+              })
+            }
+
+            style={inputStyle}
+          >
+
+            <option value="">
+              🦷 نوع المراجعة
+            </option>
+
+            <option>
+              زيارة أولى
+            </option>
+
+            <option>
+              مراجعة
+            </option>
+
+            <option>
+              إكمال علاج
+            </option>
+
+            <option>
+              طوارئ
+            </option>
+
+            <option>
+              مراجعة بعد قلع
+            </option>
+
+            <option>
+              جلسة تقويم
+            </option>
+
+          </select>
+
+          {form.review ===
+            "زيارة أولى" && (
+
+            <select
+              value={form.visitType}
 
               onChange={(e) =>
                 setForm({
-
                   ...form,
-
-                  [key]:
+                  visitType:
                     e.target.value
                 })
               }
 
-              style={{
-                width: "100%",
+              style={inputStyle}
+            >
 
-                marginBottom:
-                  "15px",
+              <option value="">
+                🦷 نوع الزيارة
+              </option>
 
-                padding: "15px",
+              <option>
+                كشف
+              </option>
 
-                borderRadius:
-                  "12px",
+              <option>
+                تنظيف
+              </option>
 
-                border:
-                  "1px solid #ccc",
+              <option>
+                قلع
+              </option>
 
-                fontSize: "18px"
-              }}
-            />
+              <option>
+                علاج عصب
+              </option>
 
-          ))}
+              <option>
+                تقويم
+              </option>
+
+              <option>
+                زراعة
+              </option>
+
+              <option>
+                تجميل
+              </option>
+
+            </select>
+
+          )}
+
+          <select
+            value={form.disease}
+
+            onChange={(e) =>
+              setForm({
+                ...form,
+                disease:
+                  e.target.value
+              })
+            }
+
+            style={inputStyle}
+          >
+
+            <option value="">
+              🚨 الأمراض المزمنة
+            </option>
+
+            <option>
+              لا يوجد
+            </option>
+
+            <option>
+              سكري
+            </option>
+
+            <option>
+              ضغط
+            </option>
+
+            <option>
+              أمراض قلب
+            </option>
+
+            <option>
+              مميعات دم
+            </option>
+
+            <option>
+              حساسية بنج أو بنسلين
+            </option>
+
+            <option>
+              حمل
+            </option>
+
+            <option>
+              أخرى
+            </option>
+
+          </select>
 
           <input
-            type="date"
+            placeholder=
+              "❗ الشكوى الرئيسية"
+
+            value={form.complaint}
+
+            onChange={(e) =>
+              setForm({
+                ...form,
+                complaint:
+                  e.target.value
+              })
+            }
+
+            style={inputStyle}
+          />
+
+          <input
+            type="datetime-local"
 
             value={form.date}
 
@@ -528,20 +698,7 @@ export default function SecretaryPage() {
               })
             }
 
-            style={{
-              width: "100%",
-
-              marginBottom: "15px",
-
-              padding: "15px",
-
-              borderRadius: "12px",
-
-              border:
-                "1px solid #ccc",
-
-              fontSize: "18px"
-            }}
+            style={inputStyle}
           />
 
           <button
@@ -572,7 +729,6 @@ export default function SecretaryPage() {
 
       )}
 
-      {/* الحجوزات */}
       <div
         style={{
           marginTop: "30px"
@@ -617,6 +773,21 @@ export default function SecretaryPage() {
                 🦷
                 {" "}
                 {patient.review}
+
+                {patient.visitType &&
+                  ` ← ${patient.visitType}`}
+              </h2>
+
+              <h2>
+                🚨
+                {" "}
+                {patient.disease}
+              </h2>
+
+              <h2>
+                ❗
+                {" "}
+                {patient.complaint}
               </h2>
 
               <h2>
@@ -726,3 +897,18 @@ export default function SecretaryPage() {
   );
 
 }
+
+const inputStyle = {
+
+  width: "100%",
+
+  marginBottom: "15px",
+
+  padding: "15px",
+
+  borderRadius: "12px",
+
+  border: "1px solid #ccc",
+
+  fontSize: "18px"
+};
