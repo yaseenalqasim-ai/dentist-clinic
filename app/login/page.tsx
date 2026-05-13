@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { useRouter } from "next/navigation";
+import { useRouter }
+from "next/navigation";
 
 export default function LoginPage() {
 
-  const router = useRouter();
+  const router =
+    useRouter();
 
   const [username, setUsername] =
     useState("");
@@ -16,6 +18,25 @@ export default function LoginPage() {
 
   const [error, setError] =
     useState("");
+
+  useEffect(() => {
+
+    const role =
+      localStorage.getItem("role");
+
+    if (role === "doctor") {
+
+      router.push("/doctor");
+
+    }
+
+    if (role === "secretary") {
+
+      router.push("/secretary");
+
+    }
+
+  }, []);
 
   function login() {
 
@@ -54,6 +75,7 @@ export default function LoginPage() {
     setError(
       "اسم المستخدم أو كلمة المرور خاطئة"
     );
+
   }
 
   return (
@@ -64,27 +86,36 @@ export default function LoginPage() {
       style={{
         minHeight: "100vh",
 
+        background:
+          "linear-gradient(to bottom,#071739,#102542)",
+
         display: "flex",
 
         justifyContent: "center",
 
         alignItems: "center",
 
-        background: "#071739"
+        padding: "20px"
       }}
     >
 
       <div
         style={{
-          width: "90%",
+          width: "100%",
 
-          maxWidth: "450px",
+          maxWidth: "500px",
 
-          background: "#102542",
+          background:
+            "rgba(255,255,255,0.08)",
 
-          padding: "30px",
+          backdropFilter:
+            "blur(10px)",
 
-          borderRadius: "20px"
+          borderRadius: "30px",
+
+          padding: "40px",
+
+          color: "white"
         }}
       >
 
@@ -92,9 +123,9 @@ export default function LoginPage() {
           style={{
             textAlign: "center",
 
-            color: "white",
+            fontSize: "50px",
 
-            marginBottom: "30px"
+            marginBottom: "10px"
           }}
         >
 
@@ -102,19 +133,35 @@ export default function LoginPage() {
 
         </h1>
 
+        <p
+          style={{
+            textAlign: "center",
+
+            color: "#ddd",
+
+            marginBottom: "30px",
+
+            fontSize: "20px"
+          }}
+        >
+
+          نظام إدارة العيادة
+
+        </p>
+
         {error && (
 
           <div
             style={{
-              background: "red",
+              background: "#dc2626",
 
-              color: "white",
+              padding: "15px",
 
-              padding: "12px",
+              borderRadius: "14px",
 
-              borderRadius: "10px",
+              marginBottom: "20px",
 
-              marginBottom: "15px"
+              textAlign: "center"
             }}
           >
 
@@ -125,7 +172,8 @@ export default function LoginPage() {
         )}
 
         <input
-          placeholder="اسم المستخدم"
+          placeholder=
+            "اسم المستخدم"
 
           value={username}
 
@@ -135,25 +183,14 @@ export default function LoginPage() {
             )
           }
 
-          style={{
-            width: "100%",
-
-            padding: "16px",
-
-            marginBottom: "15px",
-
-            borderRadius: "12px",
-
-            border: "none",
-
-            fontSize: "18px"
-          }}
+          style={inputStyle}
         />
 
         <input
           type="password"
 
-          placeholder="كلمة المرور"
+          placeholder=
+            "كلمة المرور"
 
           value={password}
 
@@ -163,19 +200,7 @@ export default function LoginPage() {
             )
           }
 
-          style={{
-            width: "100%",
-
-            padding: "16px",
-
-            marginBottom: "20px",
-
-            borderRadius: "12px",
-
-            border: "none",
-
-            fontSize: "18px"
-          }}
+          style={inputStyle}
         />
 
         <button
@@ -184,7 +209,8 @@ export default function LoginPage() {
           style={{
             width: "100%",
 
-            background: "#2563eb",
+            background:
+              "#2563eb",
 
             color: "white",
 
@@ -192,11 +218,13 @@ export default function LoginPage() {
 
             padding: "18px",
 
-            borderRadius: "12px",
+            borderRadius: "16px",
 
-            fontSize: "20px",
+            fontSize: "22px",
 
-            cursor: "pointer"
+            cursor: "pointer",
+
+            marginTop: "10px"
           }}
         >
 
@@ -204,28 +232,40 @@ export default function LoginPage() {
 
         </button>
 
+        {/* الحسابات */}
         <div
           style={{
-            color: "#ccc",
+            marginTop: "35px",
 
-            marginTop: "20px",
+            background:
+              "rgba(255,255,255,0.05)",
 
-            lineHeight: "2"
+            padding: "20px",
+
+            borderRadius: "18px",
+
+            lineHeight: "2",
+
+            color: "#ddd"
           }}
         >
 
+          <h3>
+            🔑 بيانات الدخول
+          </h3>
+
           <div>
-            الدكتور:
+            👨‍⚕️ الدكتور:
             doctor
           </div>
 
           <div>
-            السكرتير:
+            👩‍💼 السكرتير:
             secretary
           </div>
 
           <div>
-            كلمة المرور:
+            🔒 كلمة المرور:
             123456
           </div>
 
@@ -238,3 +278,18 @@ export default function LoginPage() {
   );
 
 }
+
+const inputStyle = {
+
+  width: "100%",
+
+  padding: "16px",
+
+  marginBottom: "18px",
+
+  borderRadius: "14px",
+
+  border: "none",
+
+  fontSize: "18px"
+};
