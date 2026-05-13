@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState }
+from "react";
 
 import {
   initializeApp
@@ -179,25 +180,35 @@ export default function BookingPage() {
         background:
           "linear-gradient(to bottom,#071739,#102542)",
 
-        padding: "20px"
+        padding: "20px",
+
+        display: "flex",
+
+        justifyContent:
+          "center",
+
+        alignItems: "center"
       }}
     >
 
       <div
         style={{
-          maxWidth: "700px",
+          width: "100%",
 
-          margin: "auto",
+          maxWidth: "750px",
 
           background:
             "rgba(255,255,255,0.08)",
 
           backdropFilter:
-            "blur(10px)",
+            "blur(12px)",
 
-          padding: "30px",
+          border:
+            "1px solid rgba(255,255,255,0.1)",
 
-          borderRadius: "30px",
+          padding: "35px",
+
+          borderRadius: "35px",
 
           color: "white"
         }}
@@ -207,9 +218,9 @@ export default function BookingPage() {
           style={{
             textAlign: "center",
 
-            fontSize: "45px",
+            fontSize: "55px",
 
-            marginBottom: "30px"
+            marginBottom: "15px"
           }}
         >
 
@@ -217,17 +228,36 @@ export default function BookingPage() {
 
         </h1>
 
+        <p
+          style={{
+            textAlign: "center",
+
+            color: "#ddd",
+
+            marginBottom: "35px",
+
+            fontSize: "22px"
+          }}
+        >
+
+          يرجى تعبئة البيانات
+          بشكل صحيح
+
+        </p>
+
         {error && (
 
           <div
             style={{
-              background: "red",
+              background: "#dc2626",
 
-              padding: "15px",
+              padding: "16px",
 
-              borderRadius: "12px",
+              borderRadius: "15px",
 
-              marginBottom: "20px"
+              marginBottom: "20px",
+
+              textAlign: "center"
             }}
           >
 
@@ -241,13 +271,15 @@ export default function BookingPage() {
 
           <div
             style={{
-              background: "green",
+              background: "#16a34a",
 
-              padding: "15px",
+              padding: "16px",
 
-              borderRadius: "12px",
+              borderRadius: "15px",
 
-              marginBottom: "20px"
+              marginBottom: "20px",
+
+              textAlign: "center"
             }}
           >
 
@@ -259,7 +291,7 @@ export default function BookingPage() {
 
         <input
           placeholder=
-            "👤 الاسم"
+            "👤 الاسم الكامل"
 
           value={form.name}
 
@@ -440,7 +472,7 @@ export default function BookingPage() {
 
         </select>
 
-        <input
+        <textarea
           placeholder=
             "❗ الشكوى الرئيسية"
 
@@ -454,7 +486,10 @@ export default function BookingPage() {
             })
           }
 
-          style={inputStyle}
+          style={{
+            ...inputStyle,
+            minHeight: "120px"
+          }}
         />
 
         <input
@@ -482,24 +517,26 @@ export default function BookingPage() {
             width: "100%",
 
             background:
-              "#2563eb",
+              "linear-gradient(to right,#2563eb,#1d4ed8)",
 
             color: "white",
 
             border: "none",
 
-            padding: "18px",
+            padding: "20px",
 
-            borderRadius: "15px",
+            borderRadius: "18px",
 
-            fontSize: "22px",
+            fontSize: "24px",
 
-            cursor: "pointer"
+            cursor: "pointer",
+
+            marginTop: "10px"
           }}
         >
 
           {loading
-            ? "جاري الإرسال..."
+            ? "جاري إرسال الحجز..."
             : "إرسال الحجز"}
 
         </button>
@@ -516,13 +553,18 @@ const inputStyle = {
 
   width: "100%",
 
-  marginBottom: "15px",
+  marginBottom: "18px",
 
-  padding: "16px",
+  padding: "18px",
 
-  borderRadius: "14px",
+  borderRadius: "16px",
 
   border: "none",
 
-  fontSize: "18px"
+  fontSize: "18px",
+
+  background:
+    "rgba(255,255,255,0.12)",
+
+  color: "white"
 };
