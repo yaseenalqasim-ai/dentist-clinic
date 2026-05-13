@@ -742,7 +742,30 @@ export default function SecretaryPage() {
               key={patient.id}
 
               style={{
+
                 background:
+
+                  patient.status ===
+                  "🟢 تم التنفيذ"
+
+                    ? "#14532d"
+
+                  :
+
+                  patient.status ===
+                  "🔴 حجز ملغي"
+
+                    ? "#7f1d1d"
+
+                  :
+
+                  patient.status ===
+                  "🟡 حجز مؤجل"
+
+                    ? "#713f12"
+
+                  :
+
                   darkMode
                     ? "#102542"
                     : "white",
