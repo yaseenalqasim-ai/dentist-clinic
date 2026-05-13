@@ -9,7 +9,7 @@ import {
 import {
   getFirestore,
   collection,
-  onSnapshot
+ onSnapshot
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -92,6 +92,13 @@ export default function HomePage() {
         "🟡 حجز مؤجل"
     ).length;
 
+  const confirmed =
+    patients.filter(
+      (p) =>
+        p.status ===
+        "🔵 حجز مُثبت"
+    ).length;
+
   return (
 
     <main
@@ -114,13 +121,15 @@ export default function HomePage() {
         style={{
           textAlign: "center",
 
-          marginBottom: "40px"
+          marginBottom: "50px"
         }}
       >
 
         <h1
           style={{
-            fontSize: "55px"
+            fontSize: "60px",
+
+            marginBottom: "15px"
           }}
         >
 
@@ -130,9 +139,9 @@ export default function HomePage() {
 
         <p
           style={{
-            color: "#ddd",
+            fontSize: "24px",
 
-            fontSize: "22px"
+            color: "#ddd"
           }}
         >
 
@@ -152,7 +161,7 @@ export default function HomePage() {
 
           gap: "20px",
 
-          marginBottom: "40px"
+          marginBottom: "50px"
         }}
       >
 
@@ -164,19 +173,25 @@ export default function HomePage() {
           ],
 
           [
+            "🔵 الحجوزات المثبتة",
+            confirmed,
+            "#2563eb"
+          ],
+
+          [
             "🟢 تم التنفيذ",
             completed,
             "#22c55e"
           ],
 
           [
-            "🔴 الملغية",
+            "🔴 الحجوزات الملغية",
             cancelled,
             "#ef4444"
           ],
 
           [
-            "🟡 المؤجلة",
+            "🟡 الحجوزات المؤجلة",
             delayed,
             "#eab308"
           ]
@@ -190,14 +205,17 @@ export default function HomePage() {
                 background:
                   "rgba(255,255,255,0.08)",
 
-                padding: "30px",
+                backdropFilter:
+                  "blur(10px)",
+
+                border:
+                  `2px solid ${color}`,
 
                 borderRadius: "25px",
 
-                textAlign: "center",
+                padding: "30px",
 
-                border:
-                  `2px solid ${color}`
+                textAlign: "center"
               }}
             >
 
@@ -206,12 +224,14 @@ export default function HomePage() {
                   fontSize: "28px"
                 }}
               >
+
                 {title}
+
               </h2>
 
               <div
                 style={{
-                  fontSize: "60px",
+                  fontSize: "65px",
 
                   marginTop: "20px",
 
@@ -221,7 +241,9 @@ export default function HomePage() {
                     String(color)
                 }}
               >
+
                 {value}
+
               </div>
 
             </div>
@@ -236,7 +258,11 @@ export default function HomePage() {
         style={{
           display: "grid",
 
-          gap: "20px"
+          gap: "20px",
+
+          maxWidth: "700px",
+
+          margin: "auto"
         }}
       >
 
@@ -287,6 +313,99 @@ export default function HomePage() {
           📅 حجز موعد
 
         </a>
+
+      </div>
+
+      {/* آخر الحجوزات */}
+      <div
+        style={{
+          marginTop: "60px"
+        }}
+      >
+
+        <h2
+          style={{
+            marginBottom: "25px",
+
+            fontSize: "35px"
+          }}
+        >
+
+          🕘 آخر الحجوزات
+
+        </h2>
+
+        {patients
+          .slice(-5)
+          .reverse()
+          .map((patient) => (
+
+            <div
+              key={patient.id}
+
+              style={{
+
+                background:
+
+                  patient.status ===
+                  "🟢 تم التنفيذ"
+
+                    ? "#14532d"
+
+                  :
+
+                  patient.status ===
+                  "🔴 حجز ملغي"
+
+                    ? "#7f1d1d"
+
+                  :
+
+                  patient.status ===
+                  "🟡 حجز مؤجل"
+
+                    ? "#713f12"
+
+                  :
+
+                  "rgba(255,255,255,0.08)",
+
+                padding: "20px",
+
+                borderRadius: "20px",
+
+                marginBottom: "15px"
+              }}
+            >
+
+              <h3>
+                👤
+                {" "}
+                {patient.name}
+              </h3>
+
+              <h3>
+                🦷
+                {" "}
+                {patient.review}
+
+                {patient.visitType &&
+                  ` ← ${patient.visitType}`}
+              </h3>
+
+              <h3>
+                🗓️
+                {" "}
+                {patient.date}
+              </h3>
+
+              <h3>
+                {patient.status}
+              </h3>
+
+            </div>
+
+          ))}
 
       </div>
 
