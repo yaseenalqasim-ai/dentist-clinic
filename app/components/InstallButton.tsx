@@ -2,34 +2,70 @@
 
 import {
   useEffect,
-  useRef
+  useState
 } from "react";
 
-export default function NotificationSound({
-  trigger
+export default function LiveCounter({
+
+  value
+
 }:{
-  trigger:number
+
+  value:number
+
 }){
 
-  const audioRef =
-    useRef<any>(null);
+  const [
+    count,
+    setCount
+  ] = useState(0);
 
   useEffect(()=>{
 
-    if(trigger > 0){
+    let start = 0;
 
-      audioRef.current?.play();
+    const end = value;
 
-    }
+    if(start === end)
+      return;
 
-  },[trigger]);
+    const duration = 800;
+
+    const increment =
+      end / (duration / 10);
+
+    const timer =
+      setInterval(()=>{
+
+        start += increment;
+
+        if(start >= end){
+
+          setCount(end);
+
+          clearInterval(timer);
+
+        }else{
+
+          setCount(
+            Math.floor(start)
+          );
+
+        }
+
+      },10);
+
+    return ()=>clearInterval(timer);
+
+  },[value]);
 
   return(
 
-    <audio
-      ref={audioRef}
-      src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"
-    />
+    <span>
+
+      {count}
+
+    </span>
 
   );
 
