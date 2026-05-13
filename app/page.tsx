@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState }
+from "react";
 
 import {
   initializeApp
@@ -9,7 +10,7 @@ import {
 import {
   getFirestore,
   collection,
- onSnapshot
+  onSnapshot
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -92,13 +93,6 @@ export default function HomePage() {
         "🟡 حجز مؤجل"
     ).length;
 
-  const confirmed =
-    patients.filter(
-      (p) =>
-        p.status ===
-        "🔵 حجز مُثبت"
-    ).length;
-
   return (
 
     <main
@@ -110,26 +104,27 @@ export default function HomePage() {
         background:
           "linear-gradient(to bottom,#071739,#102542)",
 
-        padding: "20px",
+        color: "white",
 
-        color: "white"
+        padding: "20px"
       }}
     >
 
-      {/* العنوان */}
+      {/* HERO */}
       <div
         style={{
           textAlign: "center",
 
-          marginBottom: "50px"
+          padding:
+            "80px 20px"
         }}
       >
 
         <h1
           style={{
-            fontSize: "60px",
+            fontSize: "70px",
 
-            marginBottom: "15px"
+            marginBottom: "20px"
           }}
         >
 
@@ -139,15 +134,89 @@ export default function HomePage() {
 
         <p
           style={{
-            fontSize: "24px",
+            fontSize: "28px",
 
-            color: "#ddd"
+            color: "#ddd",
+
+            lineHeight: "2"
           }}
         >
 
-          لوحة التحكم الرئيسية
+          نظام احترافي متكامل
+          لإدارة الحجوزات
+          والمرضى والدكتور
+          والسكرتير
 
         </p>
+
+        <div
+          style={{
+            display: "flex",
+
+            gap: "20px",
+
+            justifyContent:
+              "center",
+
+            marginTop: "40px",
+
+            flexWrap: "wrap"
+          }}
+        >
+
+          <a
+            href="/login"
+
+            style={{
+              background:
+                "#2563eb",
+
+              color: "white",
+
+              padding:
+                "20px 35px",
+
+              borderRadius:
+                "20px",
+
+              textDecoration:
+                "none",
+
+              fontSize: "24px"
+            }}
+          >
+
+            🔐 تسجيل الدخول
+
+          </a>
+
+          <a
+            href="/booking"
+
+            style={{
+              background:
+                "#22c55e",
+
+              color: "white",
+
+              padding:
+                "20px 35px",
+
+              borderRadius:
+                "20px",
+
+              textDecoration:
+                "none",
+
+              fontSize: "24px"
+            }}
+          >
+
+            📅 حجز موعد
+
+          </a>
+
+        </div>
 
       </div>
 
@@ -161,7 +230,7 @@ export default function HomePage() {
 
           gap: "20px",
 
-          marginBottom: "50px"
+          marginTop: "40px"
         }}
       >
 
@@ -173,25 +242,19 @@ export default function HomePage() {
           ],
 
           [
-            "🔵 الحجوزات المثبتة",
-            confirmed,
-            "#2563eb"
-          ],
-
-          [
             "🟢 تم التنفيذ",
             completed,
             "#22c55e"
           ],
 
           [
-            "🔴 الحجوزات الملغية",
+            "🔴 الملغية",
             cancelled,
             "#ef4444"
           ],
 
           [
-            "🟡 الحجوزات المؤجلة",
+            "🟡 المؤجلة",
             delayed,
             "#eab308"
           ]
@@ -211,11 +274,13 @@ export default function HomePage() {
                 border:
                   `2px solid ${color}`,
 
-                borderRadius: "25px",
+                borderRadius:
+                  "25px",
 
                 padding: "30px",
 
-                textAlign: "center"
+                textAlign:
+                  "center"
               }}
             >
 
@@ -235,7 +300,8 @@ export default function HomePage() {
 
                   marginTop: "20px",
 
-                  fontWeight: "bold",
+                  fontWeight:
+                    "bold",
 
                   color:
                     String(color)
@@ -253,81 +319,18 @@ export default function HomePage() {
 
       </div>
 
-      {/* الأزرار */}
-      <div
-        style={{
-          display: "grid",
-
-          gap: "20px",
-
-          maxWidth: "700px",
-
-          margin: "auto"
-        }}
-      >
-
-        <a
-          href="/login"
-
-          style={{
-            background: "#2563eb",
-
-            color: "white",
-
-            padding: "22px",
-
-            borderRadius: "20px",
-
-            textAlign: "center",
-
-            textDecoration: "none",
-
-            fontSize: "26px"
-          }}
-        >
-
-          🔐 تسجيل الدخول
-
-        </a>
-
-        <a
-          href="/booking"
-
-          style={{
-            background: "#22c55e",
-
-            color: "white",
-
-            padding: "22px",
-
-            borderRadius: "20px",
-
-            textAlign: "center",
-
-            textDecoration: "none",
-
-            fontSize: "26px"
-          }}
-        >
-
-          📅 حجز موعد
-
-        </a>
-
-      </div>
-
       {/* آخر الحجوزات */}
       <div
         style={{
-          marginTop: "60px"
+          marginTop: "70px"
         }}
       >
 
         <h2
           style={{
-            marginBottom: "25px",
+            fontSize: "40px",
 
-            fontSize: "35px"
+            marginBottom: "30px"
           }}
         >
 
@@ -370,11 +373,13 @@ export default function HomePage() {
 
                   "rgba(255,255,255,0.08)",
 
-                padding: "20px",
+                padding: "25px",
 
-                borderRadius: "20px",
+                borderRadius:
+                  "22px",
 
-                marginBottom: "15px"
+                marginBottom:
+                  "20px"
               }}
             >
 
