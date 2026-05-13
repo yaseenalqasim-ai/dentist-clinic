@@ -1,22 +1,32 @@
 {
   "name": "Dental Clinic System",
   "short_name": "Clinic",
-  "description": "نظام إدارة عيادة الأسنان",
+  "description": "نظام احترافي لإدارة عيادة الأسنان",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#071739",
   "theme_color": "#071739",
   "orientation": "portrait",
+  "lang": "ar",
+  "dir": "rtl",
+  "scope": "/",
+  "categories": [
+    "medical",
+    "health",
+    "business"
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
