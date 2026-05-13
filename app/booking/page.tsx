@@ -9,7 +9,8 @@ import {
 import {
   getFirestore,
   collection,
-  addDoc
+  addDoc,
+  getDocs
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -50,6 +51,9 @@ export default function BookingPage() {
   const [error, setError] =
     useState("");
 
+  const [loading, setLoading] =
+    useState(false);
+
   const [form, setForm] =
     useState({
 
@@ -59,20 +63,23 @@ export default function BookingPage() {
 
       review: "",
 
+      visitType: "",
+
       complaint: "",
+
+      disease: "",
 
       date: "",
 
       status:
         "🔵 حجز مُثبت",
 
-      disease:
-        "لا يوجد",
-
       notes: ""
     });
 
   async function sendBooking() {
+
+    setLoading(true);
 
     if (
       !form.name ||
@@ -85,10 +92,44 @@ export default function BookingPage() {
         "يرجى ملء جميع الحقول"
       );
 
+      setLoading(false);
+
       return;
     }
 
-    setError("");
+    const snapshot =
+      await getDocs(
+        collection(db, "bookings")
+      );
+
+    let booked = false;
+
+    snapshot.forEach((docItem) => {
+
+      const data =
+        docItem.data();
+
+      if (
+        data.date ===
+        form.date
+      ) {
+
+        booked = true;
+
+      }
+
+    });
+
+    if (booked) {
+
+      setError(
+        "هذا الموعد محجوز مسبقًا"
+      );
+
+      setLoading(false);
+
+      return;
+    }
 
     await addDoc(
       collection(db, "bookings"),
@@ -99,6 +140,10 @@ export default function BookingPage() {
       "تم إرسال الحجز بنجاح ✅"
     );
 
+    setError("");
+
+    setLoading(false);
+
     setForm({
 
       name: "",
@@ -107,18 +152,20 @@ export default function BookingPage() {
 
       review: "",
 
+      visitType: "",
+
       complaint: "",
+
+      disease: "",
 
       date: "",
 
       status:
         "🔵 حجز مُثبت",
 
-      disease:
-        "لا يوجد",
-
       notes: ""
     });
+
   }
 
   return (
@@ -129,7 +176,8 @@ export default function BookingPage() {
       style={{
         minHeight: "100vh",
 
-        background: "#f3f3f3",
+        background:
+          "linear-gradient(to bottom,#071739,#102542)",
 
         padding: "20px"
       }}
@@ -141,11 +189,17 @@ export default function BookingPage() {
 
           margin: "auto",
 
-          background: "white",
+          background:
+            "rgba(255,255,255,0.08)",
 
-          padding: "25px",
+          backdropFilter:
+            "blur(10px)",
 
-          borderRadius: "20px"
+          padding: "30px",
+
+          borderRadius: "30px",
+
+          color: "white"
         }}
       >
 
@@ -153,11 +207,13 @@ export default function BookingPage() {
           style={{
             textAlign: "center",
 
-            marginBottom: "25px"
+            fontSize: "45px",
+
+            marginBottom: "30px"
           }}
         >
 
-          🦷 حجز موعد
+          📅 حجز موعد
 
         </h1>
 
@@ -167,13 +223,11 @@ export default function BookingPage() {
             style={{
               background: "red",
 
-              color: "white",
+              padding: "15px",
 
-              padding: "12px",
+              borderRadius: "12px",
 
-              borderRadius: "10px",
-
-              marginBottom: "15px"
+              marginBottom: "20px"
             }}
           >
 
@@ -189,13 +243,11 @@ export default function BookingPage() {
             style={{
               background: "green",
 
-              color: "white",
+              padding: "15px",
 
-              padding: "12px",
+              borderRadius: "12px",
 
-              borderRadius: "10px",
-
-              marginBottom: "15px"
+              marginBottom: "20px"
             }}
           >
 
@@ -205,60 +257,232 @@ export default function BookingPage() {
 
         )}
 
-        {[
-          ["👤 الاسم", "name"],
+        <input
+          placeholder=
+            "👤 الاسم"
 
-          ["📞 الرقم", "phone"],
+          value={form.name}
 
-          ["🦷 نوع الزيارة", "review"],
+          onChange={(e) =>
+            setForm({
+              ...form,
+              name:
+                e.target.value
+            })
+          }
 
-          ["❗ الشكوى", "complaint"],
+          style={inputStyle}
+        />
 
-          ["🗓️ الموعد", "date"]
-        ].map(([label, key]) => (
+        <input
+          placeholder=
+            "📞 رقم الهاتف"
 
-          <input
-            key={key}
+          value={form.phone}
 
-            placeholder={label}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              phone:
+                e.target.value
+            })
+          }
 
-            value={(form as any)[key]}
+          style={inputStyle}
+        />
+
+        <select
+          value={form.review}
+
+          onChange={(e) =>
+            setForm({
+              ...form,
+              review:
+                e.target.value
+            })
+          }
+
+          style={inputStyle}
+        >
+
+          <option value="">
+            🦷 نوع المراجعة
+          </option>
+
+          <option>
+            زيارة أولى
+          </option>
+
+          <option>
+            مراجعة
+          </option>
+
+          <option>
+            إكمال علاج
+          </option>
+
+          <option>
+            طوارئ
+          </option>
+
+          <option>
+            مراجعة بعد قلع
+          </option>
+
+          <option>
+            جلسة تقويم
+          </option>
+
+        </select>
+
+        {form.review ===
+          "زيارة أولى" && (
+
+          <select
+            value={form.visitType}
 
             onChange={(e) =>
               setForm({
-
                 ...form,
-
-                [key]:
+                visitType:
                   e.target.value
               })
             }
 
-            style={{
-              width: "100%",
+            style={inputStyle}
+          >
 
-              marginBottom: "15px",
+            <option value="">
+              🦷 نوع الزيارة
+            </option>
 
-              padding: "16px",
+            <option>
+              كشف
+            </option>
 
-              borderRadius: "12px",
+            <option>
+              تنظيف
+            </option>
 
-              border:
-                "1px solid #ccc",
+            <option>
+              قلع
+            </option>
 
-              fontSize: "18px"
-            }}
-          />
+            <option>
+              علاج عصب
+            </option>
 
-        ))}
+            <option>
+              تقويم
+            </option>
+
+            <option>
+              زراعة
+            </option>
+
+            <option>
+              تجميل
+            </option>
+
+          </select>
+
+        )}
+
+        <select
+          value={form.disease}
+
+          onChange={(e) =>
+            setForm({
+              ...form,
+              disease:
+                e.target.value
+            })
+          }
+
+          style={inputStyle}
+        >
+
+          <option value="">
+            🚨 الأمراض المزمنة
+          </option>
+
+          <option>
+            لا يوجد
+          </option>
+
+          <option>
+            سكري
+          </option>
+
+          <option>
+            ضغط
+          </option>
+
+          <option>
+            أمراض قلب
+          </option>
+
+          <option>
+            مميعات دم
+          </option>
+
+          <option>
+            حساسية بنج أو بنسلين
+          </option>
+
+          <option>
+            حمل
+          </option>
+
+          <option>
+            أخرى
+          </option>
+
+        </select>
+
+        <input
+          placeholder=
+            "❗ الشكوى الرئيسية"
+
+          value={form.complaint}
+
+          onChange={(e) =>
+            setForm({
+              ...form,
+              complaint:
+                e.target.value
+            })
+          }
+
+          style={inputStyle}
+        />
+
+        <input
+          type="datetime-local"
+
+          value={form.date}
+
+          onChange={(e) =>
+            setForm({
+              ...form,
+              date:
+                e.target.value
+            })
+          }
+
+          style={inputStyle}
+        />
 
         <button
           onClick={sendBooking}
 
+          disabled={loading}
+
           style={{
             width: "100%",
 
-            background: "#2563eb",
+            background:
+              "#2563eb",
 
             color: "white",
 
@@ -266,15 +490,17 @@ export default function BookingPage() {
 
             padding: "18px",
 
-            borderRadius: "12px",
+            borderRadius: "15px",
 
-            fontSize: "20px",
+            fontSize: "22px",
 
             cursor: "pointer"
           }}
         >
 
-          إرسال الحجز
+          {loading
+            ? "جاري الإرسال..."
+            : "إرسال الحجز"}
 
         </button>
 
@@ -285,3 +511,18 @@ export default function BookingPage() {
   );
 
 }
+
+const inputStyle = {
+
+  width: "100%",
+
+  marginBottom: "15px",
+
+  padding: "16px",
+
+  borderRadius: "14px",
+
+  border: "none",
+
+  fontSize: "18px"
+};
