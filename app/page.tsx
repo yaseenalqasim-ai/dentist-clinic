@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useState }
-from "react";
+import {
+  useEffect,
+  useState
+} from "react";
+
+import LiveCounter
+from "./components/LiveCounter";
 
 import {
   initializeApp
@@ -149,75 +154,6 @@ export default function HomePage() {
 
         </p>
 
-        <div
-          style={{
-            display: "flex",
-
-            gap: "20px",
-
-            justifyContent:
-              "center",
-
-            marginTop: "40px",
-
-            flexWrap: "wrap"
-          }}
-        >
-
-          <a
-            href="/login"
-
-            style={{
-              background:
-                "#2563eb",
-
-              color: "white",
-
-              padding:
-                "20px 35px",
-
-              borderRadius:
-                "20px",
-
-              textDecoration:
-                "none",
-
-              fontSize: "24px"
-            }}
-          >
-
-            🔐 تسجيل الدخول
-
-          </a>
-
-          <a
-            href="/booking"
-
-            style={{
-              background:
-                "#22c55e",
-
-              color: "white",
-
-              padding:
-                "20px 35px",
-
-              borderRadius:
-                "20px",
-
-              textDecoration:
-                "none",
-
-              fontSize: "24px"
-            }}
-          >
-
-            📅 حجز موعد
-
-          </a>
-
-        </div>
-
       </div>
 
       {/* الإحصائيات */}
@@ -308,7 +244,9 @@ export default function HomePage() {
                 }}
               >
 
-                {value}
+                <LiveCounter
+                  value={Number(value)}
+                />
 
               </div>
 
@@ -316,6 +254,80 @@ export default function HomePage() {
 
           )
         )}
+
+      </div>
+
+      {/* الأزرار */}
+      <div
+        style={{
+          display: "grid",
+
+          gap: "20px",
+
+          maxWidth: "700px",
+
+          margin:
+            "60px auto"
+        }}
+      >
+
+        <a
+          href="/login"
+
+          style={{
+            background:
+              "#2563eb",
+
+            color: "white",
+
+            padding:
+              "22px",
+
+            borderRadius:
+              "20px",
+
+            textAlign:
+              "center",
+
+            textDecoration:
+              "none",
+
+            fontSize: "26px"
+          }}
+        >
+
+          🔐 تسجيل الدخول
+
+        </a>
+
+        <a
+          href="/booking"
+
+          style={{
+            background:
+              "#22c55e",
+
+            color: "white",
+
+            padding:
+              "22px",
+
+            borderRadius:
+              "20px",
+
+            textAlign:
+              "center",
+
+            textDecoration:
+              "none",
+
+            fontSize: "26px"
+          }}
+        >
+
+          📅 حجز موعد
+
+        </a>
 
       </div>
 
