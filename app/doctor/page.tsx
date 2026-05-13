@@ -5,6 +5,9 @@ import {
   useState
 } from "react";
 
+import jsPDF
+from "jspdf";
+
 import {
   initializeApp
 } from "firebase/app";
@@ -165,6 +168,77 @@ export default function DoctorPage() {
 
   }
 
+  function printPatient(
+    patient:any
+  ){
+
+    const pdf =
+      new jsPDF();
+
+    pdf.setFontSize(18);
+
+    pdf.text(
+      "Dental Clinic Report",
+      20,
+      20
+    );
+
+    pdf.setFontSize(13);
+
+    pdf.text(
+      `Name: ${patient.name}`,
+      20,
+      40
+    );
+
+    pdf.text(
+      `Phone: ${patient.phone}`,
+      20,
+      55
+    );
+
+    pdf.text(
+      `Review: ${patient.review}`,
+      20,
+      70
+    );
+
+    pdf.text(
+      `Disease: ${patient.disease}`,
+      20,
+      85
+    );
+
+    pdf.text(
+      `Complaint: ${patient.complaint}`,
+      20,
+      100
+    );
+
+    pdf.text(
+      `Date: ${patient.date}`,
+      20,
+      115
+    );
+
+    pdf.text(
+      `Status: ${patient.status}`,
+      20,
+      130
+    );
+
+    pdf.text(
+      `Notes: ${patient.notes || "-"}`,
+      20,
+      145
+    );
+
+    pdf.save(
+      `${patient.name}.pdf`
+    );
+
+  }
+
   function logout() {
 
     localStorage.removeItem(
@@ -310,7 +384,7 @@ export default function DoctorPage() {
 
       </div>
 
-      {/* البحث والفلترة */}
+      {/* البحث */}
       <div
         style={{
           display: "grid",
@@ -630,6 +704,33 @@ export default function DoctorPage() {
             >
 
               📝 ملاحظة
+
+            </button>
+
+            <button
+              onClick={() =>
+                printPatient(patient)
+              }
+
+              style={{
+                flex: 1,
+
+                background:
+                  "#2563eb",
+
+                color: "white",
+
+                border: "none",
+
+                padding: "16px",
+
+                borderRadius: "16px",
+
+                fontSize: "18px"
+              }}
+            >
+
+              🖨️ PDF
 
             </button>
 
