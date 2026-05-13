@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState
+} from "react";
 
 import {
   initializeApp
@@ -51,6 +54,12 @@ export default function DoctorPage() {
 
   const [darkMode, setDarkMode] =
     useState(false);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [filterStatus, setFilterStatus] =
+    useState("");
 
   const [showModal, setShowModal] =
     useState(false);
@@ -167,6 +176,40 @@ export default function DoctorPage() {
 
   }
 
+  const filteredPatients =
+    patients.filter((patient) => {
+
+      const matchesSearch =
+
+        patient.name
+          ?.includes(search)
+
+        ||
+
+        patient.phone
+          ?.includes(search)
+
+        ||
+
+        patient.review
+          ?.includes(search);
+
+      const matchesStatus =
+
+        filterStatus === ""
+
+        ||
+
+        patient.status ===
+        filterStatus;
+
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
+
+    });
+
   return (
 
     <main
@@ -199,12 +242,22 @@ export default function DoctorPage() {
 
           alignItems: "center",
 
-          marginBottom: "30px"
+          marginBottom: "30px",
+
+          flexWrap: "wrap",
+
+          gap: "15px"
         }}
       >
 
-        <h1>
+        <h1
+          style={{
+            fontSize: "45px"
+          }}
+        >
+
           🦷 واجهة الدكتور
+
         </h1>
 
         <div
@@ -257,8 +310,74 @@ export default function DoctorPage() {
 
       </div>
 
+      {/* البحث والفلترة */}
+      <div
+        style={{
+          display: "grid",
+
+          gap: "15px",
+
+          marginBottom: "30px"
+        }}
+      >
+
+        <input
+          placeholder=
+            "🔍 البحث عن مريض"
+
+          value={search}
+
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
+
+          style={inputStyle}
+        />
+
+        <select
+          value={filterStatus}
+
+          onChange={(e) =>
+            setFilterStatus(
+              e.target.value
+            )
+          }
+
+          style={inputStyle}
+        >
+
+          <option value="">
+            📌 جميع الحالات
+          </option>
+
+          <option>
+            🔵 حجز مُثبت
+          </option>
+
+          <option>
+            📍 تم الوصول
+          </option>
+
+          <option>
+            🟡 حجز مؤجل
+          </option>
+
+          <option>
+            🔴 حجز ملغي
+          </option>
+
+          <option>
+            🟢 تم التنفيذ
+          </option>
+
+        </select>
+
+      </div>
+
       {/* الحجوزات */}
-      {patients.map((patient) => (
+      {filteredPatients.map((patient) => (
 
         <div
           key={patient.id}
@@ -292,15 +411,14 @@ export default function DoctorPage() {
                 ? "#102542"
                 : "white",
 
-            padding: "20px",
+            padding: "25px",
 
-            borderRadius: "20px",
+            borderRadius: "25px",
 
             marginBottom: "20px"
           }}
         >
 
-          {/* الحالة */}
           <div
             style={{
               display: "flex",
@@ -310,16 +428,22 @@ export default function DoctorPage() {
 
               alignItems: "center",
 
-              marginBottom: "20px"
+              marginBottom: "20px",
+
+              flexWrap: "wrap",
+
+              gap: "15px"
             }}
           >
 
             <div
               style={{
-                fontSize: "22px"
+                fontSize: "24px"
               }}
             >
+
               {patient.status}
+
             </div>
 
             <select
@@ -332,14 +456,7 @@ export default function DoctorPage() {
                 )
               }
 
-              style={{
-                padding: "12px",
-
-                borderRadius:
-                  "12px",
-
-                fontSize: "18px"
-              }}
+              style={inputStyle}
             >
 
               <option>
@@ -366,10 +483,9 @@ export default function DoctorPage() {
 
           </div>
 
-          {/* المعلومات */}
           <div
             style={{
-              lineHeight: "2.2",
+              lineHeight: "2.3",
 
               fontSize: "22px"
             }}
@@ -414,19 +530,20 @@ export default function DoctorPage() {
 
           </div>
 
-          {/* الملاحظات */}
           {patient.notes && (
 
             <div
               style={{
-                marginTop: "15px",
+                marginTop: "20px",
 
                 background:
-                  "rgba(255,255,255,0.15)",
+                  "rgba(255,255,255,0.12)",
 
-                padding: "15px",
+                padding: "18px",
 
-                borderRadius: "12px"
+                borderRadius: "16px",
+
+                lineHeight: "2"
               }}
             >
 
@@ -438,14 +555,15 @@ export default function DoctorPage() {
 
           )}
 
-          {/* الأزرار */}
           <div
             style={{
               display: "flex",
 
-              gap: "10px",
+              gap: "12px",
 
-              marginTop: "20px"
+              marginTop: "20px",
+
+              flexWrap: "wrap"
             }}
           >
 
@@ -457,15 +575,16 @@ export default function DoctorPage() {
               style={{
                 flex: 1,
 
-                background: "#22c55e",
+                background:
+                  "#22c55e",
 
                 color: "white",
 
+                padding: "16px",
+
+                borderRadius: "16px",
+
                 textAlign: "center",
-
-                padding: "15px",
-
-                borderRadius: "12px",
 
                 textDecoration: "none",
 
@@ -502,9 +621,9 @@ export default function DoctorPage() {
 
                 border: "none",
 
-                padding: "15px",
+                padding: "16px",
 
-                borderRadius: "12px",
+                borderRadius: "16px",
 
                 fontSize: "18px"
               }}
@@ -520,7 +639,7 @@ export default function DoctorPage() {
 
       ))}
 
-      {/* نافذة الملاحظات */}
+      {/* الملاحظات */}
       {showModal && (
 
         <div
@@ -530,7 +649,7 @@ export default function DoctorPage() {
             inset: 0,
 
             background:
-              "rgba(0,0,0,0.5)",
+              "rgba(0,0,0,0.6)",
 
             display: "flex",
 
@@ -554,14 +673,20 @@ export default function DoctorPage() {
                   ? "#102542"
                   : "white",
 
-              borderRadius: "20px",
+              borderRadius: "25px",
 
-              padding: "20px"
+              padding: "25px"
             }}
           >
 
-            <h2>
+            <h2
+              style={{
+                marginBottom: "20px"
+              }}
+            >
+
               📝 إدخال ملاحظة
+
             </h2>
 
             <textarea
@@ -576,15 +701,15 @@ export default function DoctorPage() {
               style={{
                 width: "100%",
 
-                height: "200px",
+                height: "220px",
 
-                marginTop: "20px",
+                borderRadius: "18px",
 
-                borderRadius: "12px",
+                padding: "18px",
 
-                padding: "15px",
+                fontSize: "20px",
 
-                fontSize: "20px"
+                border: "none"
               }}
             />
 
@@ -592,7 +717,7 @@ export default function DoctorPage() {
               style={{
                 display: "flex",
 
-                gap: "10px",
+                gap: "12px",
 
                 marginTop: "20px"
               }}
@@ -611,10 +736,10 @@ export default function DoctorPage() {
 
                   border: "none",
 
-                  padding: "15px",
+                  padding: "18px",
 
                   borderRadius:
-                    "12px",
+                    "18px",
 
                   fontSize: "20px"
                 }}
@@ -639,10 +764,10 @@ export default function DoctorPage() {
 
                   border: "none",
 
-                  padding: "15px",
+                  padding: "18px",
 
                   borderRadius:
-                    "12px",
+                    "18px",
 
                   fontSize: "20px"
                 }}
@@ -665,3 +790,16 @@ export default function DoctorPage() {
   );
 
 }
+
+const inputStyle = {
+
+  width: "100%",
+
+  padding: "16px",
+
+  borderRadius: "16px",
+
+  border: "none",
+
+  fontSize: "18px"
+};
