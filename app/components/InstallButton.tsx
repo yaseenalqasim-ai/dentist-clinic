@@ -1,11 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState
+} from "react";
 
 export default function InstallButton() {
 
-  const [promptEvent, setPromptEvent] =
-    useState<any>(null);
+  const [
+    promptEvent,
+    setPromptEvent
+  ] = useState<any>(null);
+
+  const [
+    installed,
+    setInstalled
+  ] = useState(false);
 
   useEffect(() => {
 
@@ -20,6 +30,15 @@ export default function InstallButton() {
       }
     );
 
+    window.addEventListener(
+      "appinstalled",
+      () => {
+
+        setInstalled(true);
+
+      }
+    );
+
   }, []);
 
   async function installApp() {
@@ -29,9 +48,13 @@ export default function InstallButton() {
     promptEvent.prompt();
 
     await promptEvent.userChoice;
+
   }
 
-  if (!promptEvent) return null;
+  if (
+    !promptEvent ||
+    installed
+  ) return null;
 
   return (
 
@@ -45,25 +68,52 @@ export default function InstallButton() {
 
         left: "20px",
 
-        background: "#2563eb",
+        background:
+          "linear-gradient(to right,#2563eb,#1d4ed8)",
 
         color: "white",
 
         border: "none",
 
-        padding: "15px",
+        padding:
+          "16px 22px",
 
-        borderRadius: "15px",
+        borderRadius:
+          "18px",
 
         fontSize: "18px",
 
         zIndex: 9999,
 
-        cursor: "pointer"
+        boxShadow:
+          "0 10px 30px rgba(0,0,0,0.3)",
+
+        animation:
+          "pulse 1.5s infinite"
       }}
     >
 
       📲 تثبيت التطبيق
+
+      <style>
+        {`
+          @keyframes pulse {
+
+            0%{
+              transform:scale(1);
+            }
+
+            50%{
+              transform:scale(1.05);
+            }
+
+            100%{
+              transform:scale(1);
+            }
+
+          }
+        `}
+      </style>
 
     </button>
 
