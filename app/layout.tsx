@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata }
+from "next";
 
 import "./globals.css";
 
@@ -11,10 +12,22 @@ export const metadata: Metadata = {
     "Dental Clinic System",
 
   description:
-    "نظام إدارة عيادة الأسنان",
+    "نظام احترافي لإدارة عيادة الأسنان",
 
   manifest:
-    "/manifest.json"
+    "/manifest.json",
+
+  themeColor:
+    "#071739",
+
+  icons: {
+
+    icon:
+      "/icon-192.png",
+
+    apple:
+      "/icon-192.png"
+  }
 };
 
 export default function RootLayout({
@@ -25,7 +38,10 @@ export default function RootLayout({
 
   return (
 
-    <html lang="ar">
+    <html
+      lang="ar"
+      dir="rtl"
+    >
 
       <body>
 
