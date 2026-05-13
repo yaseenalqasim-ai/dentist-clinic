@@ -60,6 +60,9 @@ export default function SecretaryPage() {
   const [search, setSearch] =
     useState("");
 
+  const [selectedDate, setSelectedDate] =
+    useState("");
+
   const [editingId, setEditingId] =
     useState("");
 
@@ -134,18 +137,9 @@ export default function SecretaryPage() {
 
         });
 
-        if (
-          data.length >
-          patients.length
-        ) {
-
-          const audio =
-            new Audio(
-              "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"
-            );
-
-          audio.play();
-        }
+        data.sort((a, b) =>
+          a.date.localeCompare(b.date)
+        );
 
         setPatients(data);
 
@@ -241,7 +235,7 @@ export default function SecretaryPage() {
   const filteredPatients =
     patients.filter((patient) => {
 
-      return (
+      const matchesSearch =
 
         patient.name
           ?.includes(search)
@@ -254,8 +248,20 @@ export default function SecretaryPage() {
         ||
 
         patient.review
-          ?.includes(search)
+          ?.includes(search);
 
+      const matchesDate =
+
+        selectedDate === ""
+
+        ||
+
+        patient.date ===
+        selectedDate;
+
+      return (
+        matchesSearch &&
+        matchesDate
       );
 
     });
@@ -295,7 +301,7 @@ export default function SecretaryPage() {
       >
 
         <h1>
-          واجهة السكرتيرة
+          📅 واجهة السكرتيرة
         </h1>
 
         <div
@@ -320,9 +326,7 @@ export default function SecretaryPage() {
 
               border: "none",
 
-              fontSize: "24px",
-
-              cursor: "pointer"
+              fontSize: "24px"
             }}
           >
             {darkMode ? "☀️" : "🌙"}
@@ -341,9 +345,7 @@ export default function SecretaryPage() {
               padding: "12px",
 
               borderRadius:
-                "12px",
-
-              cursor: "pointer"
+                "12px"
             }}
           >
             تسجيل خروج
@@ -353,14 +355,14 @@ export default function SecretaryPage() {
 
       </div>
 
-      {/* البحث والإضافة */}
+      {/* البحث والتاريخ */}
       <div
         style={{
-          display: "flex",
+          display: "grid",
 
-          gap: "10px",
+          gap: "15px",
 
-          marginTop: "20px"
+          marginTop: "25px"
         }}
       >
 
@@ -377,14 +379,12 @@ export default function SecretaryPage() {
 
             border: "none",
 
-            padding: "15px",
+            padding: "18px",
 
             borderRadius:
-              "12px",
+              "15px",
 
-            fontSize: "20px",
-
-            cursor: "pointer"
+            fontSize: "20px"
           }}
         >
           + إضافة حجز
@@ -403,8 +403,32 @@ export default function SecretaryPage() {
           }
 
           style={{
-            flex: 1,
+            padding: "15px",
 
+            borderRadius:
+              "12px",
+
+            border:
+              "1px solid #ccc",
+
+            fontSize: "18px",
+
+            color: "black"
+          }}
+        />
+
+        <input
+          type="date"
+
+          value={selectedDate}
+
+          onChange={(e) =>
+            setSelectedDate(
+              e.target.value
+            )
+          }
+
+          style={{
             padding: "15px",
 
             borderRadius:
@@ -449,9 +473,7 @@ export default function SecretaryPage() {
 
             ["🚨 الأمراض", "disease"],
 
-            ["❗ الشكوى", "complaint"],
-
-            ["🗓️ الموعد", "date"]
+            ["❗ الشكوى", "complaint"]
           ].map(([label, key]) => (
 
             <input
@@ -492,6 +514,35 @@ export default function SecretaryPage() {
             />
 
           ))}
+
+          <input
+            type="date"
+
+            value={form.date}
+
+            onChange={(e) =>
+              setForm({
+                ...form,
+                date:
+                  e.target.value
+              })
+            }
+
+            style={{
+              width: "100%",
+
+              marginBottom: "15px",
+
+              padding: "15px",
+
+              borderRadius: "12px",
+
+              border:
+                "1px solid #ccc",
+
+              fontSize: "18px"
+            }}
+          />
 
           <button
             onClick={savePatient}
