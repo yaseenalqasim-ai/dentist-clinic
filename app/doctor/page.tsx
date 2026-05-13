@@ -20,6 +20,13 @@ import {
   doc
 } from "firebase/firestore";
 
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "firebase/storage";
+
 const firebaseConfig = {
 
   apiKey:
@@ -50,6 +57,9 @@ const app =
 const db =
   getFirestore(app);
 
+const storage =
+  getStorage(app);
+
 export default function DoctorPage() {
 
   const [patients, setPatients] =
@@ -72,6 +82,9 @@ export default function DoctorPage() {
 
   const [note, setNote] =
     useState("");
+
+  const [uploading,setUploading] =
+    useState(false);
 
   useEffect(() => {
 
@@ -165,6 +178,49 @@ export default function DoctorPage() {
     );
 
     setShowModal(false);
+
+  }
+
+  async function uploadImage(
+    e:any,
+    patient:any
+  ){
+
+    const file =
+      e.target.files[0];
+
+    if(!file) return;
+
+    setUploading(true);
+
+    const imageRef =
+      ref(
+        storage,
+        `patients/${Date.now()}-${file.name}`
+      );
+
+    await uploadBytes(
+      imageRef,
+      file
+    );
+
+    const url =
+      await getDownloadURL(
+        imageRef
+      );
+
+    await updateDoc(
+      doc(
+        db,
+        "bookings",
+        patient.id
+      ),
+      {
+        image:url
+      }
+    );
+
+    setUploading(false);
 
   }
 
@@ -450,6 +506,31 @@ export default function DoctorPage() {
 
       </div>
 
+      {/* رفع جاري */}
+      {uploading && (
+
+        <div
+          style={{
+            background:"#2563eb",
+
+            color:"white",
+
+            padding:"15px",
+
+            borderRadius:"15px",
+
+            marginBottom:"20px",
+
+            textAlign:"center"
+          }}
+        >
+
+          جاري رفع الصورة...
+
+        </div>
+
+      )}
+
       {/* الحجوزات */}
       {filteredPatients.map((patient) => (
 
@@ -629,6 +710,24 @@ export default function DoctorPage() {
 
           )}
 
+          {patient.image && (
+
+            <img
+              src={patient.image}
+
+              alt="patient"
+
+              style={{
+                width:"100%",
+
+                marginTop:"20px",
+
+                borderRadius:"20px"
+              }}
+            />
+
+          )}
+
           <div
             style={{
               display: "flex",
@@ -735,6 +834,23 @@ export default function DoctorPage() {
             </button>
 
           </div>
+
+          <input
+            type="file"
+
+            accept="image/*"
+
+            onChange={(e)=>
+              uploadImage(
+                e,
+                patient
+              )
+            }
+
+            style={{
+              marginTop:"15px"
+            }}
+          />
 
         </div>
 
