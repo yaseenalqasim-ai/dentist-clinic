@@ -47,381 +47,256 @@ const app =
 const db =
   getFirestore(app);
 
-export default function HomePage() {
+export default function HomePage(){
 
-  const [patients, setPatients] =
-    useState<any[]>([]);
+  const [
+    totalPatients,
+    setTotalPatients
+  ] = useState(0);
 
-  useEffect(() => {
+  const [
+    completed,
+    setCompleted
+  ] = useState(0);
+
+  const [
+    cancelled,
+    setCancelled
+  ] = useState(0);
+
+  useEffect(()=>{
 
     onSnapshot(
-      collection(db, "bookings"),
-      (snapshot) => {
+      collection(db,"bookings"),
+      (snapshot)=>{
 
-        const data: any[] = [];
+        const data:any[] = [];
 
-        snapshot.forEach((docItem) => {
+        snapshot.forEach((doc)=>{
 
-          data.push({
-            id: docItem.id,
-            ...docItem.data()
-          });
+          data.push(doc.data());
 
         });
 
-        setPatients(data);
+        setTotalPatients(
+          data.length
+        );
+
+        setCompleted(
+
+          data.filter(
+            (p)=>
+              p.status ===
+              "🟢 تم التنفيذ"
+          ).length
+
+        );
+
+        setCancelled(
+
+          data.filter(
+            (p)=>
+              p.status ===
+              "🔴 حجز ملغي"
+          ).length
+
+        );
 
       }
     );
 
-  }, []);
+  },[]);
 
-  const completed =
-    patients.filter(
-      (p) =>
-        p.status ===
-        "🟢 تم التنفيذ"
-    ).length;
-
-  const cancelled =
-    patients.filter(
-      (p) =>
-        p.status ===
-        "🔴 حجز ملغي"
-    ).length;
-
-  const delayed =
-    patients.filter(
-      (p) =>
-        p.status ===
-        "🟡 حجز مؤجل"
-    ).length;
-
-  return (
+  return(
 
     <main
       dir="rtl"
 
       style={{
-        minHeight: "100vh",
+        minHeight:"100vh",
 
         background:
           "linear-gradient(to bottom,#071739,#102542)",
 
-        color: "white",
+        color:"white",
 
-        padding: "20px"
+        padding:"20px"
       }}
     >
 
-      {/* HERO */}
       <div
         style={{
-          textAlign: "center",
+          maxWidth:"1300px",
 
-          padding:
-            "80px 20px"
+          margin:"auto"
         }}
       >
 
         <h1
           style={{
-            fontSize: "70px",
+            fontSize:"55px",
 
-            marginBottom: "20px"
+            textAlign:"center",
+
+            marginBottom:"15px"
           }}
         >
 
-          🦷 نظام العيادة
+          🦷 Dentist Clinic
 
         </h1>
 
         <p
           style={{
-            fontSize: "28px",
+            textAlign:"center",
 
-            color: "#ddd",
+            fontSize:"24px",
 
-            lineHeight: "2"
+            opacity:0.8,
+
+            marginBottom:"50px"
           }}
         >
 
-          نظام احترافي متكامل
-          لإدارة الحجوزات
-          والمرضى والدكتور
-          والسكرتير
+          Smart Dental Clinic System
 
         </p>
 
-      </div>
+        {/* الإحصائيات */}
 
-      {/* الإحصائيات */}
-      <div
-        style={{
-          display: "grid",
-
-          gridTemplateColumns:
-            "repeat(auto-fit,minmax(250px,1fr))",
-
-          gap: "20px",
-
-          marginTop: "40px"
-        }}
-      >
-
-        {[
-          [
-            "📅 جميع الحجوزات",
-            patients.length,
-            "#2563eb"
-          ],
-
-          [
-            "🟢 تم التنفيذ",
-            completed,
-            "#22c55e"
-          ],
-
-          [
-            "🔴 الملغية",
-            cancelled,
-            "#ef4444"
-          ],
-
-          [
-            "🟡 المؤجلة",
-            delayed,
-            "#eab308"
-          ]
-        ].map(
-          ([title, value, color]) => (
-
-            <div
-              key={String(title)}
-
-              style={{
-                background:
-                  "rgba(255,255,255,0.08)",
-
-                backdropFilter:
-                  "blur(10px)",
-
-                border:
-                  `2px solid ${color}`,
-
-                borderRadius:
-                  "25px",
-
-                padding: "30px",
-
-                textAlign:
-                  "center"
-              }}
-            >
-
-              <h2
-                style={{
-                  fontSize: "28px"
-                }}
-              >
-
-                {title}
-
-              </h2>
-
-              <div
-                style={{
-                  fontSize: "65px",
-
-                  marginTop: "20px",
-
-                  fontWeight:
-                    "bold",
-
-                  color:
-                    String(color)
-                }}
-              >
-
-                <LiveCounter
-                  value={Number(value)}
-                />
-
-              </div>
-
-            </div>
-
-          )
-        )}
-
-      </div>
-
-      {/* الأزرار */}
-      <div
-        style={{
-          display: "grid",
-
-          gap: "20px",
-
-          maxWidth: "700px",
-
-          margin:
-            "60px auto"
-        }}
-      >
-
-        <a
-          href="/login"
-
+        <div
           style={{
-            background:
-              "#2563eb",
+            display:"grid",
 
-            color: "white",
+            gridTemplateColumns:
+              "repeat(auto-fit,minmax(250px,1fr))",
 
-            padding:
-              "22px",
+            gap:"20px",
 
-            borderRadius:
-              "20px",
-
-            textAlign:
-              "center",
-
-            textDecoration:
-              "none",
-
-            fontSize: "26px"
+            marginBottom:"40px"
           }}
         >
 
-          🔐 تسجيل الدخول
+          <div style={cardStyle}>
 
-        </a>
+            <h2>
+              👥 المرضى
+            </h2>
 
-        <a
-          href="/booking"
+            <h1>
 
+              <LiveCounter
+                value={
+                  totalPatients
+                }
+              />
+
+            </h1>
+
+          </div>
+
+          <div style={cardStyle}>
+
+            <h2>
+              🟢 المكتملة
+            </h2>
+
+            <h1>
+
+              <LiveCounter
+                value={
+                  completed
+                }
+              />
+
+            </h1>
+
+          </div>
+
+          <div style={cardStyle}>
+
+            <h2>
+              🔴 الملغية
+            </h2>
+
+            <h1>
+
+              <LiveCounter
+                value={
+                  cancelled
+                }
+              />
+
+            </h1>
+
+          </div>
+
+        </div>
+
+        {/* الأزرار */}
+
+        <div
           style={{
-            background:
-              "#22c55e",
+            display:"grid",
 
-            color: "white",
+            gridTemplateColumns:
+              "repeat(auto-fit,minmax(250px,1fr))",
 
-            padding:
-              "22px",
-
-            borderRadius:
-              "20px",
-
-            textAlign:
-              "center",
-
-            textDecoration:
-              "none",
-
-            fontSize: "26px"
+            gap:"20px"
           }}
         >
 
-          📅 حجز موعد
+          <a
+            href="/booking"
 
-        </a>
+            style={buttonStyle}
+          >
 
-      </div>
+            📅 حجز موعد
 
-      {/* آخر الحجوزات */}
-      <div
-        style={{
-          marginTop: "70px"
-        }}
-      >
+          </a>
 
-        <h2
-          style={{
-            fontSize: "40px",
+          <a
+            href="/doctor"
 
-            marginBottom: "30px"
-          }}
-        >
+            style={buttonStyle}
+          >
 
-          🕘 آخر الحجوزات
+            👨‍⚕️ الدكتور
 
-        </h2>
+          </a>
 
-        {patients
-          .slice(-5)
-          .reverse()
-          .map((patient) => (
+          <a
+            href="/secretary"
 
-            <div
-              key={patient.id}
+            style={buttonStyle}
+          >
 
-              style={{
+            🧾 السكرتير
 
-                background:
+          </a>
 
-                  patient.status ===
-                  "🟢 تم التنفيذ"
+          <a
+            href="/calendar"
 
-                    ? "#14532d"
+            style={buttonStyle}
+          >
 
-                  :
+            📆 التقويم
 
-                  patient.status ===
-                  "🔴 حجز ملغي"
+          </a>
 
-                    ? "#7f1d1d"
+          <a
+            href="/reports"
 
-                  :
+            style={buttonStyle}
+          >
 
-                  patient.status ===
-                  "🟡 حجز مؤجل"
+            📊 التقارير
 
-                    ? "#713f12"
+          </a>
 
-                  :
-
-                  "rgba(255,255,255,0.08)",
-
-                padding: "25px",
-
-                borderRadius:
-                  "22px",
-
-                marginBottom:
-                  "20px"
-              }}
-            >
-
-              <h3>
-                👤
-                {" "}
-                {patient.name}
-              </h3>
-
-              <h3>
-                🦷
-                {" "}
-                {patient.review}
-
-                {patient.visitType &&
-                  ` ← ${patient.visitType}`}
-              </h3>
-
-              <h3>
-                🗓️
-                {" "}
-                {patient.date}
-              </h3>
-
-              <h3>
-                {patient.status}
-              </h3>
-
-            </div>
-
-          ))}
+        </div>
 
       </div>
 
@@ -430,3 +305,37 @@ export default function HomePage() {
   );
 
 }
+
+const cardStyle:any = {
+
+  background:
+    "rgba(255,255,255,0.08)",
+
+  padding:"30px",
+
+  borderRadius:"25px",
+
+  textAlign:"center",
+
+  backdropFilter:
+    "blur(10px)"
+};
+
+const buttonStyle:any = {
+
+  background:"#2563eb",
+
+  color:"white",
+
+  padding:"30px",
+
+  borderRadius:"25px",
+
+  textDecoration:"none",
+
+  textAlign:"center",
+
+  fontSize:"28px",
+
+  fontWeight:"bold"
+};
