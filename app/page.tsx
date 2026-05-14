@@ -5,8 +5,7 @@ import {
   useState
 } from "react";
 
-import LiveCounter
-from "./components/LiveCounter";
+import LiveCounter from "@/app/components/LiveCounter";
 
 import {
   initializeApp
