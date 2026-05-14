@@ -5,47 +5,20 @@ import {
   useState
 } from "react";
 
-import LiveCounter from "./components/LiveCounter";
+import Layout
+from "./components/Layout";
+
+import LiveCounter
+from "./components/LiveCounter";
 
 import {
-  initializeApp
-} from "firebase/app";
-
-import {
-  getFirestore,
   collection,
   onSnapshot
 } from "firebase/firestore";
 
-const firebaseConfig = {
-
-  apiKey:
-    "AIzaSyCIZdUmSX15w0CACuW4vfz9npsUi-L3lbg",
-
-  authDomain:
-    "dentist-clinic-476ac.firebaseapp.com",
-
-  projectId:
-    "dentist-clinic-476ac",
-
-  storageBucket:
-    "dentist-clinic-476ac.firebasestorage.app",
-
-  messagingSenderId:
-    "1013681862841",
-
-  appId:
-    "1:1013681862841:web:86643c3f3fa926389a8368",
-
-  measurementId:
-    "G-FW5T2FJ29R"
-};
-
-const app =
-  initializeApp(firebaseConfig);
-
-const db =
-  getFirestore(app);
+import {
+  db
+} from "../lib/firebase";
 
 export default function HomePage(){
 
@@ -66,245 +39,201 @@ export default function HomePage(){
 
   useEffect(()=>{
 
-    onSnapshot(
-      collection(db,"bookings"),
-      (snapshot)=>{
+    const unsubscribe =
+      onSnapshot(
 
-        const data:any[] = [];
+        collection(
+          db,
+          "bookings"
+        ),
 
-        snapshot.forEach((doc)=>{
+        (snapshot)=>{
 
-          data.push(doc.data());
+          const data:any[] = [];
 
-        });
+          snapshot.forEach((doc)=>{
 
-        setTotalPatients(
-          data.length
-        );
+            data.push(
+              doc.data()
+            );
 
-        setCompleted(
+          });
 
-          data.filter(
-            (p)=>
-              p.status ===
-              "🟢 تم التنفيذ"
-          ).length
+          setTotalPatients(
+            data.length
+          );
 
-        );
+          setCompleted(
 
-        setCancelled(
+            data.filter(
+              (item)=>
 
-          data.filter(
-            (p)=>
-              p.status ===
-              "🔴 حجز ملغي"
-          ).length
+                item.status ===
+                "🟢 تم التنفيذ"
 
-        );
+            ).length
 
-      }
-    );
+          );
+
+          setCancelled(
+
+            data.filter(
+              (item)=>
+
+                item.status ===
+                "🔴 حجز ملغي"
+
+            ).length
+
+          );
+
+        }
+
+      );
+
+    return ()=>unsubscribe();
 
   },[]);
 
   return(
 
-    <main
-      dir="rtl"
-
-      style={{
-        minHeight:"100vh",
-
-        background:
-          "linear-gradient(to bottom,#071739,#102542)",
-
-        color:"white",
-
-        padding:"20px"
-      }}
+    <Layout
+      title="🏠 لوحة التحكم"
     >
 
-      <div
-        style={{
-          maxWidth:"1300px",
+      {/* STATS */}
 
-          margin:"auto"
-        }}
+      <div
+        style={statsGrid}
       >
 
-        <h1
-          style={{
-            fontSize:"55px",
+        <div style={cardStyle}>
 
-            textAlign:"center",
+          <h2>
+            👥 المرضى
+          </h2>
 
-            marginBottom:"15px"
-          }}
-        >
+          <h1>
 
-          🦷 Dentist Clinic
+            <LiveCounter
+              value={
+                totalPatients
+              }
+            />
 
-        </h1>
-
-        <p
-          style={{
-            textAlign:"center",
-
-            fontSize:"24px",
-
-            opacity:0.8,
-
-            marginBottom:"50px"
-          }}
-        >
-
-          Smart Dental Clinic System
-
-        </p>
-
-        {/* الإحصائيات */}
-
-        <div
-          style={{
-            display:"grid",
-
-            gridTemplateColumns:
-              "repeat(auto-fit,minmax(250px,1fr))",
-
-            gap:"20px",
-
-            marginBottom:"40px"
-          }}
-        >
-
-          <div style={cardStyle}>
-
-            <h2>
-              👥 المرضى
-            </h2>
-
-            <h1>
-
-              <LiveCounter
-                value={
-                  totalPatients
-                }
-              />
-
-            </h1>
-
-          </div>
-
-          <div style={cardStyle}>
-
-            <h2>
-              🟢 المكتملة
-            </h2>
-
-            <h1>
-
-              <LiveCounter
-                value={
-                  completed
-                }
-              />
-
-            </h1>
-
-          </div>
-
-          <div style={cardStyle}>
-
-            <h2>
-              🔴 الملغية
-            </h2>
-
-            <h1>
-
-              <LiveCounter
-                value={
-                  cancelled
-                }
-              />
-
-            </h1>
-
-          </div>
+          </h1>
 
         </div>
 
-        {/* الأزرار */}
+        <div style={cardStyle}>
 
-        <div
-          style={{
-            display:"grid",
+          <h2>
+            🟢 المكتملة
+          </h2>
 
-            gridTemplateColumns:
-              "repeat(auto-fit,minmax(250px,1fr))",
+          <h1>
 
-            gap:"20px"
-          }}
-        >
+            <LiveCounter
+              value={
+                completed
+              }
+            />
 
-          <a
-            href="/booking"
+          </h1>
 
-            style={buttonStyle}
-          >
+        </div>
 
-            📅 حجز موعد
+        <div style={cardStyle}>
 
-          </a>
+          <h2>
+            🔴 الملغية
+          </h2>
 
-          <a
-            href="/doctor"
+          <h1>
 
-            style={buttonStyle}
-          >
+            <LiveCounter
+              value={
+                cancelled
+              }
+            />
 
-            👨‍⚕️ الدكتور
-
-          </a>
-
-          <a
-            href="/secretary"
-
-            style={buttonStyle}
-          >
-
-            🧾 السكرتير
-
-          </a>
-
-          <a
-            href="/calendar"
-
-            style={buttonStyle}
-          >
-
-            📆 التقويم
-
-          </a>
-
-          <a
-            href="/reports"
-
-            style={buttonStyle}
-          >
-
-            📊 التقارير
-
-          </a>
+          </h1>
 
         </div>
 
       </div>
 
-    </main>
+      {/* ACTIONS */}
+
+      <div
+        style={actionsGrid}
+      >
+
+        <a
+          href="/booking"
+          style={buttonStyle}
+        >
+
+          📅 حجز موعد
+
+        </a>
+
+        <a
+          href="/doctor"
+          style={buttonStyle}
+        >
+
+          👨‍⚕️ لوحة الدكتور
+
+        </a>
+
+        <a
+          href="/secretary"
+          style={buttonStyle}
+        >
+
+          🧾 لوحة السكرتير
+
+        </a>
+
+        <a
+          href="/calendar"
+          style={buttonStyle}
+        >
+
+          📆 التقويم
+
+        </a>
+
+      </div>
+
+    </Layout>
 
   );
 
 }
+
+const statsGrid:any = {
+
+  display:"grid",
+
+  gridTemplateColumns:
+    "repeat(auto-fit,minmax(250px,1fr))",
+
+  gap:"20px",
+
+  marginBottom:"30px"
+};
+
+const actionsGrid:any = {
+
+  display:"grid",
+
+  gridTemplateColumns:
+    "repeat(auto-fit,minmax(220px,1fr))",
+
+  gap:"20px"
+};
 
 const cardStyle:any = {
 
@@ -315,27 +244,34 @@ const cardStyle:any = {
 
   borderRadius:"25px",
 
+  backdropFilter:
+    "blur(10px)",
+
   textAlign:"center",
 
-  backdropFilter:
-    "blur(10px)"
+  border:
+    "1px solid rgba(255,255,255,0.1)"
 };
 
 const buttonStyle:any = {
 
-  background:"#2563eb",
+  background:
+    "#2563eb",
 
   color:"white",
 
-  padding:"30px",
+  padding:"24px",
 
-  borderRadius:"25px",
+  borderRadius:"22px",
 
   textDecoration:"none",
 
   textAlign:"center",
 
-  fontSize:"28px",
+  fontSize:"22px",
 
-  fontWeight:"bold"
+  fontWeight:"bold",
+
+  border:
+    "1px solid rgba(255,255,255,0.15)"
 };
