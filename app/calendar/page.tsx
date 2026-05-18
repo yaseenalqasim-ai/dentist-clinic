@@ -44,6 +44,35 @@ export default function CalendarPage() {
     );
   };
 
+  const deleteBooking = (
+    index:number
+  ) => {
+
+    const confirmDelete =
+      confirm(
+        "هل تريد حذف الحجز؟"
+      );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    const updatedBookings =
+      bookings.filter(
+        (
+          _:any,
+          i:number
+        ) => i !== index
+      );
+
+    setBookings(updatedBookings);
+
+    localStorage.setItem(
+      "bookings",
+      JSON.stringify(updatedBookings)
+    );
+  };
+
   return (
 
     <main
@@ -370,6 +399,31 @@ export default function CalendarPage() {
                     </button>
 
                   </div>
+
+                  <button
+
+                    onClick={()=>
+                      deleteBooking(index)
+                    }
+
+                    className="
+                      w-full
+                      h-16
+                      bg-red-500
+                      text-white
+                      rounded-3xl
+                      flex
+                      items-center
+                      justify-center
+                      text-2xl
+                      font-bold
+                      mb-4
+                    "
+                  >
+
+                    🗑 حذف الحجز
+
+                  </button>
 
                   <a
 
