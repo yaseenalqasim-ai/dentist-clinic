@@ -23,7 +23,7 @@ export default function DoctorsPage() {
   ) => {
 
     const url =
-      `${window.location.origin}/booking/${slug}`;
+      `https://dentist-clinic-r2nz.vercel.app/booking/${slug}`;
 
     navigator.clipboard.writeText(url);
 
@@ -155,7 +155,7 @@ export default function DoctorsPage() {
                   🔗
 
                   {
-                    `${window.location.origin}/booking/${doctor.slug}`
+                    `https://dentist-clinic-r2nz.vercel.app/booking/${doctor.slug}`
                   }
 
                 </div>
