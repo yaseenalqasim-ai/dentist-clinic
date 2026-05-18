@@ -7,6 +7,9 @@ export default function CalendarPage() {
   const [bookings, setBookings] =
     useState<any[]>([]);
 
+  const [filter, setFilter] =
+    useState("الكل");
+
   useEffect(() => {
 
     loadBookings();
@@ -73,6 +76,20 @@ export default function CalendarPage() {
     );
   };
 
+  const filteredBookings =
+    filter === "الكل"
+
+    ?
+
+    bookings
+
+    :
+
+    bookings.filter(
+      (booking)=>
+        booking.status === filter
+    );
+
   return (
 
     <main
@@ -122,9 +139,66 @@ export default function CalendarPage() {
 
       </div>
 
+      <div
+        className="
+          grid
+          grid-cols-4
+          gap-3
+          mb-6
+        "
+      >
+
+        {
+
+          [
+            "الكل",
+            "بالانتظار",
+            "مكتمل",
+            "ملغي",
+          ].map(
+            (item)=>(
+
+              <button
+
+                key={item}
+
+                onClick={()=>
+                  setFilter(item)
+                }
+
+                className={`
+                  h-14
+                  rounded-2xl
+                  font-bold
+
+                  ${
+                    filter === item
+
+                    ?
+
+                    "bg-[#2146e8] text-white"
+
+                    :
+
+                    "bg-white text-black"
+                  }
+                `}
+              >
+
+                {item}
+
+              </button>
+
+            )
+          )
+
+        }
+
+      </div>
+
       {
 
-        bookings.length === 0
+        filteredBookings.length === 0
 
         ?
 
@@ -153,7 +227,7 @@ export default function CalendarPage() {
 
           {
 
-            bookings.map(
+            filteredBookings.map(
               (
                 booking,
                 index
