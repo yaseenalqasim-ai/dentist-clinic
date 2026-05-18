@@ -5,6 +5,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Clinic CRM",
   description: "Dental Clinic System",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
