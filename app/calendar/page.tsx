@@ -9,6 +9,12 @@ export default function CalendarPage() {
 
   useEffect(() => {
 
+    loadBookings();
+
+  }, []);
+
+  const loadBookings = () => {
+
     const storedBookings =
       JSON.parse(
         localStorage.getItem(
@@ -17,8 +23,26 @@ export default function CalendarPage() {
       );
 
     setBookings(storedBookings);
+  };
 
-  }, []);
+  const updateStatus = (
+    index:number,
+    status:string
+  ) => {
+
+    const updatedBookings =
+      [...bookings];
+
+    updatedBookings[index].status =
+      status;
+
+    setBookings(updatedBookings);
+
+    localStorage.setItem(
+      "bookings",
+      JSON.stringify(updatedBookings)
+    );
+  };
 
   return (
 
@@ -128,14 +152,34 @@ export default function CalendarPage() {
                   >
 
                     <div
-                      className="
-                        bg-yellow-100
-                        text-yellow-700
+                      className={`
                         px-4
                         py-2
                         rounded-full
                         font-bold
-                      "
+
+                        ${
+                          booking.status ===
+                          "مكتمل"
+
+                          ?
+
+                          "bg-green-100 text-green-700"
+
+                          :
+
+                          booking.status ===
+                          "ملغي"
+
+                          ?
+
+                          "bg-red-100 text-red-700"
+
+                          :
+
+                          "bg-yellow-100 text-yellow-700"
+                        }
+                      `}
                     >
 
                       {
@@ -247,6 +291,83 @@ export default function CalendarPage() {
                       }
 
                     </div>
+
+                  </div>
+
+                  <div
+                    className="
+                      grid
+                      grid-cols-3
+                      gap-3
+                      mb-4
+                    "
+                  >
+
+                    <button
+
+                      onClick={()=>
+                        updateStatus(
+                          index,
+                          "بالانتظار"
+                        )
+                      }
+
+                      className="
+                        h-14
+                        bg-yellow-400
+                        text-white
+                        rounded-2xl
+                        font-bold
+                      "
+                    >
+
+                      انتظار
+
+                    </button>
+
+                    <button
+
+                      onClick={()=>
+                        updateStatus(
+                          index,
+                          "مكتمل"
+                        )
+                      }
+
+                      className="
+                        h-14
+                        bg-green-500
+                        text-white
+                        rounded-2xl
+                        font-bold
+                      "
+                    >
+
+                      مكتمل
+
+                    </button>
+
+                    <button
+
+                      onClick={()=>
+                        updateStatus(
+                          index,
+                          "ملغي"
+                        )
+                      }
+
+                      className="
+                        h-14
+                        bg-red-500
+                        text-white
+                        rounded-2xl
+                        font-bold
+                      "
+                    >
+
+                      ملغي
+
+                    </button>
 
                   </div>
 
