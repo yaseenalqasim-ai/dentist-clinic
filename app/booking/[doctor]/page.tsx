@@ -1,450 +1,223 @@
 "use client";
 
-import {
-  use,
-  useEffect,
-  useMemo,
-  useState
-} from "react";
+import { use } from "react";
+import { useState } from "react";
 
-import {
-  addDoc,
-  collection,
-  onSnapshot,
-} from "firebase/firestore";
+type Props = {
+  params: Promise<{
+    doctor: string;
+  }>;
+};
 
-import { db } from "@/lib/firebase";
+export default function DoctorBookingPage(props: Props) {
+  const params = use(props.params);
 
-const bookingTypes = [
-  "كشف",
-  "حشوة",
-  "قلع",
-  "تنظيف",
-  "تقويم",
-  "استشارة",
-  "مراجعة",
-  "طارئ",
-];
+  const doctorName = decodeURIComponent(params.doctor);
 
-const allTimeSlots = [
-  "09:00",
-  "10:00",
-  "11:00",
-  "12:00",
-  "01:00",
-  "02:00",
-  "03:00",
-  "04:00",
-  "05:00",
-  "06:00",
-];
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
 
-export default function DoctorBookingPage(
-  props: {
-    params: Promise<{
-      doctor: string;
-    }>;
-  }
-) {
+  const services = [
+    "كشف",
+    "تنظيف",
+    "حشوة",
+    "قلع",
+  ];
 
-  const params =
-    use(props.params);
-
-  const doctorSlug =
-    params.doctor;
-
-  const doctorName =
-    decodeURIComponent(
-      doctorSlug
-    )
-    .replaceAll("-", " ");
-
-  const [patientName, setPatientName] =
-    useState("");
-
-  const [phone, setPhone] =
-    useState("");
-
-  const [bookingType, setBookingType] =
-    useState("");
-
-  const [date, setDate] =
-    useState("");
-
-  const [time, setTime] =
-    useState("");
-
-  const [bookings, setBookings] =
-    useState<any[]>([]);
-
-  useEffect(() => {
-
-    const unsubscribe =
-      onSnapshot(
-
-        collection(db, "bookings"),
-
-        (snapshot) => {
-
-          const data =
-            snapshot.docs.map(
-              (doc) => ({
-                id: doc.id,
-                ...doc.data(),
-              })
-            );
-
-          setBookings(data);
-
-        }
-      );
-
-    return () => unsubscribe();
-
-  }, []);
-
-  const unavailableTimes =
-    useMemo(() => {
-
-      return bookings
-
-        .filter(
-          (booking: any) =>
-
-            booking.date === date
-
-            &&
-
-            booking.doctorName === doctorName
-        )
-
-        .map(
-          (booking: any) =>
-            booking.time
-        );
-
-    }, [
-      bookings,
-      date,
-      doctorName
-    ]);
-
-  const availableTimes =
-    allTimeSlots.filter(
-      (slot) =>
-        !unavailableTimes.includes(slot)
-    );
-
-  async function createBooking() {
-
-    if (
-      !patientName ||
-      !phone ||
-      !bookingType ||
-      !date ||
-      !time
-    ) {
-
-      alert(
-        "يرجى ملء جميع الحقول"
-      );
-
-      return;
-    }
-
-    try {
-
-      await addDoc(
-        collection(db, "bookings"),
-        {
-          patientName,
-          phone,
-          bookingType,
-          doctorName,
-          date,
-          time,
-          status: "بالانتظار",
-          createdAt: new Date(),
-        }
-      );
-
-      alert(
-        "تم إرسال طلب الحجز بنجاح"
-      );
-
-      setPatientName("");
-      setPhone("");
-      setBookingType("");
-      setDate("");
-      setTime("");
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(
-        "حدث خطأ أثناء الحجز"
-      );
-    }
-  }
+  const availableTimes = [
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "01:00 PM",
+    "02:00 PM",
+  ];
 
   return (
+    <main className="min-h-screen bg-[#f3f3f3] p-4 pb-32">
 
-    <div
-      className="
-        min-h-screen
-        bg-gray-100
-        p-4
-      "
-      dir="rtl"
-    >
+      <div className="max-w-2xl mx-auto">
 
-      <div
-        className="
-          max-w-2xl
-          mx-auto
-        "
-      >
+        <div className="bg-[#2146e8] text-white rounded-[35px] shadow-2xl p-6 mb-6">
 
-        <div
-          className="
-            bg-blue-700
-            text-white
-            rounded-3xl
-            p-7
-            shadow-xl
-            mb-6
-          "
-        >
-
-          <h1
-            className="
-              text-3xl
-              md:text-4xl
-              font-bold
-              mb-3
-            "
-          >
-
+          <h1 className="text-4xl md:text-5xl font-bold mb-3 text-right">
             استمارة حجز موعد
-
           </h1>
 
-          <p
-            className="
-              text-blue-100
-              text-lg
-            "
-          >
-
-            للدكتور
-            "{doctorName}"
-
+          <p className="text-right text-2xl text-gray-200">
+            للدكتور "{doctorName}"
           </p>
 
         </div>
 
-        <div
-          className="
-            bg-white
-            rounded-3xl
-            shadow-xl
-            p-6
-            space-y-5
-          "
-        >
+        <div className="bg-white rounded-[35px] shadow-2xl p-5">
 
-          <input
-            type="text"
+          <div className="mb-6">
+            <label className="block text-black text-xl font-bold mb-3 text-right">
+              👤 الاسم
+            </label>
 
-            value={patientName}
+            <input
+              type="text"
+              placeholder="اكتب الاسم الكامل"
+              className="
+                w-full
+                h-16
+                rounded-3xl
+                border-2
+                border-gray-300
+                px-5
+                text-right
+                text-black
+                text-lg
+                bg-white
+                placeholder-gray-600
+                outline-none
+              "
+            />
+          </div>
 
-            onChange={(e)=>
-              setPatientName(
-                e.target.value
-              )
-            }
+          <div className="mb-6">
+            <label className="block text-black text-xl font-bold mb-3 text-right">
+              📞 الرقم
+            </label>
 
-            placeholder="
-              👤 الاسم الكامل
-            "
+            <input
+              type="tel"
+              placeholder="07XXXXXXXXX"
+              className="
+                w-full
+                h-16
+                rounded-3xl
+                border-2
+                border-gray-300
+                px-5
+                text-right
+                text-black
+                text-lg
+                bg-white
+                placeholder-gray-600
+                outline-none
+              "
+            />
+          </div>
 
-            className="
-              w-full
-              border
-              border-gray-300
-              rounded-2xl
-              p-4
-              text-lg
-            "
-          />
+          <div className="mb-6">
+            <label className="block text-black text-xl font-bold mb-3 text-right">
+              🦷 نوع الحجز
+            </label>
 
-          <input
-            type="text"
+            <select
+              className="
+                w-full
+                h-16
+                rounded-3xl
+                border-2
+                border-gray-300
+                px-5
+                text-right
+                text-black
+                text-lg
+                bg-white
+                outline-none
+              "
+            >
+              <option>
+                اختر نوع الحجز
+              </option>
 
-            value={phone}
+              {services.map((service) => (
+                <option key={service}>
+                  {service}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            onChange={(e)=>
-              setPhone(
-                e.target.value
-              )
-            }
+          <div className="mb-6">
+            <label className="block text-black text-xl font-bold mb-3 text-right">
+              📅 الموعد
+            </label>
 
-            placeholder="
-              📞 رقم الهاتف
-            "
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) =>
+                setSelectedDate(e.target.value)
+              }
+              className="
+                w-full
+                h-16
+                rounded-3xl
+                border-2
+                border-gray-300
+                px-5
+                text-right
+                text-black
+                text-lg
+                bg-white
+                outline-none
+              "
+            />
+          </div>
 
-            className="
-              w-full
-              border
-              border-gray-300
-              rounded-2xl
-              p-4
-              text-lg
-            "
-          />
+          <div className="mb-8">
+            <label className="block text-black text-xl font-bold mb-3 text-right">
+              ⏰ الساعة
+            </label>
 
-          <select
-            value={bookingType}
+            <select
+              value={selectedTime}
+              onChange={(e) =>
+                setSelectedTime(e.target.value)
+              }
+              className="
+                w-full
+                h-16
+                rounded-3xl
+                border-2
+                border-gray-300
+                px-5
+                text-right
+                text-black
+                text-lg
+                bg-white
+                outline-none
+              "
+            >
+              <option value="">
+                اختر الوقت
+              </option>
 
-            onChange={(e)=>
-              setBookingType(
-                e.target.value
-              )
-            }
-
-            className="
-              w-full
-              border
-              border-gray-300
-              rounded-2xl
-              p-4
-              text-lg
-            "
-          >
-
-            <option value="">
-              🦷 اختر نوع الحجز
-            </option>
-
-            {
-
-              bookingTypes.map(
-                (type)=>(
-
-                  <option
-                    key={type}
-                    value={type}
-                  >
-
-                    {type}
-
-                  </option>
-
-                )
-              )
-
-            }
-
-          </select>
-
-          <input
-            type="date"
-
-            value={date}
-
-            onChange={(e)=>
-              setDate(
-                e.target.value
-              )
-            }
-
-            className="
-              w-full
-              border
-              border-gray-300
-              rounded-2xl
-              p-4
-              text-lg
-            "
-          />
-
-          <div
-            className="
-              grid
-              grid-cols-2
-              md:grid-cols-3
-              gap-3
-            "
-          >
-
-            {
-
-              availableTimes.map(
-                (slot)=>(
-
-                  <button
-                    key={slot}
-
-                    onClick={()=>
-                      setTime(slot)
-                    }
-
-                    className={`
-                      p-4
-                      rounded-2xl
-                      font-bold
-                      text-lg
-                      transition
-
-                      ${
-                        time === slot
-
-                        ?
-
-                        "bg-blue-700 text-white"
-
-                        :
-
-                        "bg-gray-200 hover:bg-gray-300"
-                      }
-                    `}
-                  >
-
-                    {slot}
-
-                  </button>
-
-                )
-              )
-
-            }
-
+              {availableTimes.map((time) => (
+                <option
+                  key={time}
+                  value={time}
+                >
+                  {time}
+                </option>
+              ))}
+            </select>
           </div>
 
           <button
-            onClick={createBooking}
-
             className="
               w-full
-              bg-blue-700
-              hover:bg-blue-800
+              h-20
+              bg-[#2146e8]
               text-white
-              rounded-2xl
-              p-5
-              text-2xl
+              rounded-3xl
+              text-3xl
               font-bold
+              shadow-xl
             "
           >
-
             تأكيد الحجز
-
           </button>
 
         </div>
 
       </div>
 
-    </div>
+    </main>
   );
 }
