@@ -1,143 +1,84 @@
+"use client";
+
 import "./globals.css";
-
 import Link from "next/link";
-
-export const metadata = {
-  title: "Clinic CRM",
-  description: "Dental Clinic System",
-  manifest: "/manifest.json",
-};
+import { usePathname } from "next/navigation";
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  const navItems = [
+    {
+      name: "الرئيسية",
+      icon: "🏠",
+      href: "/",
+    },
+    {
+      name: "الحجوزات",
+      icon: "📅",
+      href: "/booking",
+    },
+    {
+      name: "المرضى",
+      icon: "👥",
+      href: "/patients",
+    },
+    {
+      name: "الأطباء",
+      icon: "🧑‍⚕️",
+      href: "/doctors",
+    },
+    {
+      name: "الإعدادات",
+      icon: "⚙️",
+      href: "/settings",
+    },
+  ];
 
   return (
+    <html lang="ar" dir="rtl">
+      <body className="bg-[#0b1b55] text-white min-h-screen">
 
-    <html lang="ar">
-
-      <body
-        className="
-          bg-gray-100
-          min-h-screen
-        "
-      >
-
-        <div
-          className="
-            min-h-screen
-            pb-24
-          "
-        >
-
+        <div className="pb-24">
           {children}
-
         </div>
 
-        <nav
-          className="
-            fixed
-            bottom-0
-            left-0
-            right-0
-            bg-white
-            border-t
-            shadow-2xl
-            z-50
-          "
-        >
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t z-50">
+          <div className="grid grid-cols-5">
 
-          <div
-            className="
-              grid
-              grid-cols-5
-              text-center
-            "
-          >
+            {navItems.map((item) => {
+              const active = pathname === item.href;
 
-            <Link
-              href="/"
-              className="
-                p-3
-                text-sm
-                font-bold
-                text-gray-700
-              "
-            >
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex flex-col items-center justify-center py-3 text-sm transition
+                  ${
+                    active
+                      ? "text-blue-600 font-bold"
+                      : "text-gray-700"
+                  }`}
+                >
+                  <span className="text-2xl">
+                    {item.icon}
+                  </span>
 
-              🏠
-              <div>الرئيسية</div>
-
-            </Link>
-
-            <Link
-              href="/calendar"
-              className="
-                p-3
-                text-sm
-                font-bold
-                text-gray-700
-              "
-            >
-
-              📅
-              <div>الحجوزات</div>
-
-            </Link>
-
-            <Link
-              href="/patients"
-              className="
-                p-3
-                text-sm
-                font-bold
-                text-gray-700
-              "
-            >
-
-              👥
-              <div>المرضى</div>
-
-            </Link>
-
-            <Link
-              href="/doctors"
-              className="
-                p-3
-                text-sm
-                font-bold
-                text-gray-700
-              "
-            >
-
-              👨‍⚕️
-              <div>الأطباء</div>
-
-            </Link>
-
-            <Link
-              href="/settings"
-              className="
-                p-3
-                text-sm
-                font-bold
-                text-gray-700
-              "
-            >
-
-              ⚙️
-              <div>الإعدادات</div>
-
-            </Link>
+                  <span className="mt-1">
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
 
           </div>
-
         </nav>
 
       </body>
-
     </html>
   );
 }
