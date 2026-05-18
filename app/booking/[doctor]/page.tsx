@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type Props = {
   params: Promise<{
@@ -45,13 +45,47 @@ export default function DoctorBookingPage(
     "قلع",
   ];
 
-  const availableTimes = [
+  const allTimes = [
     "10:00 AM",
     "11:00 AM",
     "12:00 PM",
     "01:00 PM",
     "02:00 PM",
   ];
+
+  const bookings =
+    JSON.parse(
+      localStorage.getItem(
+        "bookings"
+      ) || "[]"
+    );
+
+  const unavailableTimes =
+    bookings
+
+      .filter(
+        (booking:any)=>
+
+          booking.doctorName ===
+          doctorName
+
+          &&
+
+          booking.date === date
+      )
+
+      .map(
+        (booking:any)=>
+          booking.time
+      );
+
+  const availableTimes =
+    allTimes.filter(
+      (time)=>
+        !unavailableTimes.includes(
+          time
+        )
+    );
 
   const createBooking = () => {
 
@@ -442,6 +476,32 @@ export default function DoctorBookingPage(
             </select>
 
           </div>
+
+          {
+
+            date !== ""
+            &&
+            availableTimes.length === 0
+
+            &&
+
+            <div
+              className="
+                bg-red-100
+                text-red-600
+                rounded-2xl
+                p-5
+                text-center
+                font-bold
+                mb-6
+              "
+            >
+
+              لا توجد أوقات شاغرة بهذا اليوم
+
+            </div>
+
+          }
 
           <button
 
