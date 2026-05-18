@@ -164,6 +164,7 @@ export default function CalendarPage() {
                     className="
                       grid
                       gap-4
+                      mb-5
                     "
                   >
 
@@ -248,6 +249,30 @@ export default function CalendarPage() {
                     </div>
 
                   </div>
+
+                  <a
+
+                    href={`https://wa.me/${booking.phone}`}
+
+                    target="_blank"
+
+                    className="
+                      w-full
+                      h-16
+                      bg-green-500
+                      text-white
+                      rounded-3xl
+                      flex
+                      items-center
+                      justify-center
+                      text-2xl
+                      font-bold
+                    "
+                  >
+
+                    💬 واتساب
+
+                  </a>
 
                 </div>
 
