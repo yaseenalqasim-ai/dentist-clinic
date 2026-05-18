@@ -1,63 +1,38 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState
-} from "react";
-
-import {
-  collection,
-  onSnapshot,
-} from "firebase/firestore";
-
-import { db } from "@/lib/firebase";
+import { useEffect, useState } from "react";
 
 export default function PatientsPage() {
 
-  const [bookings, setBookings] =
+  const [patients, setPatients] =
     useState<any[]>([]);
 
   useEffect(() => {
 
-    const unsubscribe =
-      onSnapshot(
-
-        collection(db, "bookings"),
-
-        (snapshot) => {
-
-          const data =
-            snapshot.docs.map(
-              (doc) => ({
-                id: doc.id,
-                ...doc.data(),
-              })
-            );
-
-          setBookings(data);
-
-        }
+    const bookings =
+      JSON.parse(
+        localStorage.getItem(
+          "bookings"
+        ) || "[]"
       );
 
-    return () => unsubscribe();
+    const uniquePatients =
+      bookings.reduce(
+        (
+          acc:any[],
+          booking:any
+        ) => {
 
-  }, []);
+          const exists =
+            acc.find(
+              (patient)=>
+                patient.phone ===
+                booking.phone
+            );
 
-  const patients =
-    useMemo(() => {
+          if (!exists) {
 
-      const grouped:any = {};
-
-      bookings.forEach(
-        (booking:any) => {
-
-          const key =
-            booking.phone;
-
-          if (!grouped[key]) {
-
-            grouped[key] = {
+            acc.push({
               patientName:
                 booking.patientName,
 
@@ -67,50 +42,44 @@ export default function PatientsPage() {
               doctorName:
                 booking.doctorName,
 
-              lastBooking:
+              service:
+                booking.service,
+
+              lastVisit:
                 booking.date,
-
-              bookingType:
-                booking.bookingType,
-
-              count: 1,
-            };
-
-          } else {
-
-            grouped[key].count += 1;
-
-            grouped[key].lastBooking =
-              booking.date;
+            });
 
           }
 
-        }
+          return acc;
+
+        },
+        []
       );
 
-      return Object.values(grouped);
+    setPatients(uniquePatients);
 
-    }, [bookings]);
+  }, []);
 
   return (
 
-    <div
+    <main
       className="
         min-h-screen
-        bg-gray-100
-        p-5
+        bg-[#f3f3f3]
+        p-4
+        pb-32
       "
-      dir="rtl"
     >
 
       <div
         className="
-          bg-blue-700
+          bg-[#2146e8]
           text-white
-          rounded-3xl
+          rounded-[35px]
           p-6
-          shadow-xl
           mb-6
+          shadow-2xl
         "
       >
 
@@ -119,20 +88,23 @@ export default function PatientsPage() {
             text-4xl
             font-bold
             mb-2
+            text-right
           "
         >
 
-          المرضى
+          👥 المرضى
 
         </h1>
 
         <p
           className="
-            text-blue-100
+            text-right
+            text-gray-200
+            text-lg
           "
         >
 
-          سجل المرضى داخل العيادة
+          جميع مرضى العيادة
 
         </p>
 
@@ -147,9 +119,10 @@ export default function PatientsPage() {
         <div
           className="
             bg-white
-            rounded-3xl
+            rounded-[35px]
             p-10
             text-center
+            text-2xl
             shadow-xl
           "
         >
@@ -162,8 +135,7 @@ export default function PatientsPage() {
 
         <div
           className="
-            grid
-            gap-5
+            space-y-5
           "
         >
 
@@ -171,84 +143,41 @@ export default function PatientsPage() {
 
             patients.map(
               (
-                patient:any,
-                index:number
+                patient,
+                index
               )=>(
 
                 <div
+
                   key={index}
 
                   className="
                     bg-white
-                    rounded-3xl
-                    p-6
-                    shadow-xl
+                    rounded-[35px]
+                    p-5
+                    shadow-2xl
                   "
                 >
 
                   <div
                     className="
-                      flex
-                      justify-between
-                      items-start
+                      text-2xl
+                      font-bold
+                      text-[#2146e8]
+                      text-right
                       mb-5
                     "
                   >
 
-                    <div>
-
-                      <div
-                        className="
-                          text-2xl
-                          font-bold
-                          text-blue-700
-                        "
-                      >
-
-                        👤 {
-                          patient.patientName
-                        }
-
-                      </div>
-
-                      <div
-                        className="
-                          text-gray-500
-                          mt-1
-                        "
-                      >
-
-                        📞 {
-                          patient.phone
-                        }
-
-                      </div>
-
-                    </div>
-
-                    <div
-                      className="
-                        bg-blue-100
-                        text-blue-700
-                        px-4
-                        py-2
-                        rounded-full
-                        font-bold
-                      "
-                    >
-
-                      {
-                        patient.count
-                      } زيارة
-
-                    </div>
+                    👤 {
+                      patient.patientName
+                    }
 
                   </div>
 
                   <div
                     className="
                       grid
-                      md:grid-cols-3
                       gap-4
                     "
                   >
@@ -258,23 +187,14 @@ export default function PatientsPage() {
                         bg-gray-100
                         rounded-2xl
                         p-4
+                        text-lg
+                        text-right
                       "
                     >
 
-                      👨‍⚕️ الطبيب
-
-                      <div
-                        className="
-                          font-bold
-                          mt-2
-                        "
-                      >
-
-                        {
-                          patient.doctorName
-                        }
-
-                      </div>
+                      📞 {
+                        patient.phone
+                      }
 
                     </div>
 
@@ -283,23 +203,14 @@ export default function PatientsPage() {
                         bg-gray-100
                         rounded-2xl
                         p-4
+                        text-lg
+                        text-right
                       "
                     >
 
-                      🦷 آخر حجز
-
-                      <div
-                        className="
-                          font-bold
-                          mt-2
-                        "
-                      >
-
-                        {
-                          patient.bookingType
-                        }
-
-                      </div>
+                      👨‍⚕️ {
+                        patient.doctorName
+                      }
 
                     </div>
 
@@ -308,23 +219,30 @@ export default function PatientsPage() {
                         bg-gray-100
                         rounded-2xl
                         p-4
+                        text-lg
+                        text-right
                       "
                     >
 
-                      📅 آخر زيارة
+                      🦷 {
+                        patient.service
+                      }
 
-                      <div
-                        className="
-                          font-bold
-                          mt-2
-                        "
-                      >
+                    </div>
 
-                        {
-                          patient.lastBooking
-                        }
+                    <div
+                      className="
+                        bg-gray-100
+                        rounded-2xl
+                        p-4
+                        text-lg
+                        text-right
+                      "
+                    >
 
-                      </div>
+                      📅 {
+                        patient.lastVisit
+                      }
 
                     </div>
 
@@ -341,6 +259,6 @@ export default function PatientsPage() {
 
       }
 
-    </div>
+    </main>
   );
 }
