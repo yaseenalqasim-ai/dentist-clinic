@@ -1,32 +1,22 @@
 {
-  "name": "Dental Clinic System",
+  "name": "Clinic CRM",
   "short_name": "Clinic",
-  "description": "نظام احترافي لإدارة عيادة الأسنان",
+  "description": "Dental Clinic System",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#071739",
-  "theme_color": "#071739",
+  "background_color": "#0f172a",
+  "theme_color": "#1d4ed8",
   "orientation": "portrait",
-  "lang": "ar",
-  "dir": "rtl",
-  "scope": "/",
-  "categories": [
-    "medical",
-    "health",
-    "business"
-  ],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
