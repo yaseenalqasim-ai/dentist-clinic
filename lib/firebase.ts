@@ -1,51 +1,50 @@
-import {
-  initializeApp
-} from "firebase/app";
+import { initializeApp, getApps }
+from "firebase/app";
 
-import {
-  getFirestore
-} from "firebase/firestore";
+import { getAuth }
+from "firebase/auth";
 
-import {
-  getAuth
-} from "firebase/auth";
-
-import {
-  getStorage
-} from "firebase/storage";
+import { getFirestore }
+from "firebase/firestore";
 
 const firebaseConfig = {
 
   apiKey:
-    "AIzaSyCIZdUmSX15w0CACuW4vfz9npsUi-L3lbg",
+    "AIzaSyBqsJEnwlE0fyswrU6_s8_SU1d3zH_GfRE",
 
   authDomain:
-    "dentist-clinic-476ac.firebaseapp.com",
+    "dentist-clinic-2.firebaseapp.com",
 
   projectId:
-    "dentist-clinic-476ac",
+    "dentist-clinic-2",
 
   storageBucket:
-    "dentist-clinic-476ac.firebasestorage.app",
+    "dentist-clinic-2.firebasestorage.app",
 
   messagingSenderId:
-    "1013681862841",
+    "876641399120",
 
   appId:
-    "1:1013681862841:web:86643c3f3fa926389a8368",
+    "1:876641399120:web:78d4295d39ac42be55bc55"
 
-  measurementId:
-    "G-FW5T2FJ29R"
 };
 
 const app =
-  initializeApp(firebaseConfig);
 
-export const db =
-  getFirestore(app);
+  getApps().length
+
+  ?
+
+  getApps()[0]
+
+  :
+
+  initializeApp(
+    firebaseConfig
+  );
 
 export const auth =
   getAuth(app);
 
-export const storage =
-  getStorage(app);
+export const db =
+  getFirestore(app);

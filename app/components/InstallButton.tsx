@@ -61,11 +61,15 @@ export default function LiveCounter({
 
   return(
 
-    <span>
+   <span>
 
-      {count}
+  {String(
+    isNaN(count)
+      ? 0
+      : count
+  )}
 
-    </span>
+</span>
 
   );
 

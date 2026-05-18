@@ -1,277 +1,219 @@
 "use client";
 
-import {
-  useEffect,
-  useState
-} from "react";
+import Link from "next/link";
 
-import Layout
-from "./components/Layout";
+export default function HomePage() {
 
-import LiveCounter
-from "./components/LiveCounter";
+  return (
 
-import {
-  collection,
-  onSnapshot
-} from "firebase/firestore";
-
-import {
-  db
-} from "../lib/firebase";
-
-export default function HomePage(){
-
-  const [
-    totalPatients,
-    setTotalPatients
-  ] = useState(0);
-
-  const [
-    completed,
-    setCompleted
-  ] = useState(0);
-
-  const [
-    cancelled,
-    setCancelled
-  ] = useState(0);
-
-  useEffect(()=>{
-
-    const unsubscribe =
-      onSnapshot(
-
-        collection(
-          db,
-          "bookings"
-        ),
-
-        (snapshot)=>{
-
-          const data:any[] = [];
-
-          snapshot.forEach((doc)=>{
-
-            data.push(
-              doc.data()
-            );
-
-          });
-
-          setTotalPatients(
-            data.length
-          );
-
-          setCompleted(
-
-            data.filter(
-              (item)=>
-
-                item.status ===
-                "🟢 تم التنفيذ"
-
-            ).length
-
-          );
-
-          setCancelled(
-
-            data.filter(
-              (item)=>
-
-                item.status ===
-                "🔴 حجز ملغي"
-
-            ).length
-
-          );
-
-        }
-
-      );
-
-    return ()=>unsubscribe();
-
-  },[]);
-
-  return(
-
-    <Layout
-      title="🏠 لوحة التحكم"
+    <div
+      className="
+        min-h-screen
+        bg-gradient-to-b
+        from-blue-950
+        to-blue-900
+        p-4
+      "
+      dir="rtl"
     >
 
-      {/* STATS */}
-
       <div
-        style={statsGrid}
+        className="
+          bg-white/10
+          backdrop-blur-md
+          rounded-3xl
+          p-6
+          text-white
+          shadow-2xl
+          mb-6
+        "
       >
 
-        <div style={cardStyle}>
+        <h1
+          className="
+            text-4xl
+            font-bold
+            mb-2
+          "
+        >
 
-          <h2>
-            👥 المرضى
-          </h2>
+          🏥 لوحة التحكم
 
-          <h1>
+        </h1>
 
-            <LiveCounter
-              value={
-                totalPatients
-              }
-            />
+        <p
+          className="
+            text-blue-100
+            text-lg
+          "
+        >
 
-          </h1>
+          إدارة العيادة الطبية
+
+        </p>
+
+      </div>
+
+      <div
+        className="
+          grid
+          grid-cols-2
+          gap-4
+          mb-6
+        "
+      >
+
+        <div
+          className="
+            bg-white/10
+            backdrop-blur-md
+            rounded-3xl
+            p-6
+            text-center
+            text-white
+            shadow-xl
+          "
+        >
+
+          <div className="text-5xl mb-3">
+            👥
+          </div>
+
+          <div className="text-3xl font-bold">
+            المرضى
+          </div>
 
         </div>
 
-        <div style={cardStyle}>
+        <div
+          className="
+            bg-white/10
+            backdrop-blur-md
+            rounded-3xl
+            p-6
+            text-center
+            text-white
+            shadow-xl
+          "
+        >
 
-          <h2>
-            🟢 المكتملة
-          </h2>
+          <div className="text-5xl mb-3">
+            📅
+          </div>
 
-          <h1>
-
-            <LiveCounter
-              value={
-                completed
-              }
-            />
-
-          </h1>
-
-        </div>
-
-        <div style={cardStyle}>
-
-          <h2>
-            🔴 الملغية
-          </h2>
-
-          <h1>
-
-            <LiveCounter
-              value={
-                cancelled
-              }
-            />
-
-          </h1>
+          <div className="text-3xl font-bold">
+            الحجوزات
+          </div>
 
         </div>
 
       </div>
 
-      {/* ACTIONS */}
-
       <div
-        style={actionsGrid}
+        className="
+          grid
+          gap-4
+        "
       >
 
-        <a
+        <Link
           href="/booking"
-          style={buttonStyle}
+          className="
+            bg-blue-600
+            hover:bg-blue-700
+            transition
+            rounded-3xl
+            p-6
+            text-white
+            text-2xl
+            font-bold
+            shadow-2xl
+            text-center
+          "
         >
 
           📅 حجز موعد
 
-        </a>
+        </Link>
 
-        <a
-          href="/doctor"
-          style={buttonStyle}
-        >
-
-          👨‍⚕️ لوحة الدكتور
-
-        </a>
-
-        <a
-          href="/secretary"
-          style={buttonStyle}
-        >
-
-          🧾 لوحة السكرتير
-
-        </a>
-
-        <a
+        <Link
           href="/calendar"
-          style={buttonStyle}
+          className="
+            bg-white/10
+            backdrop-blur-md
+            rounded-3xl
+            p-6
+            text-white
+            text-2xl
+            font-bold
+            shadow-2xl
+            text-center
+          "
         >
 
-          📆 التقويم
+          🗓️ التقويم
 
-        </a>
+        </Link>
+
+        <Link
+          href="/patients"
+          className="
+            bg-white/10
+            backdrop-blur-md
+            rounded-3xl
+            p-6
+            text-white
+            text-2xl
+            font-bold
+            shadow-2xl
+            text-center
+          "
+        >
+
+          👥 المرضى
+
+        </Link>
+
+        <Link
+          href="/doctors"
+          className="
+            bg-white/10
+            backdrop-blur-md
+            rounded-3xl
+            p-6
+            text-white
+            text-2xl
+            font-bold
+            shadow-2xl
+            text-center
+          "
+        >
+
+          👨‍⚕️ الأطباء
+
+        </Link>
+
+        <Link
+          href="/settings"
+          className="
+            bg-white/10
+            backdrop-blur-md
+            rounded-3xl
+            p-6
+            text-white
+            text-2xl
+            font-bold
+            shadow-2xl
+            text-center
+          "
+        >
+
+          ⚙️ الإعدادات
+
+        </Link>
 
       </div>
 
-    </Layout>
-
+    </div>
   );
-
 }
-
-const statsGrid:any = {
-
-  display:"grid",
-
-  gridTemplateColumns:
-    "repeat(auto-fit,minmax(250px,1fr))",
-
-  gap:"20px",
-
-  marginBottom:"30px"
-};
-
-const actionsGrid:any = {
-
-  display:"grid",
-
-  gridTemplateColumns:
-    "repeat(auto-fit,minmax(220px,1fr))",
-
-  gap:"20px"
-};
-
-const cardStyle:any = {
-
-  background:
-    "rgba(255,255,255,0.08)",
-
-  padding:"30px",
-
-  borderRadius:"25px",
-
-  backdropFilter:
-    "blur(10px)",
-
-  textAlign:"center",
-
-  border:
-    "1px solid rgba(255,255,255,0.1)"
-};
-
-const buttonStyle:any = {
-
-  background:
-    "#2563eb",
-
-  color:"white",
-
-  padding:"24px",
-
-  borderRadius:"22px",
-
-  textDecoration:"none",
-
-  textAlign:"center",
-
-  fontSize:"22px",
-
-  fontWeight:"bold",
-
-  border:
-    "1px solid rgba(255,255,255,0.15)"
-};

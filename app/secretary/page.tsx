@@ -1,937 +1,215 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState
+}
+from "react";
 
 import {
-  initializeApp
-} from "firebase/app";
-
-import {
-  getFirestore,
   collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  updateDoc,
-  onSnapshot
-} from "firebase/firestore";
+  getDocs
+}
+from "firebase/firestore";
 
-const firebaseConfig = {
+import {
+  db
+}
+from "@/lib/firebase";
 
-  apiKey:
-    "AIzaSyCIZdUmSX15w0CACuW4vfz9npsUi-L3lbg",
+export default function SecretaryPage(){
 
-  authDomain:
-    "dentist-clinic-476ac.firebaseapp.com",
+  const [
+    loading,
+    setLoading
+  ] = useState(true);
 
-  projectId:
-    "dentist-clinic-476ac",
+  const [
+    patients,
+    setPatients
+  ] = useState<any[]>([]);
 
-  storageBucket:
-    "dentist-clinic-476ac.firebasestorage.app",
-
-  messagingSenderId:
-    "1013681862841",
-
-  appId:
-    "1:1013681862841:web:86643c3f3fa926389a8368",
-
-  measurementId:
-    "G-FW5T2FJ29R"
-};
-
-const app =
-  initializeApp(firebaseConfig);
-
-const db =
-  getFirestore(app);
-
-export default function SecretaryPage() {
-
-  const [patients, setPatients] =
-    useState<any[]>([]);
-
-  const [showForm, setShowForm] =
-    useState(false);
-
-  const [darkMode, setDarkMode] =
-    useState(false);
-
-  const [search, setSearch] =
-    useState("");
-
-  const [selectedDate, setSelectedDate] =
-    useState("");
-
-  const [editingId, setEditingId] =
-    useState("");
-
-  const [form, setForm] = useState({
-
-    name: "",
-
-    phone: "",
-
-    review: "",
-
-    visitType: "",
-
-    disease: "",
-
-    complaint: "",
-
-    date: "",
-
-    status:
-      "🔵 حجز مُثبت",
-
-    notes: ""
-  });
-
-  useEffect(() => {
-
-    const role =
-      localStorage.getItem("role");
-
-    if (role !== "secretary") {
-
-      window.location.href =
-        "/login";
-
-    }
-
-    const savedTheme =
-      localStorage.getItem("theme");
-
-    if (savedTheme === "dark") {
-
-      setDarkMode(true);
-
-    }
+  useEffect(()=>{
 
     loadPatients();
 
-  }, []);
+  },[]);
 
-  useEffect(() => {
+  async function loadPatients(){
 
-    localStorage.setItem(
-      "theme",
-      darkMode ? "dark" : "light"
-    );
+    try{
 
-  }, [darkMode]);
+      const snapshot =
 
-  function loadPatients() {
-
-    onSnapshot(
-      collection(db, "bookings"),
-      (snapshot) => {
-
-        const data: any[] = [];
-
-        snapshot.forEach((docItem) => {
-
-          data.push({
-            id: docItem.id,
-            ...docItem.data()
-          });
-
-        });
-
-        data.sort((a, b) =>
-          a.date.localeCompare(b.date)
+        await getDocs(
+          collection(
+            db,
+            "patients"
+          )
         );
 
-        setPatients(data);
+      const data =
 
-      }
-    );
+        snapshot.docs.map(
+          doc=>({
 
-  }
+            id:doc.id,
 
-  async function savePatient() {
+            ...doc.data()
+          })
+        );
 
-    if (
-      patients.some(
-        (p) =>
-          p.date === form.date &&
-          p.id !== editingId
-      )
-    ) {
+      setPatients(data);
 
-      alert(
-        "يوجد حجز بنفس الموعد"
-      );
+    }catch(error){
 
-      return;
-    }
+      console.log(error);
 
-    if (editingId) {
+    }finally{
 
-      await updateDoc(
-        doc(
-          db,
-          "bookings",
-          editingId
-        ),
-        form
-      );
-
-    } else {
-
-      await addDoc(
-        collection(
-          db,
-          "bookings"
-        ),
-        form
-      );
+      setLoading(false);
 
     }
 
-    setForm({
-
-      name: "",
-
-      phone: "",
-
-      review: "",
-
-      visitType: "",
-
-      disease: "",
-
-      complaint: "",
-
-      date: "",
-
-      status:
-        "🔵 حجز مُثبت",
-
-      notes: ""
-    });
-
-    setEditingId("");
-
-    setShowForm(false);
-
   }
 
-  async function deletePatient(
-    id: string
-  ) {
-
-    await deleteDoc(
-      doc(db, "bookings", id)
-    );
-
-  }
-
-  function editPatient(
-    patient: any
-  ) {
-
-    setForm(patient);
-
-    setEditingId(patient.id);
-
-    setShowForm(true);
-
-  }
-
-  function logout() {
-
-    localStorage.removeItem(
-      "role"
-    );
-
-    window.location.href =
-      "/login";
-
-  }
-
-  const filteredPatients =
-    patients.filter((patient) => {
-
-      const matchesSearch =
-
-        patient.name
-          ?.includes(search)
-
-        ||
-
-        patient.phone
-          ?.includes(search)
-
-        ||
-
-        patient.review
-          ?.includes(search)
-
-        ||
-
-        patient.visitType
-          ?.includes(search);
-
-      const matchesDate =
-
-        selectedDate === ""
-
-        ||
-
-        patient.date ===
-        selectedDate;
-
-      return (
-        matchesSearch &&
-        matchesDate
-      );
-
-    });
-
-  return (
+  return(
 
     <main
       dir="rtl"
 
       style={{
-        minHeight: "100vh",
+        minHeight:"100vh",
 
-        background:
-          darkMode
-            ? "#071739"
-            : "#f3f3f3",
+        background:"#f3f6fb",
 
-        color:
-          darkMode
-            ? "white"
-            : "black",
-
-        padding: "20px"
+        padding:"20px"
       }}
     >
 
-      <div
+      <h1
         style={{
-          display: "flex",
+          fontSize:"34px",
 
-          justifyContent:
-            "space-between",
-
-          alignItems: "center"
+          marginBottom:"20px"
         }}
       >
 
-        <h1>
-          📅 واجهة السكرتيرة
-        </h1>
+        🧑‍💼 لوحة السكرتير
 
-        <div
-          style={{
-            display: "flex",
-            gap: "10px"
-          }}
-        >
+      </h1>
 
-          <button
-            onClick={() =>
-              setDarkMode(!darkMode)
-            }
+      {
 
+        loading
+
+        ?
+
+        (
+
+          <div>
+
+            جاري التحميل...
+
+          </div>
+
+        )
+
+        :
+
+        (
+
+          <div
             style={{
-              width: "60px",
+              display:"grid",
 
-              height: "60px",
-
-              borderRadius:
-                "50%",
-
-              border: "none",
-
-              fontSize: "24px"
+              gap:"14px"
             }}
           >
-            {darkMode ? "☀️" : "🌙"}
-          </button>
 
-          <button
-            onClick={logout}
+            {
 
-            style={{
-              background: "red",
+              patients.length === 0
 
-              color: "white",
+              ?
 
-              border: "none",
+              (
 
-              padding: "12px",
-
-              borderRadius:
-                "12px"
-            }}
-          >
-            تسجيل خروج
-          </button>
-
-        </div>
-
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-
-          gap: "15px",
-
-          marginTop: "25px"
-        }}
-      >
-
-        <button
-          onClick={() =>
-            setShowForm(true)
-          }
-
-          style={{
-            background:
-              "#2563eb",
-
-            color: "white",
-
-            border: "none",
-
-            padding: "18px",
-
-            borderRadius:
-              "15px",
-
-            fontSize: "20px"
-          }}
-        >
-          + إضافة حجز
-        </button>
-
-        <input
-          placeholder=
-            "البحث عن حجز.."
-
-          value={search}
-
-          onChange={(e) =>
-            setSearch(
-              e.target.value
-            )
-          }
-
-          style={{
-            padding: "15px",
-
-            borderRadius:
-              "12px",
-
-            border:
-              "1px solid #ccc",
-
-            fontSize: "18px",
-
-            color: "black"
-          }}
-        />
-
-        <input
-          type="date"
-
-          value={selectedDate}
-
-          onChange={(e) =>
-            setSelectedDate(
-              e.target.value
-            )
-          }
-
-          style={{
-            padding: "15px",
-
-            borderRadius:
-              "12px",
-
-            border:
-              "1px solid #ccc",
-
-            fontSize: "18px",
-
-            color: "black"
-          }}
-        />
-
-      </div>
-
-      {showForm && (
-
-        <div
-          style={{
-            marginTop: "20px",
-
-            background:
-              darkMode
-                ? "#102542"
-                : "white",
-
-            padding: "20px",
-
-            borderRadius:
-              "20px"
-          }}
-        >
-
-          <input
-            placeholder=
-              "👤 اسم المريض"
-
-            value={form.name}
-
-            onChange={(e) =>
-              setForm({
-                ...form,
-                name:
-                  e.target.value
-              })
-            }
-
-            style={inputStyle}
-          />
-
-          <input
-            placeholder=
-              "📞 رقم المريض"
-
-            value={form.phone}
-
-            onChange={(e) =>
-              setForm({
-                ...form,
-                phone:
-                  e.target.value
-              })
-            }
-
-            style={inputStyle}
-          />
-
-          <select
-            value={form.review}
-
-            onChange={(e) =>
-              setForm({
-                ...form,
-                review:
-                  e.target.value
-              })
-            }
-
-            style={inputStyle}
-          >
-
-            <option value="">
-              🦷 نوع المراجعة
-            </option>
-
-            <option>
-              زيارة أولى
-            </option>
-
-            <option>
-              مراجعة
-            </option>
-
-            <option>
-              إكمال علاج
-            </option>
-
-            <option>
-              طوارئ
-            </option>
-
-            <option>
-              مراجعة بعد قلع
-            </option>
-
-            <option>
-              جلسة تقويم
-            </option>
-
-          </select>
-
-          {form.review ===
-            "زيارة أولى" && (
-
-            <select
-              value={form.visitType}
-
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  visitType:
-                    e.target.value
-                })
-              }
-
-              style={inputStyle}
-            >
-
-              <option value="">
-                🦷 نوع الزيارة
-              </option>
-
-              <option>
-                كشف
-              </option>
-
-              <option>
-                تنظيف
-              </option>
-
-              <option>
-                قلع
-              </option>
-
-              <option>
-                علاج عصب
-              </option>
-
-              <option>
-                تقويم
-              </option>
-
-              <option>
-                زراعة
-              </option>
-
-              <option>
-                تجميل
-              </option>
-
-            </select>
-
-          )}
-
-          <select
-            value={form.disease}
-
-            onChange={(e) =>
-              setForm({
-                ...form,
-                disease:
-                  e.target.value
-              })
-            }
-
-            style={inputStyle}
-          >
-
-            <option value="">
-              🚨 الأمراض المزمنة
-            </option>
-
-            <option>
-              لا يوجد
-            </option>
-
-            <option>
-              سكري
-            </option>
-
-            <option>
-              ضغط
-            </option>
-
-            <option>
-              أمراض قلب
-            </option>
-
-            <option>
-              مميعات دم
-            </option>
-
-            <option>
-              حساسية بنج أو بنسلين
-            </option>
-
-            <option>
-              حمل
-            </option>
-
-            <option>
-              أخرى
-            </option>
-
-          </select>
-
-          <input
-            placeholder=
-              "❗ الشكوى الرئيسية"
-
-            value={form.complaint}
-
-            onChange={(e) =>
-              setForm({
-                ...form,
-                complaint:
-                  e.target.value
-              })
-            }
-
-            style={inputStyle}
-          />
-
-          <input
-            type="datetime-local"
-
-            value={form.date}
-
-            onChange={(e) =>
-              setForm({
-                ...form,
-                date:
-                  e.target.value
-              })
-            }
-
-            style={inputStyle}
-          />
-
-          <button
-            onClick={savePatient}
-
-            style={{
-              width: "100%",
-
-              background:
-                "#7c3aed",
-
-              color: "white",
-
-              border: "none",
-
-              padding: "18px",
-
-              borderRadius:
-                "14px",
-
-              fontSize: "20px"
-            }}
-          >
-            حفظ الحجز
-          </button>
-
-        </div>
-
-      )}
-
-      <div
-        style={{
-          marginTop: "30px"
-        }}
-      >
-
-        {filteredPatients.map(
-          (patient) => (
-
-            <div
-              key={patient.id}
-
-              style={{
-
-                background:
-
-                  patient.status ===
-                  "🟢 تم التنفيذ"
-
-                    ? "#14532d"
-
-                  :
-
-                  patient.status ===
-                  "🔴 حجز ملغي"
-
-                    ? "#7f1d1d"
-
-                  :
-
-                  patient.status ===
-                  "🟡 حجز مؤجل"
-
-                    ? "#713f12"
-
-                  :
-
-                  darkMode
-                    ? "#102542"
-                    : "white",
-
-                padding: "20px",
-
-                borderRadius:
-                  "20px",
-
-                marginBottom:
-                  "20px"
-              }}
-            >
-
-              <h2>
-                👤
-                {" "}
-                {patient.name}
-              </h2>
-
-              <h2>
-                📞
-                {" "}
-                {patient.phone}
-              </h2>
-
-              <h2>
-                🦷
-                {" "}
-                {patient.review}
-
-                {patient.visitType &&
-                  ` ← ${patient.visitType}`}
-              </h2>
-
-              <h2>
-                🚨
-                {" "}
-                {patient.disease}
-              </h2>
-
-              <h2>
-                ❗
-                {" "}
-                {patient.complaint}
-              </h2>
-
-              <h2>
-                🗓️
-                {" "}
-                {patient.date}
-              </h2>
-
-              <div
-                style={{
-                  display: "flex",
-
-                  gap: "10px",
-
-                  marginTop: "20px"
-                }}
-              >
-
-                <a
-                  href={`https://wa.me/${patient.phone}`}
-
-                  target="_blank"
-
+                <div
                   style={{
-                    flex: 1,
+                    background:"white",
 
-                    background:
-                      "#22c55e",
+                    padding:"20px",
 
-                    color: "white",
-
-                    padding:
-                      "15px",
-
-                    borderRadius:
-                      "12px",
-
-                    textAlign:
-                      "center",
-
-                    textDecoration:
-                      "none"
+                    borderRadius:"20px"
                   }}
                 >
-                  واتساب
-                </a>
 
-                <button
-                  onClick={() =>
-                    editPatient(
-                      patient
-                    )
-                  }
+                  لا يوجد مرضى حاليًا
 
-                  style={{
-                    flex: 1,
+                </div>
 
-                    background:
-                      "#2563eb",
+              )
 
-                    color: "white",
+              :
 
-                    border: "none",
+              (
 
-                    borderRadius:
-                      "12px"
-                  }}
-                >
-                  تعديل
-                </button>
+                patients.map(
+                  (patient:any)=>(
 
-                <button
-                  onClick={() =>
-                    deletePatient(
-                      patient.id
-                    )
-                  }
+                    <div
+                      key={patient.id}
 
-                  style={{
-                    flex: 1,
+                      style={{
+                        background:"white",
 
-                    background:
-                      "red",
+                        padding:"20px",
 
-                    color: "white",
+                        borderRadius:"20px",
 
-                    border: "none",
+                        boxShadow:
+                          "0 4px 14px rgba(0,0,0,0.06)"
+                      }}
+                    >
 
-                    borderRadius:
-                      "12px"
-                  }}
-                >
-                  حذف
-                </button>
+                      <div
+                        style={{
+                          fontWeight:"bold",
 
-              </div>
+                          fontSize:"20px",
 
-            </div>
+                          marginBottom:"8px"
+                        }}
+                      >
 
-          )
-        )}
+                        {patient.name || "مريض"}
 
-      </div>
+                      </div>
+
+                      <div>
+
+                        📞 {patient.phone || "-"}
+
+                      </div>
+
+                    </div>
+
+                  )
+                )
+
+              )
+
+            }
+
+          </div>
+
+        )
+
+      }
 
     </main>
 
   );
 
 }
-
-const inputStyle = {
-
-  width: "100%",
-
-  marginBottom: "15px",
-
-  padding: "15px",
-
-  borderRadius: "12px",
-
-  border: "1px solid #ccc",
-
-  fontSize: "18px"
-};

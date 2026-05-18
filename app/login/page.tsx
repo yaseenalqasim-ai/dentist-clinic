@@ -1,167 +1,198 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useState
+} from "react";
 
-import { useRouter }
-from "next/navigation";
+import {
+  signInWithEmailAndPassword
+} from "firebase/auth";
 
-export default function LoginPage() {
+import {
+  useRouter
+} from "next/navigation";
+
+import {
+  auth
+} from "../../lib/firebase";
+
+export default function LoginPage(){
 
   const router =
     useRouter();
 
-  const [username, setUsername] =
-    useState("");
+  const [
+    email,
+    setEmail
+  ] = useState("");
 
-  const [password, setPassword] =
-    useState("");
+  const [
+    password,
+    setPassword
+  ] = useState("");
 
-  const [error, setError] =
-    useState("");
+  const [
+    loading,
+    setLoading
+  ] = useState(false);
 
-  useEffect(() => {
+  const [
+    error,
+    setError
+  ] = useState("");
 
-    const role =
-      localStorage.getItem("role");
+  async function login(){
 
-    if (role === "doctor") {
+    if(
+      !email ||
+      !password
+    ){
 
-      router.push("/doctor");
-
-    }
-
-    if (role === "secretary") {
-
-      router.push("/secretary");
-
-    }
-
-  }, []);
-
-  function login() {
-
-    // الدكتور
-    if (
-      username === "doctor" &&
-      password === "123456"
-    ) {
-
-      localStorage.setItem(
-        "role",
-        "doctor"
+      setError(
+        "يرجى تعبئة جميع الحقول"
       );
 
-      router.push("/doctor");
-
       return;
+
     }
 
-    // السكرتير
-    if (
-      username === "secretary" &&
-      password === "123456"
-    ) {
+    try{
 
-      localStorage.setItem(
-        "role",
-        "secretary"
+      setLoading(true);
+
+      setError("");
+
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
       );
 
-      router.push("/secretary");
+      router.replace(
+        "/dashboard"
+      );
 
-      return;
+    }catch(error:any){
+
+      console.error(error);
+
+      if(
+        error.code ===
+        "auth/invalid-credential"
+      ){
+
+        setError(
+          "البريد أو كلمة المرور غير صحيحة"
+        );
+
+      }else{
+
+        setError(
+          "حدث خطأ أثناء تسجيل الدخول"
+        );
+
+      }
+
+    }finally{
+
+      setLoading(false);
+
     }
-
-    setError(
-      "اسم المستخدم أو كلمة المرور خاطئة"
-    );
 
   }
 
-  return (
+  return(
 
     <main
       dir="rtl"
 
       style={{
-        minHeight: "100vh",
+        minHeight:"100vh",
 
         background:
-          "linear-gradient(to bottom,#071739,#102542)",
+          "linear-gradient(135deg,#2563eb,#1d4ed8)",
 
-        display: "flex",
+        display:"flex",
 
-        justifyContent: "center",
+        alignItems:"center",
 
-        alignItems: "center",
+        justifyContent:"center",
 
-        padding: "20px"
+        padding:"20px"
       }}
     >
 
       <div
         style={{
-          width: "100%",
+          width:"100%",
+          maxWidth:"420px",
 
-          maxWidth: "500px",
+          background:"white",
 
-          background:
-            "rgba(255,255,255,0.08)",
+          borderRadius:"30px",
 
-          backdropFilter:
-            "blur(10px)",
+          padding:"30px",
 
-          borderRadius: "30px",
-
-          padding: "40px",
-
-          color: "white"
+          boxShadow:
+            "0 20px 60px rgba(0,0,0,0.15)"
         }}
       >
 
-        <h1
+        <div
           style={{
-            textAlign: "center",
-
-            fontSize: "50px",
-
-            marginBottom: "10px"
+            textAlign:"center",
+            marginBottom:"30px"
           }}
         >
-
-          🦷 تسجيل الدخول
-
-        </h1>
-
-        <p
-          style={{
-            textAlign: "center",
-
-            color: "#ddd",
-
-            marginBottom: "30px",
-
-            fontSize: "20px"
-          }}
-        >
-
-          نظام إدارة العيادة
-
-        </p>
-
-        {error && (
 
           <div
             style={{
-              background: "#dc2626",
+              fontSize:"70px",
+              marginBottom:"14px"
+            }}
+          >
 
-              padding: "15px",
+            🦷
 
-              borderRadius: "14px",
+          </div>
 
-              marginBottom: "20px",
+          <h1
+            style={{
+              fontSize:"34px",
+              marginBottom:"10px",
+              color:"#111827"
+            }}
+          >
 
-              textAlign: "center"
+            Dental Clinic
+
+          </h1>
+
+          <p
+            style={{
+              color:"#6b7280"
+            }}
+          >
+
+            تسجيل الدخول إلى النظام
+
+          </p>
+
+        </div>
+
+        {
+
+          error &&
+
+          <div
+            style={{
+              background:"#fee2e2",
+              color:"#991b1b",
+              padding:"14px",
+              borderRadius:"14px",
+              marginBottom:"18px",
+              textAlign:"center",
+              fontWeight:"bold"
             }}
           >
 
@@ -169,105 +200,98 @@ export default function LoginPage() {
 
           </div>
 
-        )}
+        }
 
-        <input
-          placeholder=
-            "اسم المستخدم"
-
-          value={username}
-
-          onChange={(e) =>
-            setUsername(
-              e.target.value
-            )
-          }
-
-          style={inputStyle}
-        />
-
-        <input
-          type="password"
-
-          placeholder=
-            "كلمة المرور"
-
-          value={password}
-
-          onChange={(e) =>
-            setPassword(
-              e.target.value
-            )
-          }
-
-          style={inputStyle}
-        />
-
-        <button
-          onClick={login}
-
-          style={{
-            width: "100%",
-
-            background:
-              "#2563eb",
-
-            color: "white",
-
-            border: "none",
-
-            padding: "18px",
-
-            borderRadius: "16px",
-
-            fontSize: "22px",
-
-            cursor: "pointer",
-
-            marginTop: "10px"
-          }}
-        >
-
-          دخول
-
-        </button>
-
-        {/* الحسابات */}
         <div
           style={{
-            marginTop: "35px",
-
-            background:
-              "rgba(255,255,255,0.05)",
-
-            padding: "20px",
-
-            borderRadius: "18px",
-
-            lineHeight: "2",
-
-            color: "#ddd"
+            display:"grid",
+            gap:"16px"
           }}
         >
 
-          <h3>
-            🔑 بيانات الدخول
-          </h3>
+          <input
+            type="email"
 
-          <div>
-            👨‍⚕️ الدكتور:
-            doctor
-          </div>
+            placeholder="البريد الإلكتروني"
 
-          <div>
-            👩‍💼 السكرتير:
-            secretary
-          </div>
+            value={email}
 
-          <div>
-            🔒 كلمة المرور:
-            123456
-          </div>
+            onChange={(e)=>
+              setEmail(
+                e.target.value
+              )
+            }
+
+            style={inputStyle}
+          />
+
+          <input
+            type="password"
+
+            placeholder="كلمة المرور"
+
+            value={password}
+
+            onChange={(e)=>
+              setPassword(
+                e.target.value
+              )
+            }
+
+            style={inputStyle}
+          />
+
+          <button
+            onClick={login}
+
+            disabled={loading}
+
+            style={{
+              background:
+
+                loading
+
+                ?
+
+                "#93c5fd"
+
+                :
+
+                "#2563eb",
+
+              color:"white",
+
+              border:"none",
+
+              padding:"18px",
+
+              borderRadius:"16px",
+
+              fontSize:"18px",
+
+              fontWeight:"bold",
+
+              cursor:"pointer",
+
+              transition:"0.2s"
+            }}
+          >
+
+            {
+
+              loading
+
+              ?
+
+              "جاري تسجيل الدخول..."
+
+              :
+
+              "تسجيل الدخول"
+
+            }
+
+          </button>
 
         </div>
 
@@ -279,17 +303,19 @@ export default function LoginPage() {
 
 }
 
-const inputStyle = {
+const inputStyle:any = {
 
-  width: "100%",
+  width:"100%",
 
-  padding: "16px",
+  padding:"16px",
 
-  marginBottom: "18px",
+  borderRadius:"14px",
 
-  borderRadius: "14px",
+  border:"1px solid #d1d5db",
 
-  border: "none",
+  fontSize:"16px",
 
-  fontSize: "18px"
+  outline:"none",
+
+  background:"#f9fafb"
 };

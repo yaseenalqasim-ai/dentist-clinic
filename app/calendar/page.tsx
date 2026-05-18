@@ -1,262 +1,191 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
-  useEffect,
-  useState
-} from "react";
-
-import Calendar
-from "react-calendar";
-
-import "react-calendar/dist/Calendar.css";
-
-import {
-  initializeApp
-} from "firebase/app";
-
-import {
-  getFirestore,
   collection,
-  onSnapshot
+  onSnapshot,
+  orderBy,
+  query,
 } from "firebase/firestore";
 
-const firebaseConfig = {
+import { db } from "@/lib/firebase";
 
-  apiKey:
-    "AIzaSyCIZdUmSX15w0CACuW4vfz9npsUi-L3lbg",
+interface Booking {
+  id: string;
+  patientName: string;
+  phone: string;
+  doctorName: string;
+  bookingType: string;
+  date: string;
+  time: string;
+  status: string;
+}
 
-  authDomain:
-    "dentist-clinic-476ac.firebaseapp.com",
+export default function CalendarPage() {
+  const [bookings, setBookings] = useState<Booking[]>([]);
 
-  projectId:
-    "dentist-clinic-476ac",
-
-  storageBucket:
-    "dentist-clinic-476ac.firebasestorage.app",
-
-  messagingSenderId:
-    "1013681862841",
-
-  appId:
-    "1:1013681862841:web:86643c3f3fa926389a8368",
-
-  measurementId:
-    "G-FW5T2FJ29R"
-};
-
-const app =
-  initializeApp(firebaseConfig);
-
-const db =
-  getFirestore(app);
-
-export default function CalendarPage(){
-
-  const [patients,setPatients] =
-    useState<any[]>([]);
-
-  const [date,setDate] =
-    useState<any>(
-      new Date()
+  useEffect(() => {
+    const q = query(
+      collection(db, "bookings"),
+      orderBy("date", "asc")
     );
 
-  useEffect(()=>{
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data: Booking[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<Booking, "id">),
+      }));
 
-    onSnapshot(
-      collection(db,"bookings"),
-      (snapshot)=>{
-
-        const data:any[] = [];
-
-        snapshot.forEach((docItem)=>{
-
-          data.push({
-            id:docItem.id,
-            ...docItem.data()
-          });
-
-        });
-
-        setPatients(data);
-
-      }
-    );
-
-  },[]);
-
-  const selectedDate =
-    new Date(date)
-      .toISOString()
-      .split("T")[0];
-
-  const todayBookings =
-    patients.filter((p)=>{
-
-      if(!p.date) return false;
-
-      return p.date.startsWith(
-        selectedDate
-      );
-
+      setBookings(data);
     });
 
-  return(
+    return () => unsubscribe();
+  }, []);
 
-    <main
-      dir="rtl"
+  const groupedBookings = bookings.reduce((acc: any, booking) => {
+    if (!acc[booking.date]) {
+      acc[booking.date] = [];
+    }
 
-      style={{
-        minHeight:"100vh",
+    acc[booking.date].push(booking);
 
-        background:
-          "linear-gradient(to bottom,#071739,#102542)",
+    return acc;
+  }, {});
 
-        padding:"20px",
+  const statusColor = (status: string) => {
+    switch (status) {
+      case "مكتمل":
+        return "bg-green-500";
 
-        color:"white"
-      }}
-    >
+      case "ملغي":
+        return "bg-red-500";
 
-      <h1
-        style={{
-          fontSize:"50px",
+      case "بالانتظار":
+        return "bg-yellow-500";
 
-          marginBottom:"30px",
+      default:
+        return "bg-blue-500";
+    }
+  };
 
-          textAlign:"center"
-        }}
-      >
+  return (
+    <div className="min-h-screen bg-gray-100 p-5">
 
-        📅 تقويم المواعيد
+      <div className="bg-blue-700 text-white rounded-3xl p-6 mb-6 shadow-xl">
+        <h1 className="text-4xl font-bold mb-2">
+          الحجوزات
+        </h1>
 
-      </h1>
+        <p className="text-blue-100">
+          إدارة حجوزات العيادة
+        </p>
+      </div>
 
-      <div
-        style={{
-          display:"flex",
-
-          justifyContent:"center",
-
-          marginBottom:"40px"
-        }}
-      >
-
-        <div
-          style={{
-            background:"white",
-
-            padding:"20px",
-
-            borderRadius:"25px"
-          }}
-        >
-
-          <Calendar
-            onChange={setDate}
-            value={date}
-          />
-
+      {Object.keys(groupedBookings).length === 0 && (
+        <div className="bg-white rounded-3xl p-10 text-center shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-500">
+            لا توجد حجوزات
+          </h2>
         </div>
+      )}
+
+      <div className="space-y-8">
+
+        {Object.entries(groupedBookings).map(
+          ([date, dayBookings]: any) => (
+
+            <div key={date}>
+
+              <div className="bg-black text-white rounded-2xl px-5 py-3 mb-4 text-xl font-bold shadow-lg">
+                📅 {date}
+              </div>
+
+              <div className="grid gap-5">
+
+                {dayBookings.map((booking: Booking) => (
+
+                  <div
+                    key={booking.id}
+                    className="bg-white rounded-3xl p-5 shadow-xl border border-gray-200"
+                  >
+
+                    <div className="flex justify-between items-start mb-5">
+
+                      <div>
+
+                        <div className="text-5xl font-bold text-blue-700">
+                          {booking.time}
+                        </div>
+
+                        <div className="text-gray-500 mt-1">
+                          وقت الحجز
+                        </div>
+
+                      </div>
+
+                      <div
+                        className={`${statusColor(
+                          booking.status
+                        )} text-white px-4 py-2 rounded-full text-sm font-bold`}
+                      >
+                        {booking.status || "بالانتظار"}
+                      </div>
+
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4 text-lg">
+
+                      <div className="bg-gray-100 rounded-2xl p-4">
+                        👤 المريض:
+                        <div className="font-bold mt-1">
+                          {booking.patientName}
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-100 rounded-2xl p-4">
+                        📞 الهاتف:
+                        <div className="font-bold mt-1">
+                          {booking.phone}
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-100 rounded-2xl p-4">
+                        🦷 نوع الحجز:
+                        <div className="font-bold mt-1">
+                          {booking.bookingType}
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-100 rounded-2xl p-4">
+                        👨‍⚕️ الطبيب:
+                        <div className="font-bold mt-1">
+                          {booking.doctorName}
+                        </div>
+                      </div>
+
+                    </div>
+
+                    <a
+                      href={`https://wa.me/${booking.phone}`}
+                      target="_blank"
+                      className="mt-5 block bg-green-500 hover:bg-green-600 text-white text-center py-4 rounded-2xl text-xl font-bold transition"
+                    >
+                      واتساب
+                    </a>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            </div>
+
+          )
+        )}
 
       </div>
 
-      <h2
-        style={{
-          marginBottom:"20px",
-
-          fontSize:"35px"
-        }}
-      >
-
-        🕘 حجوزات اليوم
-
-      </h2>
-
-      {todayBookings.length === 0 && (
-
-        <div
-          style={{
-            background:
-              "rgba(255,255,255,0.08)",
-
-            padding:"25px",
-
-            borderRadius:"20px"
-          }}
-        >
-
-          لا توجد حجوزات
-
-        </div>
-
-      )}
-
-      {todayBookings.map((patient)=>(
-
-        <div
-          key={patient.id}
-
-          style={{
-
-            background:
-
-              patient.status ===
-              "🟢 تم التنفيذ"
-
-                ? "#14532d"
-
-              :
-
-              patient.status ===
-              "🔴 حجز ملغي"
-
-                ? "#7f1d1d"
-
-              :
-
-              patient.status ===
-              "🟡 حجز مؤجل"
-
-                ? "#713f12"
-
-              :
-
-              "rgba(255,255,255,0.08)",
-
-            padding:"25px",
-
-            borderRadius:"25px",
-
-            marginBottom:"20px"
-          }}
-        >
-
-          <h2>
-            👤 {patient.name}
-          </h2>
-
-          <h2>
-            📞 {patient.phone}
-          </h2>
-
-          <h2>
-            🦷 {patient.review}
-          </h2>
-
-          <h2>
-            🗓️ {patient.date}
-          </h2>
-
-          <h2>
-            {patient.status}
-          </h2>
-
-        </div>
-
-      ))}
-
-    </main>
-
+    </div>
   );
-
 }

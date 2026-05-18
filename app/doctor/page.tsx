@@ -2,1021 +2,395 @@
 
 import {
   useEffect,
+  useMemo,
   useState
 } from "react";
 
-import jsPDF
-from "jspdf";
-
 import {
-  initializeApp
-} from "firebase/app";
-
-import {
-  getFirestore,
   collection,
-  onSnapshot,
-  updateDoc,
-  doc
+  getDocs
 } from "firebase/firestore";
 
 import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL
-} from "firebase/storage";
+  db
+} from "../../lib/firebase";
 
-const firebaseConfig = {
+import AuthGuard
+from "../components/AuthGuard";
 
-  apiKey:
-    "AIzaSyCIZdUmSX15w0CACuW4vfz9npsUi-L3lbg",
+import RoleGuard
+from "../components/RoleGuard";
 
-  authDomain:
-    "dentist-clinic-476ac.firebaseapp.com",
+import BottomNav
+from "../components/BottomNav";
 
-  projectId:
-    "dentist-clinic-476ac",
+import useBookings
+from "../hooks/useBookings";
 
-  storageBucket:
-    "dentist-clinic-476ac.firebasestorage.app",
+export default function DoctorsPage(){
 
-  messagingSenderId:
-    "1013681862841",
+  const {
+    bookings
+  } = useBookings();
 
-  appId:
-    "1:1013681862841:web:86643c3f3fa926389a8368",
+  const [
+    doctors,
+    setDoctors
+  ] = useState<any[]>([]);
 
-  measurementId:
-    "G-FW5T2FJ29R"
-};
+  const [
+    loading,
+    setLoading
+  ] = useState(true);
 
-const app =
-  initializeApp(firebaseConfig);
+  const [
+    search,
+    setSearch
+  ] = useState("");
 
-const db =
-  getFirestore(app);
+  useEffect(()=>{
 
-const storage =
-  getStorage(app);
+    async function fetchDoctors(){
 
-export default function DoctorPage() {
+      try{
 
-  const [patients, setPatients] =
-    useState<any[]>([]);
+        const snapshot =
+          await getDocs(
 
-  const [darkMode, setDarkMode] =
-    useState(false);
+            collection(
+              db,
+              "users"
+            )
 
-  const [search, setSearch] =
-    useState("");
+          );
 
-  const [filterStatus, setFilterStatus] =
-    useState("");
+        const data:any[] = [];
 
-  const [showModal, setShowModal] =
-    useState(false);
+        snapshot.forEach((docItem)=>{
 
-  const [editingPatient, setEditingPatient] =
-    useState<any>(null);
+          const user:any =
+            docItem.data();
 
-  const [note, setNote] =
-    useState("");
+          if(
+            user.role ===
+            "doctor"
+          ){
 
-  const [uploading,setUploading] =
-    useState(false);
+            data.push(user);
 
-  useEffect(() => {
-
-    const role =
-      localStorage.getItem("role");
-
-    if (role !== "doctor") {
-
-      window.location.href =
-        "/login";
-
-    }
-
-    const savedTheme =
-      localStorage.getItem(
-        "doctor-theme"
-      );
-
-    if (savedTheme === "dark") {
-
-      setDarkMode(true);
-
-    }
-
-    loadPatients();
-
-  }, []);
-
-  useEffect(() => {
-
-    localStorage.setItem(
-      "doctor-theme",
-      darkMode ? "dark" : "light"
-    );
-
-  }, [darkMode]);
-
-  function loadPatients() {
-
-    onSnapshot(
-      collection(db, "bookings"),
-      (snapshot) => {
-
-        const data: any[] = [];
-
-        snapshot.forEach((docItem) => {
-
-          data.push({
-            id: docItem.id,
-            ...docItem.data()
-          });
+          }
 
         });
 
-        data.sort((a, b) =>
-          a.date.localeCompare(b.date)
-        );
+        setDoctors(data);
 
-        setPatients(data);
+      }catch(error){
+
+        console.error(error);
+
+      }finally{
+
+        setLoading(false);
 
       }
-    );
 
-  }
+    }
 
-  async function changeStatus(
-    id: string,
-    status: string
-  ) {
+    fetchDoctors();
 
-    await updateDoc(
-      doc(db, "bookings", id),
-      {
-        status
-      }
-    );
+  },[]);
 
-  }
+  const filteredDoctors =
+    useMemo(()=>{
 
-  async function saveNote() {
+      return doctors.filter(
+        (doctor:any)=>{
 
-    await updateDoc(
-      doc(
-        db,
-        "bookings",
-        editingPatient.id
-      ),
-      {
-        notes: note
-      }
-    );
+          const q =
+            search.toLowerCase();
 
-    setShowModal(false);
+          return(
 
-  }
+            doctor.name
+            ?.toLowerCase()
+            .includes(q)
 
-  async function uploadImage(
-    e:any,
-    patient:any
+            ||
+
+            doctor.specialty
+            ?.toLowerCase()
+            .includes(q)
+
+          );
+
+        }
+      );
+
+    },[
+      doctors,
+      search
+    ]);
+
+  function getDoctorBookings(
+    doctorId:string
   ){
 
-    const file =
-      e.target.files[0];
+    return bookings.filter(
+      (booking:any)=>
 
-    if(!file) return;
-
-    setUploading(true);
-
-    const imageRef =
-      ref(
-        storage,
-        `patients/${Date.now()}-${file.name}`
-      );
-
-    await uploadBytes(
-      imageRef,
-      file
-    );
-
-    const url =
-      await getDownloadURL(
-        imageRef
-      );
-
-    await updateDoc(
-      doc(
-        db,
-        "bookings",
-        patient.id
-      ),
-      {
-        image:url
-      }
-    );
-
-    setUploading(false);
+        booking.doctorId ===
+        doctorId
+    ).length;
 
   }
 
-  function printPatient(
-    patient:any
-  ){
+  return(
 
-    const pdf =
-      new jsPDF();
+    <AuthGuard>
 
-    pdf.setFontSize(18);
-
-    pdf.text(
-      "Dental Clinic Report",
-      20,
-      20
-    );
-
-    pdf.setFontSize(13);
-
-    pdf.text(
-      `Name: ${patient.name}`,
-      20,
-      40
-    );
-
-    pdf.text(
-      `Phone: ${patient.phone}`,
-      20,
-      55
-    );
-
-    pdf.text(
-      `Review: ${patient.review}`,
-      20,
-      70
-    );
-
-    pdf.text(
-      `Disease: ${patient.disease}`,
-      20,
-      85
-    );
-
-    pdf.text(
-      `Complaint: ${patient.complaint}`,
-      20,
-      100
-    );
-
-    pdf.text(
-      `Date: ${patient.date}`,
-      20,
-      115
-    );
-
-    pdf.text(
-      `Status: ${patient.status}`,
-      20,
-      130
-    );
-
-    pdf.text(
-      `Notes: ${patient.notes || "-"}`,
-      20,
-      145
-    );
-
-    pdf.save(
-      `${patient.name}.pdf`
-    );
-
-  }
-
-  function logout() {
-
-    localStorage.removeItem(
-      "role"
-    );
-
-    window.location.href =
-      "/login";
-
-  }
-
-  const filteredPatients =
-    patients.filter((patient) => {
-
-      const matchesSearch =
-
-        patient.name
-          ?.includes(search)
-
-        ||
-
-        patient.phone
-          ?.includes(search)
-
-        ||
-
-        patient.review
-          ?.includes(search);
-
-      const matchesStatus =
-
-        filterStatus === ""
-
-        ||
-
-        patient.status ===
-        filterStatus;
-
-      return (
-        matchesSearch &&
-        matchesStatus
-      );
-
-    });
-
-  return (
-
-    <main
-      dir="rtl"
-
-      style={{
-        minHeight: "100vh",
-
-        background:
-          darkMode
-            ? "#071739"
-            : "#f3f3f3",
-
-        color:
-          darkMode
-            ? "white"
-            : "black",
-
-        padding: "20px"
-      }}
-    >
-
-      {/* الأعلى */}
-      <div
-        style={{
-          display: "flex",
-
-          justifyContent:
-            "space-between",
-
-          alignItems: "center",
-
-          marginBottom: "30px",
-
-          flexWrap: "wrap",
-
-          gap: "15px"
-        }}
+      <RoleGuard
+        allow={[
+          "admin"
+        ]}
       >
 
-        <h1
-          style={{
-            fontSize: "45px"
-          }}
-        >
-
-          🦷 واجهة الدكتور
-
-        </h1>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "10px"
-          }}
-        >
-
-          <button
-            onClick={() =>
-              setDarkMode(!darkMode)
-            }
-
-            style={{
-              width: "60px",
-
-              height: "60px",
-
-              borderRadius: "50%",
-
-              border: "none",
-
-              fontSize: "24px"
-            }}
-          >
-            {darkMode ? "☀️" : "🌙"}
-          </button>
-
-          <button
-            onClick={logout}
-
-            style={{
-              background: "red",
-
-              color: "white",
-
-              border: "none",
-
-              padding: "12px",
-
-              borderRadius:
-                "12px"
-            }}
-          >
-            تسجيل خروج
-          </button>
-
-        </div>
-
-      </div>
-
-      {/* البحث */}
-      <div
-        style={{
-          display: "grid",
-
-          gap: "15px",
-
-          marginBottom: "30px"
-        }}
-      >
-
-        <input
-          placeholder=
-            "🔍 البحث عن مريض"
-
-          value={search}
-
-          onChange={(e) =>
-            setSearch(
-              e.target.value
-            )
-          }
-
-          style={inputStyle}
-        />
-
-        <select
-          value={filterStatus}
-
-          onChange={(e) =>
-            setFilterStatus(
-              e.target.value
-            )
-          }
-
-          style={inputStyle}
-        >
-
-          <option value="">
-            📌 جميع الحالات
-          </option>
-
-          <option>
-            🔵 حجز مُثبت
-          </option>
-
-          <option>
-            📍 تم الوصول
-          </option>
-
-          <option>
-            🟡 حجز مؤجل
-          </option>
-
-          <option>
-            🔴 حجز ملغي
-          </option>
-
-          <option>
-            🟢 تم التنفيذ
-          </option>
-
-        </select>
-
-      </div>
-
-      {/* رفع جاري */}
-      {uploading && (
-
-        <div
-          style={{
-            background:"#2563eb",
-
-            color:"white",
-
-            padding:"15px",
-
-            borderRadius:"15px",
-
-            marginBottom:"20px",
-
-            textAlign:"center"
-          }}
-        >
-
-          جاري رفع الصورة...
-
-        </div>
-
-      )}
-
-      {/* الحجوزات */}
-      {filteredPatients.map((patient) => (
-
-        <div
-          key={patient.id}
+        <main
+          dir="rtl"
 
           style={{
-
-            background:
-
-              patient.status ===
-              "🟢 تم التنفيذ"
-
-                ? "#14532d"
-
-              :
-
-              patient.status ===
-              "🔴 حجز ملغي"
-
-                ? "#7f1d1d"
-
-              :
-
-              patient.status ===
-              "🟡 حجز مؤجل"
-
-                ? "#713f12"
-
-              :
-
-              darkMode
-                ? "#102542"
-                : "white",
-
-            padding: "25px",
-
-            borderRadius: "25px",
-
-            marginBottom: "20px"
+            minHeight:"100vh",
+            background:"#f3f6fb",
+            padding:"14px",
+            paddingBottom:"100px"
           }}
         >
 
           <div
             style={{
-              display: "flex",
+              background:
+                "linear-gradient(135deg,#2563eb,#1d4ed8)",
 
-              justifyContent:
-                "space-between",
+              borderRadius:"30px",
 
-              alignItems: "center",
+              padding:"28px",
 
-              marginBottom: "20px",
+              color:"white",
 
-              flexWrap: "wrap",
-
-              gap: "15px"
+              marginBottom:"20px"
             }}
           >
 
-            <div
+            <h1
               style={{
-                fontSize: "24px"
+                fontSize:"34px",
+                marginBottom:"12px"
               }}
             >
 
-              {patient.status}
+              👨‍⚕️ الأطباء
 
-            </div>
+            </h1>
 
-            <select
-              value={patient.status}
+            <p
+              style={{
+                opacity:0.9
+              }}
+            >
 
-              onChange={(e) =>
-                changeStatus(
-                  patient.id,
+              إدارة أطباء العيادة
+
+            </p>
+
+          </div>
+
+          <div
+            style={{
+              background:"white",
+              borderRadius:"24px",
+              padding:"16px",
+              marginBottom:"20px"
+            }}
+          >
+
+            <input
+              placeholder="
+                بحث بالاسم أو التخصص
+              "
+
+              value={search}
+
+              onChange={(e)=>
+                setSearch(
                   e.target.value
                 )
               }
-
-              style={inputStyle}
-            >
-
-              <option>
-                🔵 حجز مُثبت
-              </option>
-
-              <option>
-                📍 تم الوصول
-              </option>
-
-              <option>
-                🟡 حجز مؤجل
-              </option>
-
-              <option>
-                🔴 حجز ملغي
-              </option>
-
-              <option>
-                🟢 تم التنفيذ
-              </option>
-
-            </select>
-
-          </div>
-
-          <div
-            style={{
-              lineHeight: "2.3",
-
-              fontSize: "22px"
-            }}
-          >
-
-            👤 الاسم:
-            {" "}
-            {patient.name}
-
-            <br />
-
-            📞 الرقم:
-            {" "}
-            {patient.phone}
-
-            <br />
-
-            🦷 المراجعة:
-            {" "}
-            {patient.review}
-
-            {patient.visitType &&
-              ` ← ${patient.visitType}`}
-
-            <br />
-
-            🚨 الأمراض:
-            {" "}
-            {patient.disease}
-
-            <br />
-
-            ❗ الشكوى:
-            {" "}
-            {patient.complaint}
-
-            <br />
-
-            🗓️ الموعد:
-            {" "}
-            {patient.date}
-
-          </div>
-
-          {patient.notes && (
-
-            <div
-              style={{
-                marginTop: "20px",
-
-                background:
-                  "rgba(255,255,255,0.12)",
-
-                padding: "18px",
-
-                borderRadius: "16px",
-
-                lineHeight: "2"
-              }}
-            >
-
-              📝
-              {" "}
-              {patient.notes}
-
-            </div>
-
-          )}
-
-          {patient.image && (
-
-            <img
-              src={patient.image}
-
-              alt="patient"
 
               style={{
                 width:"100%",
-
-                marginTop:"20px",
-
-                borderRadius:"20px"
+                padding:"16px",
+                borderRadius:"16px",
+                border:"1px solid #d1d5db",
+                fontSize:"16px"
               }}
             />
-
-          )}
-
-          <div
-            style={{
-              display: "flex",
-
-              gap: "12px",
-
-              marginTop: "20px",
-
-              flexWrap: "wrap"
-            }}
-          >
-
-            <a
-              href={`https://wa.me/${patient.phone}`}
-
-              target="_blank"
-
-              style={{
-                flex: 1,
-
-                background:
-                  "#22c55e",
-
-                color: "white",
-
-                padding: "16px",
-
-                borderRadius: "16px",
-
-                textAlign: "center",
-
-                textDecoration: "none",
-
-                fontSize: "18px"
-              }}
-            >
-
-              واتساب
-
-            </a>
-
-            <button
-              onClick={() => {
-
-                setEditingPatient(
-                  patient
-                );
-
-                setNote(
-                  patient.notes || ""
-                );
-
-                setShowModal(true);
-
-              }}
-
-              style={{
-                flex: 1,
-
-                background:
-                  "#7c3aed",
-
-                color: "white",
-
-                border: "none",
-
-                padding: "16px",
-
-                borderRadius: "16px",
-
-                fontSize: "18px"
-              }}
-            >
-
-              📝 ملاحظة
-
-            </button>
-
-            <button
-              onClick={() =>
-                printPatient(patient)
-              }
-
-              style={{
-                flex: 1,
-
-                background:
-                  "#2563eb",
-
-                color: "white",
-
-                border: "none",
-
-                padding: "16px",
-
-                borderRadius: "16px",
-
-                fontSize: "18px"
-              }}
-            >
-
-              🖨️ PDF
-
-            </button>
 
           </div>
 
-          <input
-            type="file"
+          {
 
-            accept="image/*"
+            loading
 
-            onChange={(e)=>
-              uploadImage(
-                e,
-                patient
-              )
-            }
-
-            style={{
-              marginTop:"15px"
-            }}
-          />
-
-        </div>
-
-      ))}
-
-      {/* الملاحظات */}
-      {showModal && (
-
-        <div
-          style={{
-            position: "fixed",
-
-            inset: 0,
-
-            background:
-              "rgba(0,0,0,0.6)",
-
-            display: "flex",
-
-            justifyContent:
-              "center",
-
-            alignItems: "center",
-
-            zIndex: 999
-          }}
-        >
-
-          <div
-            style={{
-              width: "90%",
-
-              maxWidth: "700px",
-
-              background:
-                darkMode
-                  ? "#102542"
-                  : "white",
-
-              borderRadius: "25px",
-
-              padding: "25px"
-            }}
-          >
-
-            <h2
-              style={{
-                marginBottom: "20px"
-              }}
-            >
-
-              📝 إدخال ملاحظة
-
-            </h2>
-
-            <textarea
-              value={note}
-
-              onChange={(e) =>
-                setNote(
-                  e.target.value
-                )
-              }
-
-              style={{
-                width: "100%",
-
-                height: "220px",
-
-                borderRadius: "18px",
-
-                padding: "18px",
-
-                fontSize: "20px",
-
-                border: "none"
-              }}
-            />
+            ?
 
             <div
               style={{
-                display: "flex",
-
-                gap: "12px",
-
-                marginTop: "20px"
+                background:"white",
+                borderRadius:"24px",
+                padding:"40px",
+                textAlign:"center",
+                fontWeight:"bold"
               }}
             >
 
-              <button
-                onClick={saveNote}
-
-                style={{
-                  flex: 1,
-
-                  background:
-                    "#2563eb",
-
-                  color: "white",
-
-                  border: "none",
-
-                  padding: "18px",
-
-                  borderRadius:
-                    "18px",
-
-                  fontSize: "20px"
-                }}
-              >
-
-                حفظ
-
-              </button>
-
-              <button
-                onClick={() =>
-                  setShowModal(false)
-                }
-
-                style={{
-                  flex: 1,
-
-                  background:
-                    "red",
-
-                  color: "white",
-
-                  border: "none",
-
-                  padding: "18px",
-
-                  borderRadius:
-                    "18px",
-
-                  fontSize: "20px"
-                }}
-              >
-
-                إغلاق
-
-              </button>
+              جاري تحميل الأطباء...
 
             </div>
 
-          </div>
+            :
 
-        </div>
+            <div
+              style={{
+                display:"grid",
+                gap:"16px"
+              }}
+            >
 
-      )}
+              {
 
-    </main>
+                filteredDoctors.length === 0
+
+                ?
+
+                <div
+                  style={{
+                    background:"white",
+                    borderRadius:"24px",
+                    padding:"30px",
+                    textAlign:"center",
+                    color:"#6b7280"
+                  }}
+                >
+
+                  لا يوجد أطباء
+
+                </div>
+
+                :
+
+                filteredDoctors.map(
+                  (doctor:any)=>(
+
+                    <div
+                      key={doctor.doctorId}
+
+                      style={{
+                        background:"white",
+                        borderRadius:"24px",
+                        padding:"20px",
+                        boxShadow:
+                          "0 4px 14px rgba(0,0,0,0.06)"
+                      }}
+                    >
+
+                      <div
+                        style={{
+                          display:"flex",
+                          justifyContent:
+                            "space-between",
+                          alignItems:"center",
+                          marginBottom:"16px"
+                        }}
+                      >
+
+                        <div
+                          style={{
+                            fontSize:"24px",
+                            fontWeight:"bold"
+                          }}
+                        >
+
+                          👨‍⚕️ {
+                            doctor.name
+                          }
+
+                        </div>
+
+                        <div
+                          style={{
+                            background:"#dbeafe",
+                            color:"#1d4ed8",
+                            padding:"8px 12px",
+                            borderRadius:"12px",
+                            fontWeight:"bold",
+                            fontSize:"13px"
+                          }}
+                        >
+
+                          {
+                            getDoctorBookings(
+                              doctor.doctorId
+                            )
+                          } حجز
+
+                        </div>
+
+                      </div>
+
+                      <div
+                        style={{
+                          color:"#6b7280",
+                          marginBottom:"10px"
+                        }}
+                      >
+
+                        🦷 {
+                          doctor.specialty ||
+                          "طبيب أسنان"
+                        }
+
+                      </div>
+
+                      <div
+                        style={{
+                          color:"#6b7280"
+                        }}
+                      >
+
+                        📧 {
+                          doctor.email
+                        }
+
+                      </div>
+
+                    </div>
+
+                  )
+                )
+
+              }
+
+            </div>
+
+          }
+
+          <BottomNav />
+
+        </main>
+
+      </RoleGuard>
+
+    </AuthGuard>
 
   );
 
 }
-
-const inputStyle = {
-
-  width: "100%",
-
-  padding: "16px",
-
-  borderRadius: "16px",
-
-  border: "none",
-
-  fontSize: "18px"
-};

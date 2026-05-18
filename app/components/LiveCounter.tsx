@@ -22,24 +22,44 @@ export default function LiveCounter({
 
   useEffect(()=>{
 
+    if(
+      typeof value !== "number"
+      ||
+      isNaN(value)
+    ){
+      setCount(0);
+      return;
+    }
+
     let start = 0;
 
     const end = value;
 
+    const duration = 800;
+
+    const increment =
+      end / (duration / 16);
+
     const timer =
       setInterval(()=>{
 
-        start += 1;
-
-        setCount(start);
+        start += increment;
 
         if(start >= end){
 
+          setCount(end);
+
           clearInterval(timer);
+
+        }else{
+
+          setCount(
+            Math.floor(start)
+          );
 
         }
 
-      },20);
+      },16);
 
     return ()=>clearInterval(timer);
 
@@ -49,7 +69,7 @@ export default function LiveCounter({
 
     <span>
 
-      {count}
+      {String(count)}
 
     </span>
 
