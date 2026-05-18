@@ -1,29 +1,78 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
 
+  const [bookingsCount, setBookingsCount] =
+    useState(0);
+
+  const [patientsCount, setPatientsCount] =
+    useState(0);
+
+  const [todayBookings, setTodayBookings] =
+    useState(0);
+
+  useEffect(() => {
+
+    const bookings =
+      JSON.parse(
+        localStorage.getItem(
+          "bookings"
+        ) || "[]"
+      );
+
+    setBookingsCount(
+      bookings.length
+    );
+
+    const uniquePatients =
+      new Set(
+        bookings.map(
+          (booking:any)=>
+            booking.phone
+        )
+      );
+
+    setPatientsCount(
+      uniquePatients.size
+    );
+
+    const today =
+      new Date()
+        .toISOString()
+        .split("T")[0];
+
+    const todayData =
+      bookings.filter(
+        (booking:any)=>
+          booking.date === today
+      );
+
+    setTodayBookings(
+      todayData.length
+    );
+
+  }, []);
+
   return (
 
-    <div
+    <main
       className="
         min-h-screen
-        bg-gradient-to-b
-        from-blue-950
-        to-blue-900
+        bg-[#0b1b55]
         p-4
+        pb-32
+        text-white
       "
-      dir="rtl"
     >
 
       <div
         className="
-          bg-white/10
-          backdrop-blur-md
-          rounded-3xl
+          bg-[#2146e8]
+          rounded-[35px]
           p-6
-          text-white
           shadow-2xl
           mb-6
         "
@@ -33,7 +82,8 @@ export default function HomePage() {
           className="
             text-4xl
             font-bold
-            mb-2
+            mb-3
+            text-right
           "
         >
 
@@ -43,7 +93,8 @@ export default function HomePage() {
 
         <p
           className="
-            text-blue-100
+            text-gray-200
+            text-right
             text-lg
           "
         >
@@ -65,45 +116,136 @@ export default function HomePage() {
 
         <div
           className="
-            bg-white/10
-            backdrop-blur-md
-            rounded-3xl
-            p-6
-            text-center
-            text-white
-            shadow-xl
+            bg-white
+            text-black
+            rounded-[30px]
+            p-5
+            shadow-2xl
           "
         >
 
-          <div className="text-5xl mb-3">
-            👥
+          <div
+            className="
+              text-4xl
+              mb-3
+            "
+          >
+
+            📅
+
           </div>
 
-          <div className="text-3xl font-bold">
-            المرضى
+          <div
+            className="
+              text-3xl
+              font-bold
+            "
+          >
+
+            {
+              bookingsCount
+            }
+
+          </div>
+
+          <div
+            className="
+              text-gray-600
+              mt-2
+            "
+          >
+
+            الحجوزات
+
           </div>
 
         </div>
 
         <div
           className="
-            bg-white/10
-            backdrop-blur-md
-            rounded-3xl
-            p-6
-            text-center
-            text-white
-            shadow-xl
+            bg-white
+            text-black
+            rounded-[30px]
+            p-5
+            shadow-2xl
           "
         >
 
-          <div className="text-5xl mb-3">
-            📅
+          <div
+            className="
+              text-4xl
+              mb-3
+            "
+          >
+
+            👥
+
           </div>
 
-          <div className="text-3xl font-bold">
-            الحجوزات
+          <div
+            className="
+              text-3xl
+              font-bold
+            "
+          >
+
+            {
+              patientsCount
+            }
+
           </div>
+
+          <div
+            className="
+              text-gray-600
+              mt-2
+            "
+          >
+
+            المرضى
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div
+        className="
+          bg-white
+          text-black
+          rounded-[35px]
+          p-6
+          shadow-2xl
+          mb-6
+        "
+      >
+
+        <div
+          className="
+            text-2xl
+            font-bold
+            mb-3
+            text-right
+          "
+        >
+
+          🔥 حجوزات اليوم
+
+        </div>
+
+        <div
+          className="
+            text-5xl
+            font-bold
+            text-[#2146e8]
+            text-center
+          "
+        >
+
+          {
+            todayBookings
+          }
 
         </div>
 
@@ -117,56 +259,40 @@ export default function HomePage() {
       >
 
         <Link
-          href="/booking"
-          className="
-            bg-blue-600
-            hover:bg-blue-700
-            transition
-            rounded-3xl
-            p-6
-            text-white
-            text-2xl
-            font-bold
-            shadow-2xl
-            text-center
-          "
-        >
-
-          📅 حجز موعد
-
-        </Link>
-
-        <Link
           href="/calendar"
+
           className="
-            bg-white/10
-            backdrop-blur-md
-            rounded-3xl
-            p-6
-            text-white
+            h-20
+            bg-white
+            text-black
+            rounded-[30px]
+            flex
+            items-center
+            justify-center
             text-2xl
             font-bold
             shadow-2xl
-            text-center
           "
         >
 
-          🗓️ التقويم
+          📅 إدارة الحجوزات
 
         </Link>
 
         <Link
           href="/patients"
+
           className="
-            bg-white/10
-            backdrop-blur-md
-            rounded-3xl
-            p-6
-            text-white
+            h-20
+            bg-white
+            text-black
+            rounded-[30px]
+            flex
+            items-center
+            justify-center
             text-2xl
             font-bold
             shadow-2xl
-            text-center
           "
         >
 
@@ -175,45 +301,28 @@ export default function HomePage() {
         </Link>
 
         <Link
-          href="/doctors"
+          href="/booking/dr-ahmed"
+
           className="
-            bg-white/10
-            backdrop-blur-md
-            rounded-3xl
-            p-6
+            h-20
+            bg-[#2146e8]
             text-white
+            rounded-[30px]
+            flex
+            items-center
+            justify-center
             text-2xl
             font-bold
             shadow-2xl
-            text-center
           "
         >
 
-          👨‍⚕️ الأطباء
-
-        </Link>
-
-        <Link
-          href="/settings"
-          className="
-            bg-white/10
-            backdrop-blur-md
-            rounded-3xl
-            p-6
-            text-white
-            text-2xl
-            font-bold
-            shadow-2xl
-            text-center
-          "
-        >
-
-          ⚙️ الإعدادات
+          ➕ إنشاء حجز
 
         </Link>
 
       </div>
 
-    </div>
+    </main>
   );
 }
