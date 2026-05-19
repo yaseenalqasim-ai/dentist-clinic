@@ -1,107 +1,120 @@
+Skip to content
+ 
+Search Gists
+Search...
+All gists
+Back to GitHub
+@yaseenalqasim-ai
+yaseenalqasim-ai/page.tsx Secret
+Created 24 minutes ago
+Code
+Revisions
+1
+Clone this repository at &lt;script src=&quot;https://gist.github.com/yaseenalqasim-ai/5d2eebd4246e912678cc3a11db5b1120.js&quot;&gt;&lt;/script&gt;
+<script src="https://gist.github.com/yaseenalqasim-ai/5d2eebd4246e912678cc3a11db5b1120.js"></script>
+Copied!
+1
+page.tsx
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+
+import {
+
+  Users,
+
+  CalendarDays,
+
+  Plus,
+
+  Activity,
+
+} from "lucide-react";
 
 export default function HomePage() {
-
-  const [bookingsCount, setBookingsCount] =
-    useState(0);
-
-  const [patientsCount, setPatientsCount] =
-    useState(0);
-
-  const [todayBookings, setTodayBookings] =
-    useState(0);
-
-  useEffect(() => {
-
-    const bookings =
-      JSON.parse(
-        localStorage.getItem(
-          "bookings"
-        ) || "[]"
-      );
-
-    setBookingsCount(
-      bookings.length
-    );
-
-    const uniquePatients =
-      new Set(
-        bookings.map(
-          (booking:any)=>
-            booking.phone
-        )
-      );
-
-    setPatientsCount(
-      uniquePatients.size
-    );
-
-    const today =
-      new Date()
-        .toISOString()
-        .split("T")[0];
-
-    const todayData =
-      bookings.filter(
-        (booking:any)=>
-          booking.date === today
-      );
-
-    setTodayBookings(
-      todayData.length
-    );
-
-  }, []);
 
   return (
 
     <main
       className="
         min-h-screen
-        bg-[#0b1b55]
-        p-4
+        bg-[#08144a]
+        p-5
         pb-32
-        text-white
       "
     >
 
       <div
         className="
           bg-[#2146e8]
-          rounded-[35px]
+          rounded-[32px]
           p-6
           shadow-2xl
           mb-6
         "
       >
 
-        <h1
+        <div
           className="
-            text-4xl
-            font-bold
+            flex
+            items-center
+            justify-between
             mb-3
-            text-right
           "
         >
 
-          🏥 لوحة التحكم
+          <div
+            className="
+              w-16
+              h-16
+              rounded-2xl
+              bg-white/20
+              flex
+              items-center
+              justify-center
+            "
+          >
 
-        </h1>
+            <Activity
+              size={34}
+              color="white"
+            />
 
-        <p
-          className="
-            text-gray-200
-            text-right
-            text-lg
-          "
-        >
+          </div>
 
-          إدارة العيادة الطبية
+          <div
+            className="
+              text-right
+            "
+          >
 
-        </p>
+            <h1
+              className="
+                text-white
+                text-4xl
+                font-extrabold
+                mb-2
+              "
+            >
+
+              لوحة التحكم
+
+            </h1>
+
+            <p
+              className="
+                text-blue-100
+                text-lg
+              "
+            >
+
+              إدارة العيادة الطبية
+
+            </p>
+
+          </div>
+
+        </div>
 
       </div>
 
@@ -117,8 +130,7 @@ export default function HomePage() {
         <div
           className="
             bg-white
-            text-black
-            rounded-[30px]
+            rounded-[28px]
             p-5
             shadow-2xl
           "
@@ -126,36 +138,48 @@ export default function HomePage() {
 
           <div
             className="
-              text-4xl
-              mb-3
+              w-14
+              h-14
+              rounded-2xl
+              bg-blue-100
+              flex
+              items-center
+              justify-center
+              mb-5
             "
           >
 
-            📅
+            <Users
+              size={30}
+              className="
+                text-[#2146e8]
+              "
+            />
 
           </div>
 
           <div
             className="
-              text-3xl
+              text-5xl
+              font-extrabold
+              text-black
+              mb-2
+            "
+          >
+
+            0
+
+          </div>
+
+          <div
+            className="
+              text-gray-500
+              text-xl
               font-bold
             "
           >
 
-            {
-              bookingsCount
-            }
-
-          </div>
-
-          <div
-            className="
-              text-gray-600
-              mt-2
-            "
-          >
-
-            الحجوزات
+            المرضى
 
           </div>
 
@@ -164,8 +188,7 @@ export default function HomePage() {
         <div
           className="
             bg-white
-            text-black
-            rounded-[30px]
+            rounded-[28px]
             p-5
             shadow-2xl
           "
@@ -173,36 +196,48 @@ export default function HomePage() {
 
           <div
             className="
-              text-4xl
-              mb-3
+              w-14
+              h-14
+              rounded-2xl
+              bg-blue-100
+              flex
+              items-center
+              justify-center
+              mb-5
             "
           >
 
-            👥
+            <CalendarDays
+              size={30}
+              className="
+                text-[#2146e8]
+              "
+            />
 
           </div>
 
           <div
             className="
-              text-3xl
+              text-5xl
+              font-extrabold
+              text-black
+              mb-2
+            "
+          >
+
+            0
+
+          </div>
+
+          <div
+            className="
+              text-gray-500
+              text-xl
               font-bold
             "
           >
 
-            {
-              patientsCount
-            }
-
-          </div>
-
-          <div
-            className="
-              text-gray-600
-              mt-2
-            "
-          >
-
-            المرضى
+            الحجوزات
 
           </div>
 
@@ -213,8 +248,7 @@ export default function HomePage() {
       <div
         className="
           bg-white
-          text-black
-          rounded-[35px]
+          rounded-[30px]
           p-6
           shadow-2xl
           mb-6
@@ -223,29 +257,65 @@ export default function HomePage() {
 
         <div
           className="
-            text-2xl
-            font-bold
-            mb-3
-            text-right
+            flex
+            items-center
+            justify-between
+            mb-4
           "
         >
 
-          🔥 حجوزات اليوم
+          <div
+            className="
+              w-14
+              h-14
+              rounded-2xl
+              bg-orange-100
+              flex
+              items-center
+              justify-center
+            "
+          >
 
-        </div>
+            <CalendarDays
+              size={30}
+              className="
+                text-orange-500
+              "
+            />
 
-        <div
-          className="
-            text-5xl
-            font-bold
-            text-[#2146e8]
-            text-center
-          "
-        >
+          </div>
 
-          {
-            todayBookings
-          }
+          <div
+            className="
+              text-right
+            "
+          >
+
+            <div
+              className="
+                text-3xl
+                font-extrabold
+                text-black
+              "
+            >
+
+              حجوزات اليوم
+
+            </div>
+
+            <div
+              className="
+                text-gray-500
+                text-lg
+                mt-1
+              "
+            >
+
+              لا توجد حجوزات اليوم
+
+            </div>
+
+          </div>
 
         </div>
 
@@ -253,75 +323,146 @@ export default function HomePage() {
 
       <div
         className="
-          grid
-          gap-4
+          space-y-4
         "
       >
 
         <Link
           href="/calendar"
-
           className="
-            h-20
+            h-24
             bg-white
-            text-black
             rounded-[30px]
+            shadow-2xl
             flex
             items-center
-            justify-center
-            text-2xl
-            font-bold
-            shadow-2xl
+            justify-between
+            px-6
           "
         >
 
-          📅 إدارة الحجوزات
+          <div
+            className="
+              w-14
+              h-14
+              rounded-2xl
+              bg-blue-100
+              flex
+              items-center
+              justify-center
+            "
+          >
+
+            <CalendarDays
+              size={30}
+              className="
+                text-[#2146e8]
+              "
+            />
+
+          </div>
+
+          <div
+            className="
+              text-2xl
+              font-extrabold
+              text-black
+            "
+          >
+
+            إدارة الحجوزات
+
+          </div>
 
         </Link>
 
         <Link
           href="/patients"
-
           className="
-            h-20
+            h-24
             bg-white
-            text-black
             rounded-[30px]
+            shadow-2xl
             flex
             items-center
-            justify-center
-            text-2xl
-            font-bold
-            shadow-2xl
+            justify-between
+            px-6
           "
         >
 
-          👥 المرضى
+          <div
+            className="
+              w-14
+              h-14
+              rounded-2xl
+              bg-blue-100
+              flex
+              items-center
+              justify-center
+            "
+          >
 
-        </Link>
+            <Users
+              size={30}
+              className="
+                text-[#2146e8]
+              "
+            />
 
-        <Link
-          href="/booking/dr-ahmed"
+          </div>
 
-          className="
-            h-20
-            bg-[#2146e8]
-            text-white
-            rounded-[30px]
-            flex
-            items-center
-            justify-center
-            text-2xl
-            font-bold
-            shadow-2xl
-          "
-        >
+          <div
+            className="
+              text-2xl
+              font-extrabold
+              text-black
+            "
+          >
 
-          ➕ إنشاء حجز
+            المرضى
+
+          </div>
 
         </Link>
 
       </div>
+
+      <Link
+        href="/booking/dr-ahmed"
+        className="
+          fixed
+          bottom-28
+          left-5
+          right-5
+          h-20
+          bg-[#2146e8]
+          rounded-[30px]
+          shadow-2xl
+          flex
+          items-center
+          justify-center
+          gap-3
+        "
+      >
+
+        <Plus
+          size={32}
+          color="white"
+        />
+
+        <span
+          className="
+            text-white
+            text-2xl
+            font-extrabold
+          "
+        >
+
+          إنشاء حجز
+
+        </span>
+
+      </Link>
 
     </main>
   );
