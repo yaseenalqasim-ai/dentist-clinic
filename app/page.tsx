@@ -2,500 +2,226 @@
 
 import {
   useEffect,
-  useState
+  useState,
 } from "react";
 
 import {
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit
+  useRouter,
+} from "next/navigation";
+
+import {
+  useAuth,
+} from "@/app/context/AuthContext";
+
+import {
+  doc,
+  getDoc,
 } from "firebase/firestore";
 
 import {
-  db
-} from "../lib/firebase";
+  db,
+} from "@/lib/firebase";
 
-import {
-  useUser
-} from "./context/UserContext";
+export default function HomePage() {
 
-export default function DashboardPage(){
+  const router =
+    useRouter();
 
   const {
-    currentUser
-  } = useUser();
+    user,
+    loading,
+  } = useAuth();
 
   const [
-    loading,
-    setLoading
+    checkingSubscription,
+    setCheckingSubscription,
   ] = useState(true);
 
-  const [
-    stats,
-    setStats
-  ] = useState({
+  useEffect(() => {
 
-    patients:0,
+    async function checkAccess() {
 
-    bookings:0,
-
-    todayBookings:0,
-
-    doctors:0
-
-  });
-
-  const [
-    latestBookings,
-    setLatestBookings
-  ] = useState<any[]>([]);
-
-  useEffect(()=>{
-
-    async function loadDashboard(){
-
-      if(
-        !currentUser?.clinicId
-      ){
+      if (loading) {
         return;
       }
 
-      try{
+      if (!user) {
 
-        const clinicId =
-          currentUser.clinicId;
+        router.push("/login");
 
-        const patientsQuery =
-          query(
+        return;
+      }
 
-            collection(
-              db,
-              "patients"
-            ),
+      try {
 
-            where(
-              "clinicId",
-              "==",
-              clinicId
-            )
-
+        const userRef =
+          doc(
+            db,
+            "users",
+            user.uid
           );
 
-        const bookingsQuery =
-          query(
+        const userSnap =
+          await getDoc(userRef);
 
-            collection(
-              db,
-              "bookings"
-            ),
+        if (!userSnap.exists()) {
 
-            where(
-              "clinicId",
-              "==",
-              clinicId
-            )
+          setCheckingSubscription(false);
 
+          return;
+        }
+
+        const userData:any =
+          userSnap.data();
+
+        if (!userData?.clinicId) {
+
+          setCheckingSubscription(false);
+
+          return;
+        }
+
+        const clinicRef =
+          doc(
+            db,
+            "clinics",
+            userData.clinicId
           );
 
-        const doctorsQuery =
-          query(
+        const clinicSnap =
+          await getDoc(clinicRef);
 
-            collection(
-              db,
-              "users"
-            ),
+        if (!clinicSnap.exists()) {
 
-            where(
-              "clinicId",
-              "==",
-              clinicId
-            ),
+          setCheckingSubscription(false);
 
-            where(
-              "role",
-              "==",
-              "doctor"
-            )
+          return;
+        }
 
+        const clinicData:any =
+          clinicSnap.data();
+
+        if (
+          !clinicData.subscriptionEnd
+        ) {
+
+          setCheckingSubscription(false);
+
+          return;
+        }
+
+        const endDate =
+          new Date(
+            clinicData.subscriptionEnd
           );
-
-        const latestBookingsQuery =
-          query(
-
-            collection(
-              db,
-              "bookings"
-            ),
-
-            where(
-              "clinicId",
-              "==",
-              clinicId
-            ),
-
-            orderBy(
-              "createdAt",
-              "desc"
-            ),
-
-            limit(5)
-
-          );
-
-        const [
-          patientsSnap,
-          bookingsSnap,
-          doctorsSnap,
-          latestSnap
-        ] = await Promise.all([
-
-          getDocs(
-            patientsQuery
-          ),
-
-          getDocs(
-            bookingsQuery
-          ),
-
-          getDocs(
-            doctorsQuery
-          ),
-
-          getDocs(
-            latestBookingsQuery
-          )
-
-        ]);
 
         const today =
-          new Date()
-            .toISOString()
-            .split("T")[0];
+          new Date();
 
-        const todayCount =
-          bookingsSnap.docs.filter(
-            (doc)=>{
+        if (endDate < today) {
 
-              const data:any =
-                doc.data();
-
-              return (
-                data.date === today
-              );
-
-            }
-          ).length;
-
-        setStats({
-
-          patients:
-            patientsSnap.size,
-
-          bookings:
-            bookingsSnap.size,
-
-          todayBookings:
-            todayCount,
-
-          doctors:
-            doctorsSnap.size
-
-        });
-
-        const latestData =
-          latestSnap.docs.map(
-            (doc)=>({
-
-              id:doc.id,
-
-              ...doc.data()
-
-            })
+          router.push(
+            "/subscription-expired"
           );
 
-        setLatestBookings(
-          latestData
-        );
+          return;
+        }
 
-      }catch(error){
+        setCheckingSubscription(false);
+
+      } catch (error) {
 
         console.error(error);
 
-      }finally{
-
-        setLoading(false);
+        setCheckingSubscription(false);
 
       }
 
     }
 
-    loadDashboard();
+    checkAccess();
 
-  },[
-    currentUser
+  }, [
+    user,
+    loading,
+    router,
   ]);
 
-  if(loading){
+  if (
+    loading ||
+    checkingSubscription
+  ) {
 
-    return(
+    return (
 
-      <main
+      <div
         className="
-          min-h-screen
+          h-screen
           flex
           items-center
           justify-center
-          text-3xl
-          bg-[#f3f3f3]
+          text-2xl
+          font-bold
         "
       >
 
         جاري التحميل...
 
-      </main>
+      </div>
 
     );
 
   }
 
-  return(
+  return (
 
     <main
       className="
         min-h-screen
-        bg-[#f3f3f3]
-        p-4
-        pb-32
+        bg-zinc-100
+        p-6
       "
     >
 
       <div
         className="
-          bg-[#2146e8]
-          rounded-[35px]
-          p-6
-          text-white
-          shadow-2xl
-          mb-6
+          max-w-5xl
+          mx-auto
+          space-y-6
         "
       >
-
-        <h1
-          className="
-            text-4xl
-            font-bold
-            text-right
-            mb-3
-          "
-        >
-
-          🦷 Dashboard
-
-        </h1>
-
-        <p
-          className="
-            text-right
-            text-xl
-            text-blue-100
-          "
-        >
-
-          مرحبًا {
-            currentUser?.name
-          }
-
-        </p>
-
-      </div>
-
-      <div
-        className="
-          grid
-          grid-cols-2
-          gap-4
-          mb-6
-        "
-      >
-
-        <StatCard
-          title="المرضى"
-          value={stats.patients}
-          icon="👥"
-        />
-
-        <StatCard
-          title="الحجوزات"
-          value={stats.bookings}
-          icon="📅"
-        />
-
-        <StatCard
-          title="حجوزات اليوم"
-          value={stats.todayBookings}
-          icon="⏰"
-        />
-
-        <StatCard
-          title="الأطباء"
-          value={stats.doctors}
-          icon="👨‍⚕️"
-        />
-
-      </div>
-
-      <div
-        className="
-          bg-white
-          rounded-[35px]
-          p-5
-          shadow-2xl
-        "
-      >
-
-        <h2
-          className="
-            text-2xl
-            font-bold
-            text-right
-            mb-5
-          "
-        >
-
-          آخر الحجوزات
-
-        </h2>
 
         <div
           className="
-            space-y-4
+            bg-white
+            rounded-2xl
+            p-6
+            shadow
           "
         >
 
-          {
+          <h1
+            className="
+              text-3xl
+              font-bold
+              mb-4
+            "
+          >
 
-            latestBookings.map(
-              (booking:any)=>(
+            نظام المواعيد المطور لأطباء الأسنان 🦷
 
-                <div
+          </h1>
 
-                  key={booking.id}
+          <p>
 
-                  className="
-                    bg-gray-100
-                    rounded-2xl
-                    p-4
-                    text-right
-                  "
-                >
+            مرحباً بك
 
-                  <div
-                    className="
-                      text-xl
-                      font-bold
-                      mb-2
-                    "
-                  >
-
-                    👤 {
-                      booking.patientName
-                    }
-
-                  </div>
-
-                  <div
-                    className="
-                      text-gray-700
-                    "
-                  >
-
-                    📅 {
-                      booking.date
-                    }
-
-                    {" - "}
-
-                    ⏰ {
-                      booking.time
-                    }
-
-                  </div>
-
-                </div>
-
-              )
-            )
-
-          }
+          </p>
 
         </div>
 
       </div>
 
     </main>
-
   );
-
-}
-
-function StatCard({
-  title,
-  value,
-  icon
-}:any){
-
-  return(
-
-    <div
-      className="
-        bg-white
-        rounded-[30px]
-        p-5
-        shadow-2xl
-        text-center
-      "
-    >
-
-      <div
-        className="
-          text-5xl
-          mb-3
-        "
-      >
-
-        {icon}
-
-      </div>
-
-      <div
-        className="
-          text-3xl
-          font-bold
-          text-[#2146e8]
-          mb-2
-        "
-      >
-
-        {value}
-
-      </div>
-
-      <div
-        className="
-          text-gray-600
-          text-lg
-        "
-      >
-
-        {title}
-
-      </div>
-
-    </div>
-
-  );
-
 }
