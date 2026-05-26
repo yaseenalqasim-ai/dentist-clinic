@@ -18,9 +18,6 @@ import {
   UserProvider
 } from "@/app/context/UserContext";
 
-import SubscriptionGuard
-from "@/app/components/SubscriptionGuard";
-
 export default function RootLayout({
   children,
 }: {
@@ -92,113 +89,109 @@ export default function RootLayout({
 
         <UserProvider>
 
-          <SubscriptionGuard>
+          <div
+            className="
+              pb-28
+            "
+          >
 
-            <div
-              className="
-                pb-28
-              "
-            >
+            {children}
 
-              {children}
+          </div>
 
-            </div>
+          {
 
-            {
+            !hideNavbar && (
 
-              !hideNavbar && (
+              <nav
+                className="
+                  fixed
+                  bottom-0
+                  left-0
+                  right-0
+                  bg-white
+                  border-t
+                  shadow-2xl
+                  z-50
+                "
+              >
 
-                <nav
+                <div
                   className="
-                    fixed
-                    bottom-0
-                    left-0
-                    right-0
-                    bg-white
-                    border-t
-                    shadow-2xl
-                    z-50
+                    grid
+                    grid-cols-5
                   "
                 >
 
-                  <div
-                    className="
-                      grid
-                      grid-cols-5
-                    "
-                  >
+                  {
 
-                    {
+                    navItems.map((item)=>{
 
-                      navItems.map((item)=>{
+                      const active =
+                        pathname ===
+                        item.href;
 
-                        const active =
-                          pathname ===
-                          item.href;
+                      const Icon =
+                        item.icon;
 
-                        const Icon =
-                          item.icon;
+                      return(
 
-                        return(
+                        <Link
+                          key={item.href}
+                          href={item.href}
 
-                          <Link
-                            key={item.href}
-                            href={item.href}
+                          className={`
 
-                            className={`
+                            flex
+                            flex-col
+                            items-center
+                            justify-center
+                            py-3
+                            transition
 
-                              flex
-                              flex-col
-                              items-center
-                              justify-center
-                              py-3
-                              transition
+                            ${
+                              active
+                              ?
+                              "text-[#2146e8]"
+                              :
+                              "text-gray-500"
+                            }
 
-                              ${
-                                active
-                                ?
-                                "text-[#2146e8]"
-                                :
-                                "text-gray-500"
-                              }
+                          `}
+                        >
 
-                            `}
+                          <Icon
+                            size={28}
+                            strokeWidth={2.5}
+                          />
+
+                          <span
+                            className="
+                              text-sm
+                              font-bold
+                              mt-1
+                            "
                           >
 
-                            <Icon
-                              size={28}
-                              strokeWidth={2.5}
-                            />
+                            {item.name}
 
-                            <span
-                              className="
-                                text-sm
-                                font-bold
-                                mt-1
-                              "
-                            >
+                          </span>
 
-                              {item.name}
+                        </Link>
 
-                            </span>
+                      );
 
-                          </Link>
+                    })
 
-                        );
+                  }
 
-                      })
+                </div>
 
-                    }
+              </nav>
 
-                  </div>
+            )
 
-                </nav>
-
-              )
-
-            }
-
-          </SubscriptionGuard>
+          }
 
         </UserProvider>
 
