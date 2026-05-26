@@ -2,42 +2,41 @@
 
 import {
   useEffect,
-  useState
+  useState,
 } from "react";
 
 import {
   doc,
   getDoc,
-  updateDoc
 } from "firebase/firestore";
 
 import {
-  db
+  db,
 } from "../../lib/firebase";
 
 import {
-  useUser
+  useUser,
 } from "../context/UserContext";
 
 export default function SubscriptionGuard({
-  children
+  children,
 }:{
   children:React.ReactNode
 }){
 
   const {
     currentUser,
-    loading
+    loading,
   } = useUser();
 
   const [
     allowed,
-    setAllowed
+    setAllowed,
   ] = useState(false);
 
   const [
     checking,
-    setChecking
+    setChecking,
   ] = useState(true);
 
   useEffect(()=>{
@@ -50,11 +49,19 @@ export default function SubscriptionGuard({
           return;
         }
 
-        if(
-          !currentUser?.clinicId
-        ){
+        if(!currentUser){
+
           setChecking(false);
           return;
+
+        }
+
+        if(!currentUser?.clinicId){
+
+          setAllowed(true);
+          setChecking(false);
+          return;
+
         }
 
         const clinicRef =
@@ -65,66 +72,50 @@ export default function SubscriptionGuard({
           );
 
         const clinicSnap =
-          await getDoc(
-            clinicRef
-          );
+          await getDoc(clinicRef);
 
-        if(
-          !clinicSnap.exists()
-        ){
+        if(!clinicSnap.exists()){
+
+          setAllowed(true);
           setChecking(false);
           return;
+
         }
 
         const clinicData:any =
           clinicSnap.data();
 
-        const today =
-          new Date();
+        if(!clinicData?.subscriptionEnd){
+
+          setAllowed(true);
+          setChecking(false);
+          return;
+
+        }
 
         const endDate =
           new Date(
             clinicData.subscriptionEnd
           );
 
-        if(
-          endDate < today
-        ){
+        const today =
+          new Date();
 
-          await updateDoc(
-
-            clinicRef,
-
-            {
-              subscriptionStatus:
-                "expired"
-            }
-
-          );
-
-        }
-
-        if(
-
-          clinicData.subscriptionStatus
-          ===
-          "active"
-
-          ||
-
-          clinicData.subscriptionStatus
-          ===
-          "trial"
-
-        ){
+        if(endDate >= today){
 
           setAllowed(true);
+
+        }else{
+
+          setAllowed(false);
 
         }
 
       }catch(error){
 
         console.error(error);
+
+        setAllowed(true);
 
       }finally{
 
@@ -138,7 +129,7 @@ export default function SubscriptionGuard({
 
   },[
     currentUser,
-    loading
+    loading,
   ]);
 
   if(checking){
@@ -153,6 +144,7 @@ export default function SubscriptionGuard({
           justify-center
           text-3xl
           font-bold
+          bg-white
         "
       >
 
