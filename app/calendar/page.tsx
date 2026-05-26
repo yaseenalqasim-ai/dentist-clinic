@@ -23,6 +23,9 @@ import {
   useUser
 } from "../context/UserContext";
 
+import ProtectedPage
+from "../components/ProtectedPage";
+
 export default function CalendarPage() {
 
   const {
@@ -182,7 +185,9 @@ export default function CalendarPage() {
         booking.status === filter
     );
 
-  return (
+ return (
+
+  <ProtectedPage>
 
     <main
       className="
@@ -608,5 +613,5 @@ ${booking.time}
       }
 
     </main>
-  );
+  </ProtectedPage>);
 }

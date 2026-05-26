@@ -24,6 +24,9 @@ import {
   useUser
 } from "../context/UserContext";
 
+import ProtectedPage
+from "../components/ProtectedPage";
+
 export default function PatientsPage() {
 
   const router =
@@ -110,6 +113,8 @@ export default function PatientsPage() {
   ]);
 
   return (
+
+  <ProtectedPage>
 
     <main
       className="
@@ -306,5 +311,5 @@ export default function PatientsPage() {
       }
 
     </main>
-  );
+ </ProtectedPage> );
 }
