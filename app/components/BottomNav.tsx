@@ -1,263 +1,271 @@
 "use client";
 
-import Link
-from "next/link";
+import Link from "next/link";
 
 import {
-  usePathname
+  usePathname,
 } from "next/navigation";
 
 import {
-  useUser
-} from "../context/UserContext";
+  House,
+  CalendarDays,
+  Users,
+  UserRoundCog,
+  Settings,
+  BarChart3,
+} from "lucide-react";
 
-export default function BottomNav(){
+import {
+  useAuth,
+} from "@/app/context/AuthContext";
+
+export default function BottomNav() {
 
   const pathname =
     usePathname();
 
   const {
-    currentUser
-  } = useUser();
+    role,
+  } = useAuth();
 
-  const items:any[] = [
+  const hideNavbar =
 
-    {
-      href:"/dashboard",
-      label:"الرئيسية",
-      icon:"🏠"
-    },
+    pathname === "/login"
 
-    {
-      href:"/calendar",
-      label:"الحجوزات",
-      icon:"📅"
-    },
+    ||
 
-    {
-      href:"/booking",
-      label:"إضافة",
-      icon:"➕"
-    },
+    pathname === "/create-user"
 
-    {
-      href:"/patients",
-      label:"المرضى",
-      icon:"🧑‍⚕️"
-    }
+    ||
 
-  ];
+    pathname === "/unauthorized";
 
-  if(
-    currentUser?.role ===
-    "admin"
-  ){
+  if (hideNavbar) {
+    return null;
+  }
 
-    items.push(
+  let navItems:any[] = [];
+
+  // =========================
+  // DOCTOR NAVIGATION
+  // =========================
+
+  if (role === "doctor") {
+
+    navItems = [
 
       {
-        href:"/doctors",
-        label:"الأطباء",
-        icon:"👨‍⚕️"
+        name: "الرئيسية",
+        href: "/",
+        icon: House,
       },
 
       {
-        href:"/staff",
-        label:"الموظفون",
-        icon:"🧑‍💼"
+        name: "الحجوزات",
+        href: "/calendar",
+        icon: CalendarDays,
       },
 
       {
-        href:"/reports",
-        label:"التقارير",
-        icon:"📊"
+        name: "المرضى",
+        href: "/patients",
+        icon: Users,
       },
 
       {
-        href:"/create-user",
-        label:"مستخدم",
-        icon:"👤"
-      }
+        name: "الإحصائيات",
+        href: "/reports",
+        icon: BarChart3,
+      },
 
-    );
+    ];
 
   }
 
-  items.push({
+  // =========================
+  // SECRETARY NAVIGATION
+  // =========================
 
-    href:"/settings",
-    label:"الإعدادات",
-    icon:"⚙️"
+  else if (
+    role === "secretary"
+  ) {
 
-  });
-
-  return(
-
-    <nav
-      style={navStyle}
-    >
+    navItems = [
 
       {
+        name: "الرئيسية",
+        href: "/",
+        icon: House,
+      },
 
-        items.map((item)=>{
+      {
+        name: "الحجوزات",
+        href: "/calendar",
+        icon: CalendarDays,
+      },
 
-          const active =
+      {
+        name: "المرضى",
+        href: "/patients",
+        icon: Users,
+      },
 
-            pathname ===
-            item.href;
+      {
+        name: "الأطباء",
+        href: "/doctors",
+        icon: UserRoundCog,
+      },
 
-          return(
+      {
+        name: "الإعدادات",
+        href: "/settings",
+        icon: Settings,
+      },
 
-            <Link
-              key={item.href}
+    ];
 
-              href={item.href}
+  }
 
-              style={{
+  // =========================
+  // OWNER / ADMIN
+  // =========================
 
-                ...itemStyle,
+  else {
 
-                transform:
+    navItems = [
 
-                  active
+      {
+        name: "الرئيسية",
+        href: "/",
+        icon: House,
+      },
 
-                  ?
+      {
+        name: "الحجوزات",
+        href: "/calendar",
+        icon: CalendarDays,
+      },
 
-                  "translateY(-6px)"
+      {
+        name: "الأطباء",
+        href: "/doctors",
+        icon: UserRoundCog,
+      },
 
-                  :
+      {
+        name: "الإحصائيات",
+        href: "/reports",
+        icon: BarChart3,
+      },
 
-                  "translateY(0)",
+      {
+        name: "الإعدادات",
+        href: "/settings",
+        icon: Settings,
+      },
 
-                background:
+    ];
 
-                  active
+  }
 
-                  ?
+  return (
 
-                  "linear-gradient(135deg,#2563eb,#1d4ed8)"
+    <nav
+      className="
+        fixed
+        bottom-0
+        left-0
+        right-0
+        bg-[#0d1730]
+        border-t
+        border-white/10
+        z-50
+        backdrop-blur-xl
+      "
+    >
 
-                  :
+      <div
+        className={`
+          grid
 
-                  "transparent",
+          ${
+            navItems.length === 5
+            ? "grid-cols-5"
+            : navItems.length === 4
+            ? "grid-cols-4"
+            : "grid-cols-3"
+          }
+        `}
+      >
 
-                color:
+        {
 
-                  active
+          navItems.map((item:any)=>{
 
-                  ?
+            const active =
+              pathname ===
+              item.href;
 
-                  "white"
+            const Icon =
+              item.icon;
 
-                  :
+            return(
 
-                  "#6b7280",
+              <Link
 
-                boxShadow:
+                key={item.href}
 
-                  active
+                href={item.href}
 
-                  ?
+                className={`
 
-                  "0 10px 20px rgba(37,99,235,0.25)"
+                  flex
+                  flex-col
+                  items-center
+                  justify-center
+                  py-3
+                  transition-all
 
-                  :
+                  ${
+                    active
+                    ?
+                    "text-blue-500"
+                    :
+                    "text-zinc-400"
+                  }
 
-                  "none"
-
-              }}
-            >
-
-              <div
-                style={{
-                  fontSize:"24px",
-                  marginBottom:"6px"
-                }}
+                `}
               >
 
-                {
-                  item.icon
-                }
+                <Icon
+                  size={24}
+                  strokeWidth={2.5}
+                />
 
-              </div>
+                <span
+                  className="
+                    text-xs
+                    font-bold
+                    mt-1
+                  "
+                >
 
-              <div
-                style={{
-                  fontSize:"12px",
-                  fontWeight:"bold",
-                  textAlign:"center",
-                  lineHeight:"1.3"
-                }}
-              >
+                  {item.name}
 
-                {
-                  item.label
-                }
+                </span>
 
-              </div>
+              </Link>
 
-            </Link>
+            );
 
-          );
+          })
 
-        })
+        }
 
-      }
+      </div>
 
     </nav>
 
   );
 
 }
-
-const navStyle:any = {
-
-  position:"fixed",
-
-  bottom:"10px",
-
-  right:"10px",
-
-  left:"10px",
-
-  background:"rgba(255,255,255,0.95)",
-
-  backdropFilter:"blur(14px)",
-
-  borderRadius:"28px",
-
-  padding:"10px",
-
-  display:"grid",
-
-  gridTemplateColumns:
-    "repeat(auto-fit,minmax(70px,1fr))",
-
-  gap:"8px",
-
-  boxShadow:
-    "0 10px 40px rgba(0,0,0,0.12)",
-
-  zIndex:9999
-};
-
-const itemStyle:any = {
-
-  textDecoration:"none",
-
-  padding:"12px 6px",
-
-  borderRadius:"20px",
-
-  display:"flex",
-
-  flexDirection:"column",
-
-  alignItems:"center",
-
-  justifyContent:"center",
-
-  transition:"0.25s",
-
-  minHeight:"74px"
-};
