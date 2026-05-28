@@ -15,17 +15,18 @@ import {
 } from "lucide-react";
 
 import {
-  UserProvider
-} from "@/app/context/UserContext";
+  AuthProvider,
+  useAuth,
+} from "@/app/context/AuthContext";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function BottomNavigation() {
 
   const pathname =
     usePathname();
+
+  const {
+    role,
+  } = useAuth();
 
   const hideNavbar =
 
@@ -39,39 +40,213 @@ export default function RootLayout({
 
     pathname === "/unauthorized";
 
-  const navItems = [
+  if (hideNavbar) {
+    return null;
+  }
 
-    {
-      name: "الرئيسية",
-      href: "/",
-      icon: House,
-    },
+  let navItems:any[] = [];
 
-    {
-      name: "الحجوزات",
-      href: "/calendar",
-      icon: CalendarDays,
-    },
+  if (
+    role === "doctor"
+  ) {
 
-    {
-      name: "المرضى",
-      href: "/patients",
-      icon: Users,
-    },
+    navItems = [
 
-    {
-      name: "الأطباء",
-      href: "/doctors",
-      icon: UserRoundCog,
-    },
+      {
+        name: "الرئيسية",
+        href: "/",
+        icon: House,
+      },
 
-    {
-      name: "الإعدادات",
-      href: "/settings",
-      icon: Settings,
-    },
+      {
+        name: "الحجوزات",
+        href: "/calendar",
+        icon: CalendarDays,
+      },
 
-  ];
+      {
+        name: "المرضى",
+        href: "/patients",
+        icon: Users,
+      },
+
+      {
+        name: "الإعدادات",
+        href: "/settings",
+        icon: Settings,
+      },
+
+    ];
+
+  } else if (
+    role === "secretary"
+  ) {
+
+    navItems = [
+
+      {
+        name: "الرئيسية",
+        href: "/",
+        icon: House,
+      },
+
+      {
+        name: "الحجوزات",
+        href: "/calendar",
+        icon: CalendarDays,
+      },
+
+      {
+        name: "المرضى",
+        href: "/patients",
+        icon: Users,
+      },
+
+      {
+        name: "الأطباء",
+        href: "/doctors",
+        icon: UserRoundCog,
+      },
+
+      {
+        name: "الإعدادات",
+        href: "/settings",
+        icon: Settings,
+      },
+
+    ];
+
+  } else if (
+    role === "admin"
+  ) {
+
+    navItems = [
+
+      {
+        name: "الرئيسية",
+        href: "/",
+        icon: House,
+      },
+
+      {
+        name: "الأطباء",
+        href: "/doctors",
+        icon: UserRoundCog,
+      },
+
+      {
+        name: "الإعدادات",
+        href: "/settings",
+        icon: Settings,
+      },
+
+    ];
+
+  }
+
+  return (
+
+    <nav
+      className="
+        fixed
+        bottom-0
+        left-0
+        right-0
+        bg-white
+        border-t
+        shadow-2xl
+        z-50
+      "
+    >
+
+      <div
+        className={`
+          grid
+          ${
+            navItems.length === 5
+            ? "grid-cols-5"
+            : navItems.length === 4
+            ? "grid-cols-4"
+            : "grid-cols-3"
+          }
+        `}
+      >
+
+        {
+
+          navItems.map((item:any)=>{
+
+            const active =
+              pathname ===
+              item.href;
+
+            const Icon =
+              item.icon;
+
+            return(
+
+              <Link
+                key={item.href}
+                href={item.href}
+
+                className={`
+
+                  flex
+                  flex-col
+                  items-center
+                  justify-center
+                  py-3
+                  transition
+
+                  ${
+                    active
+                    ?
+                    "text-[#2146e8]"
+                    :
+                    "text-gray-500"
+                  }
+
+                `}
+              >
+
+                <Icon
+                  size={28}
+                  strokeWidth={2.5}
+                />
+
+                <span
+                  className="
+                    text-sm
+                    font-bold
+                    mt-1
+                  "
+                >
+
+                  {item.name}
+
+                </span>
+
+              </Link>
+
+            );
+
+          })
+
+        }
+
+      </div>
+
+    </nav>
+
+  );
+
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
 
   return (
 
@@ -82,12 +257,12 @@ export default function RootLayout({
 
       <body
         className="
-          bg-[#0b1b55]
+          bg-[#f4f4f4]
           min-h-screen
         "
       >
 
-        <UserProvider>
+        <AuthProvider>
 
           <div
             className="
@@ -99,101 +274,9 @@ export default function RootLayout({
 
           </div>
 
-          {
+          <BottomNavigation />
 
-            !hideNavbar && (
-
-              <nav
-                className="
-                  fixed
-                  bottom-0
-                  left-0
-                  right-0
-                  bg-white
-                  border-t
-                  shadow-2xl
-                  z-50
-                "
-              >
-
-                <div
-                  className="
-                    grid
-                    grid-cols-5
-                  "
-                >
-
-                  {
-
-                    navItems.map((item)=>{
-
-                      const active =
-                        pathname ===
-                        item.href;
-
-                      const Icon =
-                        item.icon;
-
-                      return(
-
-                        <Link
-                          key={item.href}
-                          href={item.href}
-
-                          className={`
-
-                            flex
-                            flex-col
-                            items-center
-                            justify-center
-                            py-3
-                            transition
-
-                            ${
-                              active
-                              ?
-                              "text-[#2146e8]"
-                              :
-                              "text-gray-500"
-                            }
-
-                          `}
-                        >
-
-                          <Icon
-                            size={28}
-                            strokeWidth={2.5}
-                          />
-
-                          <span
-                            className="
-                              text-sm
-                              font-bold
-                              mt-1
-                            "
-                          >
-
-                            {item.name}
-
-                          </span>
-
-                        </Link>
-
-                      );
-
-                    })
-
-                  }
-
-                </div>
-
-              </nav>
-
-            )
-
-          }
-
-        </UserProvider>
+        </AuthProvider>
 
       </body>
 

@@ -2,7 +2,6 @@
 
 import {
   useEffect,
-  useState,
 } from "react";
 
 import {
@@ -10,126 +9,45 @@ import {
 } from "next/navigation";
 
 import {
-  doc,
-  getDoc,
-} from "firebase/firestore";
-
-import {
-  db,
-} from "../../lib/firebase";
-
-import {
-  useUser,
-} from "../context/UserContext";
+  useAuth,
+} from "@/app/context/AuthContext";
 
 export default function ProtectedPage({
   children,
-}:{
-  children:React.ReactNode
-}){
+}: {
+  children: React.ReactNode;
+}) {
 
   const router =
     useRouter();
 
   const {
-    currentUser,
+    user,
     loading,
-  } = useUser();
+  } = useAuth();
 
-  const [
-    checking,
-    setChecking,
-  ] = useState(true);
+  useEffect(() => {
 
-  useEffect(()=>{
+    if (
+      !loading &&
+      !user
+    ) {
 
-    async function checkAccess(){
-
-      try{
-
-        if(loading){
-          return;
-        }
-
-        if(!currentUser){
-
-          router.push("/login");
-          return;
-
-        }
-
-        if(!currentUser?.clinicId){
-
-          setChecking(false);
-          return;
-
-        }
-
-        const clinicRef =
-          doc(
-            db,
-            "clinics",
-            currentUser.clinicId
-          );
-
-        const clinicSnap =
-          await getDoc(clinicRef);
-
-        if(!clinicSnap.exists()){
-
-          router.push("/subscription-expired");
-          return;
-
-        }
-
-        const clinicData:any =
-          clinicSnap.data();
-
-        if(!clinicData?.subscriptionEnd){
-
-          router.push("/subscription-expired");
-          return;
-
-        }
-
-        const endDate =
-          new Date(
-            clinicData.subscriptionEnd
-          );
-
-        const today =
-          new Date();
-
-        if(endDate < today){
-
-          router.push("/subscription-expired");
-          return;
-
-        }
-
-        setChecking(false);
-
-      }catch(error){
-
-        console.error(error);
-
-        router.push("/login");
-
-      }
+      router.push("/login");
 
     }
 
-    checkAccess();
-
-  },[
-    currentUser,
+  }, [
+    user,
     loading,
     router,
   ]);
 
-  if(checking){
+  if (
+    loading
+  ) {
 
-    return(
+    return (
 
       <main
         className="
@@ -137,18 +55,30 @@ export default function ProtectedPage({
           flex
           items-center
           justify-center
-          text-3xl
-          font-bold
-          bg-white
+          bg-[#f4f4f4]
         "
       >
 
-        جاري التحقق...
+        <div
+          className="
+            text-3xl
+            font-black
+            text-blue-700
+          "
+        >
+
+          جاري التحميل...
+
+        </div>
 
       </main>
 
     );
 
+  }
+
+  if (!user) {
+    return null;
   }
 
   return children;
