@@ -1,9 +1,21 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
+
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+} from "firebase/firestore";
+
+import {
+  db,
+} from "@/lib/firebase";
 
 import CalendarHeader
 from "@/app/components/calendar/CalendarHeader";
@@ -11,279 +23,549 @@ from "@/app/components/calendar/CalendarHeader";
 import WeeklyBoard
 from "@/app/components/calendar/WeeklyBoard";
 
-import StatusModal
-from "@/app/components/calendar/StatusModal";
-
 import QuickBookingModal
 from "@/app/components/calendar/QuickBookingModal";
 
-type Booking = {
-  id:string;
-  patientName:string;
-  time:string;
-  status:string;
-  treatment:string;
-  doctorName:string;
-  duration:number;
-  day:string;
-};
+import AuthGuard
+from "@/app/components/auth/AuthGuard";
 
 export default function CalendarPage(){
 
   const [
-    statusModal,
-    setStatusModal
-  ] = useState(false);
-
-  const [
-    quickBookingModal,
-    setQuickBookingModal
-  ] = useState(false);
-
-  const [
     bookings,
     setBookings
-  ] = useState<Booking[]>([
+  ] = useState<any[]>([]);
 
-    {
-      id:"1",
-      patientName:"ياسين",
-      time:"09:00",
-      status:"confirmed",
-      treatment:"تبييض الأسنان",
-      doctorName:"د. أحمد",
-      duration:120,
-      day:"الأحد",
-    },
+  const [
+    bookingModal,
+    setBookingModal
+  ] = useState(false);
 
-    {
-      id:"2",
-      patientName:"محمد",
-      time:"11:30",
-      status:"completed",
-      treatment:"تقويم",
-      doctorName:"د. أحمد",
-      duration:60,
-      day:"الأحد",
-    },
+  const [
+    loading,
+    setLoading
+  ] = useState(true);
 
-    {
-      id:"3",
-      patientName:"علي",
-      time:"01:00",
-      status:"booked",
-      treatment:"قلع",
-      doctorName:"د. محمد",
-      duration:45,
-      day:"الاثنين",
-    },
+  const [
+    search,
+    setSearch
+  ] = useState("");
 
-  ]);
+  useEffect(()=>{
 
-  const weeklyStats = useMemo(()=>{
+    const q =
+      query(
 
-    return {
+        collection(
+          db,
+          "bookings"
+        ),
 
-      total:
-        bookings.length,
+        orderBy(
+          "createdAt",
+          "desc"
+        )
 
-      completed:
-        bookings.filter(
-          b => b.status === "completed"
-        ).length,
+      );
 
-      cancelled:
-        bookings.filter(
-          b => b.status === "cancelled"
-        ).length,
+    const unsubscribe =
+      onSnapshot(q,(snapshot)=>{
 
-    };
+        const data:any[] = [];
 
-  },[bookings]);
+        snapshot.forEach((docItem)=>{
 
-  return(
+          data.push({
 
-    <main
-      className="
-        min-h-screen
-        bg-[#071028]
-        text-white
-        p-4
-        pb-32
-      "
-    >
+            id:docItem.id,
 
-      <div
+            ...docItem.data(),
+
+          });
+
+        });
+
+        setBookings(data);
+
+        setLoading(false);
+
+      });
+
+    return ()=>unsubscribe();
+
+  },[]);
+
+  const filteredBookings =
+    useMemo(()=>{
+
+      return bookings.filter((booking)=>{
+
+        const text =
+          search.toLowerCase();
+
+        return(
+
+          booking.patientName
+          ?.toLowerCase()
+          .includes(text)
+
+          ||
+
+          booking.treatment
+          ?.toLowerCase()
+          .includes(text)
+
+          ||
+
+          booking.doctorName
+          ?.toLowerCase()
+          .includes(text)
+
+        );
+
+      });
+
+    },[
+      bookings,
+      search
+    ]);
+
+  const weeklyStats =
+    useMemo(()=>{
+
+      return {
+
+        total:
+          filteredBookings.length,
+
+        completed:
+          filteredBookings.filter(
+            booking =>
+              booking.status
+              ===
+              "completed"
+          ).length,
+
+        cancelled:
+          filteredBookings.filter(
+            booking =>
+              booking.status
+              ===
+              "cancelled"
+          ).length,
+
+      };
+
+    },[
+      filteredBookings
+    ]);
+
+  /* LOADING */
+
+  if(loading){
+
+    return(
+
+      <main
         className="
-          max-w-[1900px]
-          mx-auto
+          min-h-screen
+          bg-[#071028]
+
+          p-4
+          md:p-6
         "
       >
 
-        {/* Header */}
-
-        <CalendarHeader
-
-          onOpenBooking={()=>
-            setQuickBookingModal(true)
-          }
-
-        />
-
-        {/* Stats */}
-
         <div
           className="
-            grid
-            grid-cols-3
-            gap-4
-            mb-6
+            max-w-[1900px]
+            mx-auto
           "
         >
 
+          {/* HEADER */}
+
           <div
             className="
-              bg-white/5
+              h-[140px]
+
+              rounded-[36px]
+
+              bg-[#091427]
+
               border
               border-white/10
-              rounded-3xl
-              p-5
+
+              animate-pulse
+
+              mb-8
             "
-          >
+          />
 
-            <p
-              className="
-                text-zinc-400
-                mb-2
-              "
-            >
-
-              مرضى الأسبوع
-
-            </p>
-
-            <h2
-              className="
-                text-4xl
-                font-black
-              "
-            >
-
-              {weeklyStats.total}
-
-            </h2>
-
-          </div>
+          {/* STATS */}
 
           <div
             className="
-              bg-emerald-500/10
-              border
-              border-emerald-500/20
-              rounded-3xl
-              p-5
+              grid
+
+              grid-cols-1
+              sm:grid-cols-3
+
+              gap-4
+
+              mb-8
             "
           >
 
-            <p
-              className="
-                text-emerald-300
-                mb-2
-              "
-            >
+            {
 
-              مكتمل
+              Array.from({
+                length:3
+              }).map((_,i)=>(
 
-            </p>
+                <div
 
-            <h2
-              className="
-                text-4xl
-                font-black
-              "
-            >
+                  key={i}
 
-              {weeklyStats.completed}
+                  className="
+                    h-[130px]
 
-            </h2>
+                    rounded-[30px]
+
+                    bg-[#091427]
+
+                    border
+                    border-white/10
+
+                    animate-pulse
+                  "
+                />
+
+              ))
+
+            }
 
           </div>
 
+          {/* BOARD */}
+
           <div
             className="
-              bg-red-500/10
-              border
-              border-red-500/20
-              rounded-3xl
-              p-5
+              flex
+              gap-5
+
+              overflow-hidden
             "
           >
 
-            <p
-              className="
-                text-red-300
-                mb-2
-              "
-            >
+            {
 
-              ملغي
+              Array.from({
+                length:4
+              }).map((_,i)=>(
 
-            </p>
+                <div
 
-            <h2
-              className="
-                text-4xl
-                font-black
-              "
-            >
+                  key={i}
 
-              {weeklyStats.cancelled}
+                  className="
+                    w-[320px]
 
-            </h2>
+                    rounded-[34px]
+
+                    bg-[#091427]
+
+                    border
+                    border-white/10
+
+                    flex-shrink-0
+
+                    overflow-hidden
+                  "
+                >
+
+                  <div
+                    className="
+                      h-[90px]
+
+                      bg-blue-500/20
+
+                      animate-pulse
+                    "
+                  />
+
+                  <div
+                    className="
+                      p-4
+
+                      flex
+                      flex-col
+                      gap-4
+                    "
+                  >
+
+                    {
+
+                      Array.from({
+                        length:3
+                      }).map((_,x)=>(
+
+                        <div
+
+                          key={x}
+
+                          className="
+                            h-[170px]
+
+                            rounded-[28px]
+
+                            bg-[#0d1730]
+
+                            animate-pulse
+                          "
+                        />
+
+                      ))
+
+                    }
+
+                  </div>
+
+                </div>
+
+              ))
+
+            }
 
           </div>
 
         </div>
 
-        {/* Weekly Board */}
+      </main>
 
-        <WeeklyBoard
+    );
+
+  }
+
+  /* PAGE */
+
+  return(
+
+    <AuthGuard>
+
+      <main
+        className="
+          min-h-screen
+          bg-[#071028]
+          text-white
+
+          px-3
+          md:px-6
+
+          pt-4
+          pb-36
+        "
+      >
+
+        <div
+          className="
+            max-w-[1900px]
+            mx-auto
+          "
+        >
+
+          {/* HEADER */}
+
+          <CalendarHeader
+
+            search={search}
+
+            setSearch={setSearch}
+
+          />
+
+          {/* STATS */}
+
+          <div
+            className="
+              grid
+
+              grid-cols-1
+              sm:grid-cols-3
+
+              gap-4
+
+              mb-7
+            "
+          >
+
+            <StatCard
+              title="إجمالي الحجوزات"
+              value={weeklyStats.total}
+            />
+
+            <StatCard
+              title="الحجوزات المكتملة"
+              value={weeklyStats.completed}
+              green
+            />
+
+            <StatCard
+              title="الحجوزات الملغية"
+              value={weeklyStats.cancelled}
+              red
+            />
+
+          </div>
+
+          {/* ADD BUTTON */}
+
+          <div
+            className="
+              flex
+              justify-end
+              mb-7
+            "
+          >
+
+            <button
+
+              onClick={()=>
+                setBookingModal(true)
+              }
+
+              className="
+                h-16
+
+                px-7
+
+                rounded-[24px]
+
+                bg-gradient-to-r
+                from-[#2948ff]
+                to-[#3d63ff]
+
+                shadow-[0_10px_30px_rgba(41,72,255,0.35)]
+
+                hover:scale-[1.02]
+
+                transition-all
+                duration-300
+
+                text-white
+                text-[17px]
+                font-black
+              "
+            >
+
+              + حجز جديد
+
+            </button>
+
+          </div>
+
+          {/* BOARD */}
+
+          <WeeklyBoard
+            bookings={filteredBookings}
+          />
+
+        </div>
+
+        {/* MODAL */}
+
+        <QuickBookingModal
+
+          open={bookingModal}
+
+          onClose={()=>
+            setBookingModal(false)
+          }
 
           bookings={bookings}
 
-          onOpenStatus={()=>
-            setStatusModal(true)
-          }
-
         />
 
-      </div>
+      </main>
 
-      {/* Status Modal */}
+    </AuthGuard>
 
-      <StatusModal
+  );
 
-        open={statusModal}
+}
 
-        onClose={()=>
-          setStatusModal(false)
+/* STAT CARD */
+
+function StatCard({
+  title,
+  value,
+  green,
+  red,
+}:any){
+
+  return(
+
+    <div
+      className={`
+
+        rounded-[30px]
+
+        p-6
+
+        shadow-[0_10px_40px_rgba(0,0,0,0.35)]
+
+        border
+
+        ${
+          green
+
+          ?
+
+          "bg-emerald-500/10 border-emerald-500/20"
+
+          :
+
+          red
+
+          ?
+
+          "bg-red-500/10 border-red-500/20"
+
+          :
+
+          "bg-[#091427] border-white/10"
+
         }
 
-      />
+      `}
+    >
 
-      {/* Quick Booking Modal */}
+      <p
+        className="
+          text-zinc-500
+          text-sm
+          mb-3
+        "
+      >
 
-      <QuickBookingModal
+        {title}
 
-        open={quickBookingModal}
+      </p>
 
-        onClose={()=>
-          setQuickBookingModal(false)
-        }
+      <h2
+        className="
+          text-white
+          text-[42px]
+          font-black
+          leading-none
+        "
+      >
 
-      />
+        {value}
 
-    </main>
+      </h2>
+
+    </div>
 
   );
 

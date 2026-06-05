@@ -1,341 +1,391 @@
 "use client";
 
 import {
-  durationHeight,
-  calculateEndTime,
-} from "@/lib/calendar";
+  useState,
+} from "react";
+
+import BookingDetailsModal
+from "./BookingDetailsModal";
 
 type Props = {
   booking:any;
-  onOpenStatus:()=>void;
 };
 
-function statusColor(
-  status:string
-){
-
-  switch(status){
-
-    case "confirmed":
-      return "border-blue-500";
-
-    case "completed":
-      return "border-green-500";
-
-    case "cancelled":
-      return "border-red-500";
-
-    default:
-      return "border-yellow-500";
-
-  }
-
-}
-
-function statusLabel(
-  status:string
-){
-
-  switch(status){
-
-    case "confirmed":
-      return "مؤكد";
-
-    case "completed":
-      return "مكتمل";
-
-    case "cancelled":
-      return "ملغي";
-
-    default:
-      return "انتظار";
-
-  }
-
-}
-
-function statusBadge(
-  status:string
-){
-
-  switch(status){
-
-    case "confirmed":
-      return "bg-blue-500 text-white";
-
-    case "completed":
-      return "bg-green-500 text-white";
-
-    case "cancelled":
-      return "bg-red-500 text-white";
-
-    default:
-      return "bg-yellow-500 text-black";
-
-  }
-
-}
-
-function bookingPosition(
-  time:string
-){
-
-  switch(time){
-
-    case "09:00":
-      return "20px";
-
-    case "10:00":
-      return "120px";
-
-    case "11:00":
-      return "220px";
-
-    case "11:30":
-      return "260px";
-
-    case "12:00":
-      return "320px";
-
-    case "01:00":
-      return "420px";
-
-    case "02:00":
-      return "520px";
-
-    case "03:00":
-      return "620px";
-
-    case "04:00":
-      return "720px";
-
-    default:
-      return "20px";
-
-  }
-
-}
-
 export default function BookingCard({
-  booking,
-  onOpenStatus,
+  booking
 }:Props){
+
+  const [
+    open,
+    setOpen
+  ] = useState(false);
+
+  const statusBorders:any = {
+
+    booked:
+      "border-blue-500/20",
+
+    completed:
+      "border-emerald-500/20",
+
+    cancelled:
+      "border-red-500/20",
+
+    waiting:
+      "border-orange-500/20",
+
+  };
+
+  const statusGlow:any = {
+
+    booked:
+      "hover:shadow-[0_10px_40px_rgba(59,130,246,0.18)]",
+
+    completed:
+      "hover:shadow-[0_10px_40px_rgba(16,185,129,0.18)]",
+
+    cancelled:
+      "hover:shadow-[0_10px_40px_rgba(239,68,68,0.18)]",
+
+    waiting:
+      "hover:shadow-[0_10px_40px_rgba(249,115,22,0.18)]",
+
+  };
+
+  const statusLabels:any = {
+
+    booked:"مؤكد",
+
+    completed:"مكتمل",
+
+    cancelled:"ملغي",
+
+    waiting:"انتظار",
+
+  };
+
+  const statusColors:any = {
+
+    booked:
+      "bg-blue-500 text-white",
+
+    completed:
+      "bg-emerald-500 text-white",
+
+    cancelled:
+      "bg-red-500 text-white",
+
+    waiting:
+      "bg-orange-500 text-white",
+
+  };
 
   return(
 
-    <div
+    <>
 
-      className={`
-
-        absolute
-        right-4
-        left-4
-        rounded-3xl
-        border-2
-        p-4
-        shadow-2xl
-        hover:scale-[1.01]
-        transition
-        cursor-pointer
-        bg-[#111c38]
-        overflow-hidden
-
-        ${statusColor(
-          booking.status
-        )}
-
-      `}
-
-      style={{
-
-        top:
-          bookingPosition(
-            booking.time
-          ),
-
-        height:`
-
-          ${
-            durationHeight(
-              booking.duration || 60
-            )
-          }px
-
-        `,
-
-      }}
-
-    >
-
-      {/* Top */}
-
-      <div
-        className="
-          flex
-          items-center
-          justify-between
-          mb-4
-        "
-      >
-
-        <div
-          className="
-            text-xl
-            font-black
-            text-[#4b6bff]
-            leading-8
-          "
-        >
-
-          {booking.time}
-
-          <span
-            className="
-              text-zinc-500
-              mx-2
-            "
-          >
-
-            -
-
-          </span>
-
-          {
-
-            calculateEndTime(
-              booking.time,
-              booking.duration || 60
-            )
-
-          }
-
-        </div>
-
-        <div
-          className={`
-            px-3
-            py-1
-            rounded-full
-            text-sm
-            font-bold
-
-            ${statusBadge(
-              booking.status
-            )}
-          `}
-        >
-
-          {
-
-            statusLabel(
-              booking.status
-            )
-
-          }
-
-        </div>
-
-      </div>
-
-      {/* Patient */}
-
-      <div
-        className="
-          text-2xl
-          font-black
-          text-white
-          text-right
-          mb-2
-        "
-      >
-
-        👤 {
-          booking.patientName
-        }
-
-      </div>
-
-      {/* Treatment */}
-
-      <div
-        className="
-          text-zinc-300
-          text-right
-          mb-3
-          font-medium
-        "
-      >
-
-        🦷 {
-          booking.treatment
-        }
-
-      </div>
-
-      {/* Doctor */}
-
-      <div
-        className="
-          text-sm
-          text-zinc-500
-          text-right
-          mb-4
-        "
-      >
-
-        👨‍⚕️ {
-          booking.doctorName
-        }
-
-      </div>
-
-      {/* Duration */}
-
-      <div
-        className="
-          text-xs
-          text-zinc-500
-          text-right
-          mb-6
-        "
-      >
-
-        مدة الجلسة:
-        {" "}
-        {
-          booking.duration || 60
-        }
-        {" "}
-        دقيقة
-
-      </div>
-
-      {/* Action */}
+      {/* CARD */}
 
       <button
 
-        onClick={onOpenStatus}
+        onClick={()=>
+          setOpen(true)
+        }
 
-        className="
-          absolute
-          bottom-4
-          right-4
-          left-4
-          h-12
-          rounded-2xl
-          bg-[#2146e8]
-          text-white
-          font-black
-          hover:bg-[#3358ff]
-          transition
-        "
+        className={`
+
+          w-full
+          text-right
+
+          min-h-[165px]
+
+          rounded-[30px]
+
+          border
+
+          ${
+            statusBorders[
+              booking.status
+            ] ||
+
+            "border-white/10"
+          }
+
+          bg-gradient-to-b
+          from-[#0b1930]
+          to-[#071327]
+
+          px-5
+          py-5
+
+          shadow-[0_10px_40px_rgba(0,0,0,0.45)]
+
+          transition-all
+          duration-300
+
+          hover:scale-[1.015]
+
+          ${
+            statusGlow[
+              booking.status
+            ] || ""
+          }
+
+          active:scale-[0.99]
+
+        `}
       >
 
-        تغيير الحالة
+        {/* TOP */}
+
+        <div
+          className="
+            flex
+            items-start
+            justify-between
+            mb-6
+          "
+        >
+
+          {/* STATUS */}
+
+          <div
+            className={`
+
+              px-3
+              py-1
+
+              rounded-full
+
+              text-[11px]
+              font-black
+
+              shadow-lg
+
+              ${
+                statusColors[
+                  booking.status
+                ] ||
+
+                "bg-blue-500 text-white"
+              }
+
+            `}
+          >
+
+            {
+
+              statusLabels[
+                booking.status
+              ] ||
+
+              "مؤكد"
+
+            }
+
+          </div>
+
+          {/* TIME */}
+
+          <div
+            className="
+              text-right
+            "
+          >
+
+            <p
+              className="
+                text-[34px]
+                leading-none
+                font-black
+                text-blue-400
+                tracking-tight
+              "
+            >
+
+              {booking.time}
+
+            </p>
+
+          </div>
+
+        </div>
+
+        {/* BODY */}
+
+        <div
+          className="
+            flex
+            flex-col
+            gap-4
+          "
+        >
+
+          {/* PATIENT */}
+
+          <div>
+
+            <p
+              className="
+                text-white
+                text-[24px]
+                font-black
+                leading-none
+                mb-1
+              "
+            >
+
+              {booking.patientName}
+
+            </p>
+
+          </div>
+
+          {/* TREATMENT */}
+
+          <div
+            className="
+              flex
+              items-center
+              justify-end
+              gap-2
+            "
+          >
+
+            <p
+              className="
+                text-zinc-200
+                text-[15px]
+                font-semibold
+              "
+            >
+
+              {booking.treatment}
+
+            </p>
+
+            <span
+              className="
+                text-blue-400
+                text-[16px]
+              "
+            >
+              🦷
+            </span>
+
+          </div>
+
+          {/* DOCTOR */}
+
+          <div
+            className="
+              flex
+              items-center
+              justify-end
+              gap-2
+            "
+          >
+
+            <p
+              className="
+                text-zinc-400
+                text-[14px]
+                font-medium
+              "
+            >
+
+              {booking.doctorName}
+
+            </p>
+
+            <span
+              className="
+                text-zinc-500
+              "
+            >
+              👨‍⚕️
+            </span>
+
+          </div>
+
+          {/* FOOTER */}
+
+          <div
+            className="
+              mt-2
+              pt-3
+
+              border-t
+              border-white/5
+
+              flex
+              items-center
+              justify-between
+            "
+          >
+
+            <div
+              className="
+                text-zinc-600
+                text-[12px]
+              "
+            >
+
+              {booking.day}
+
+            </div>
+
+            <div
+              className="
+                flex
+                items-center
+                gap-2
+              "
+            >
+
+              <p
+                className="
+                  text-zinc-500
+                  text-[12px]
+                  font-medium
+                "
+              >
+
+                {booking.duration} دقيقة
+
+              </p>
+
+              <span
+                className="
+                  text-zinc-600
+                "
+              >
+                ⏱
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
 
       </button>
 
-    </div>
+      {/* MODAL */}
+
+      <BookingDetailsModal
+
+        booking={booking}
+
+        open={open}
+
+        onClose={()=>
+          setOpen(false)
+        }
+
+      />
+
+    </>
 
   );
 

@@ -11,30 +11,20 @@ import {
 
 import {
   collection,
-  getDocs,
-  query,
-  where
+  getDocs
 } from "firebase/firestore";
 
 import {
   db
 } from "../../lib/firebase";
 
-import {
-  useUser
-} from "../context/UserContext";
-
-import ProtectedPage
-from "../components/ProtectedPage";
+import AuthGuard
+from "../components/auth/AuthGuard";
 
 export default function PatientsPage() {
 
   const router =
     useRouter();
-
-  const {
-    currentUser
-  } = useUser();
 
   const [
     patients,
@@ -50,33 +40,16 @@ export default function PatientsPage() {
 
     async function loadPatients() {
 
-      if(
-        !currentUser?.clinicId
-      ){
-        return;
-      }
-
       try{
 
-        const patientsQuery =
-          query(
+        const snapshot =
+          await getDocs(
 
             collection(
               db,
               "patients"
-            ),
-
-            where(
-              "clinicId",
-              "==",
-              currentUser.clinicId
             )
 
-          );
-
-        const snapshot =
-          await getDocs(
-            patientsQuery
           );
 
         const patientsData =
@@ -108,13 +81,11 @@ export default function PatientsPage() {
 
     loadPatients();
 
-  },[
-    currentUser
-  ]);
+  },[]);
 
   return (
 
-  <ProtectedPage>
+  <AuthGuard>
 
     <main
       className="
@@ -281,22 +252,6 @@ export default function PatientsPage() {
 
                     </div>
 
-                    <div
-                      className="
-                        bg-gray-100
-                        rounded-2xl
-                        p-4
-                        text-lg
-                        text-right
-                      "
-                    >
-
-                      🏥 {
-                        patient.clinicId
-                      }
-
-                    </div>
-
                   </div>
 
                 </div>
@@ -311,5 +266,9 @@ export default function PatientsPage() {
       }
 
     </main>
- </ProtectedPage> );
+
+  </AuthGuard>
+
+  );
+
 }

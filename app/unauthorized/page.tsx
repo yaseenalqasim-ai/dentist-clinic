@@ -8,100 +8,133 @@ export default function UnauthorizedPage(){
   return(
 
     <main
-      dir="rtl"
-
-      style={{
-        minHeight:"100vh",
-
-        background:
-          "linear-gradient(135deg,#111827,#1f2937)",
-
-        display:"flex",
-
-        alignItems:"center",
-
-        justifyContent:"center",
-
-        padding:"20px"
-      }}
+      className="
+        min-h-screen
+        bg-[#071028]
+        flex
+        items-center
+        justify-center
+        p-6
+      "
     >
 
       <div
-        style={{
-          width:"100%",
-          maxWidth:"500px",
-
-          background:"white",
-
-          borderRadius:"30px",
-
-          padding:"40px",
-
-          textAlign:"center",
-
-          boxShadow:
-            "0 20px 60px rgba(0,0,0,0.15)"
-        }}
+        className="
+          w-full
+          max-w-2xl
+          rounded-[40px]
+          bg-[#0d1730]
+          border
+          border-white/10
+          p-10
+          text-center
+        "
       >
 
+        {/* Icon */}
+
         <div
-          style={{
-            fontSize:"90px",
-            marginBottom:"20px"
-          }}
+          className="
+            text-8xl
+            mb-6
+          "
         >
 
           🔒
 
         </div>
 
+        {/* Title */}
+
         <h1
-          style={{
-            fontSize:"42px",
-            marginBottom:"16px",
-            color:"#111827"
-          }}
+          className="
+            text-5xl
+            font-black
+            text-white
+            mb-5
+          "
         >
 
-          غير مصرح
+          غير مصرح لك
 
         </h1>
 
+        {/* Description */}
+
         <p
-          style={{
-            color:"#6b7280",
-            marginBottom:"30px",
-            lineHeight:"2"
-          }}
+          className="
+            text-zinc-400
+            text-xl
+            leading-9
+            mb-10
+          "
         >
 
-          ليس لديك صلاحية للوصول إلى هذه الصفحة
+          ليس لديك صلاحية للوصول
+          إلى هذه الصفحة.
 
         </p>
 
-        <Link
-          href="/dashboard"
+        {/* Actions */}
 
-          style={{
-            display:"inline-block",
-
-            background:"#111827",
-
-            color:"white",
-
-            textDecoration:"none",
-
-            padding:"16px 24px",
-
-            borderRadius:"16px",
-
-            fontWeight:"bold"
-          }}
+        <div
+          className="
+            flex
+            items-center
+            justify-center
+            gap-4
+          "
         >
 
-          العودة للرئيسية
+          <Link
 
-        </Link>
+            href="/"
+
+            className="
+              h-14
+              px-8
+              rounded-2xl
+              bg-[#2146e8]
+              hover:bg-[#3257ff]
+              transition
+              text-white
+              font-black
+              flex
+              items-center
+              justify-center
+            "
+          >
+
+            العودة للرئيسية
+
+          </Link>
+
+          <Link
+
+            href="/calendar"
+
+            className="
+              h-14
+              px-8
+              rounded-2xl
+              bg-white/5
+              border
+              border-white/10
+              hover:bg-white/10
+              transition
+              text-white
+              font-black
+              flex
+              items-center
+              justify-center
+            "
+          >
+
+            الحجوزات
+
+          </Link>
+
+        </div>
 
       </div>
 

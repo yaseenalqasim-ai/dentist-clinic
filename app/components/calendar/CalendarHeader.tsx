@@ -1,56 +1,119 @@
 "use client";
 
 type Props = {
-  onOpenBooking:()=>void;
+
+  search:string;
+
+  setSearch:(value:string)=>void;
+
 };
 
 export default function CalendarHeader({
-  onOpenBooking,
+  search,
+  setSearch,
 }:Props){
 
   return(
 
     <div
       className="
-        sticky
-        top-0
-        z-40
-        bg-[#071028]
-        pb-5
+        w-full
+
+        mb-8
+
+        flex
+        flex-col
+        lg:flex-row
+
+        lg:items-center
+        lg:justify-between
+
+        gap-5
+
+        bg-[#091427]
+
+        border
+        border-white/10
+
+        rounded-[36px]
+
+        px-5
+        md:px-8
+
+        py-6
+
+        shadow-[0_10px_40px_rgba(0,0,0,0.35)]
       "
     >
+
+      {/* RIGHT */}
 
       <div
         className="
           flex
           items-center
-          justify-between
           gap-4
-          mb-5
         "
       >
 
-        {/* Right */}
+        <div
+          className="
+            w-14
+            h-14
 
-        <div>
+            rounded-2xl
+
+            bg-gradient-to-br
+            from-[#2948ff]
+            to-[#4f6bff]
+
+            flex
+            items-center
+            justify-center
+
+            text-3xl
+
+            shadow-xl
+          "
+        >
+
+          🗓️
+
+        </div>
+
+        <div
+          className="
+            text-right
+          "
+        >
 
           <h1
             className="
-              text-4xl
+              text-[34px]
+              md:text-[42px]
+
+              leading-none
+
               font-black
+
               text-white
-              mb-2
+
+              tracking-tight
             "
           >
 
-            📅 الحجوزات الأسبوعية
+            الحجوزات الأسبوعية
 
           </h1>
 
           <p
             className="
               text-zinc-400
-              text-lg
+              text-sm
+              md:text-[15px]
+
+              mt-2
+              font-medium
             "
           >
 
@@ -60,54 +123,132 @@ export default function CalendarHeader({
 
         </div>
 
-        {/* Left */}
+      </div>
+
+      {/* LEFT */}
+
+      <div
+        className="
+          flex
+          flex-col
+          md:flex-row
+
+          items-stretch
+          md:items-center
+
+          gap-4
+        "
+      >
+
+        {/* SEARCH */}
 
         <div
           className="
+            w-full
+            md:w-[320px]
+
+            bg-[#0d1a31]
+
+            border
+            border-white/10
+
+            rounded-2xl
+
+            px-5
+            h-14
+
             flex
             items-center
             gap-3
           "
         >
 
+          <span
+            className="
+              text-zinc-500
+              text-lg
+            "
+          >
+
+            🔍
+
+          </span>
+
           <input
 
+            value={search}
+
+            onChange={(e)=>
+              setSearch(
+                e.target.value
+              )
+            }
+
             placeholder="
-              البحث عن مريض...
+              ابحث عن مريض أو علاج...
             "
 
             className="
-              h-14
-              w-[280px]
-              rounded-2xl
-              bg-[#111c38]
-              border
-              border-white/10
-              px-5
-              text-white
+              bg-transparent
               outline-none
+
+              text-white
+              placeholder:text-zinc-500
+
+              w-full
             "
           />
 
-          <button
+        </div>
 
-            onClick={onOpenBooking}
+        {/* MONTH */}
 
+        <div
+          className="
+            bg-[#0d1a31]
+
+            border
+            border-white/10
+
+            rounded-2xl
+
+            px-6
+            h-14
+
+            flex
+            flex-col
+            items-center
+            justify-center
+
+            text-center
+
+            min-w-[140px]
+          "
+        >
+
+          <p
             className="
-              h-14
-              px-6
-              rounded-2xl
-              bg-blue-600
-              hover:bg-blue-700
-              transition
+              text-zinc-500
+              text-[10px]
+              mb-1
+            "
+          >
+
+            الشهر الحالي
+
+          </p>
+
+          <h3
+            className="
               text-white
+              text-sm
               font-black
             "
           >
 
-            + حجز جديد
+            يونيو 2026
 
-          </button>
+          </h3>
 
         </div>
 

@@ -1,228 +1,533 @@
 "use client";
 
 import {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  useRouter,
-} from "next/navigation";
-
-import {
   useAuth,
 } from "@/app/context/AuthContext";
 
-import {
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import AuthGuard
+from "@/app/components/auth/AuthGuard";
 
-import {
-  db,
-} from "@/lib/firebase";
+import RoleGuard
+from "@/app/components/auth/RoleGuard";
 
-export default function HomePage() {
+import Link
+from "next/link";
 
-  const router =
-    useRouter();
+export default function HomePage(){
 
   const {
-    user,
-    loading,
+    role,
+    userData,
   } = useAuth();
 
-  const [
-    checkingSubscription,
-    setCheckingSubscription,
-  ] = useState(true);
+  return(
 
-  useEffect(() => {
+    <AuthGuard>
 
-    async function checkAccess() {
+      {/* ADMIN */}
 
-      if (loading) {
-        return;
-      }
+      {
 
-      if (!user) {
+        role === "admin"
 
-        router.push("/login");
+        &&
 
-        return;
-      }
-
-      try {
-
-        const userRef =
-          doc(
-            db,
-            "users",
-            user.uid
-          );
-
-        const userSnap =
-          await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-
-          setCheckingSubscription(false);
-
-          return;
-        }
-
-        const userData:any =
-          userSnap.data();
-
-        if (!userData?.clinicId) {
-
-          setCheckingSubscription(false);
-
-          return;
-        }
-
-        const clinicRef =
-          doc(
-            db,
-            "clinics",
-            userData.clinicId
-          );
-
-        const clinicSnap =
-          await getDoc(clinicRef);
-
-        if (!clinicSnap.exists()) {
-
-          setCheckingSubscription(false);
-
-          return;
-        }
-
-        const clinicData:any =
-          clinicSnap.data();
-
-        if (
-          !clinicData.subscriptionEnd
-        ) {
-
-          setCheckingSubscription(false);
-
-          return;
-        }
-
-        const endDate =
-          new Date(
-            clinicData.subscriptionEnd
-          );
-
-        const today =
-          new Date();
-
-        if (endDate < today) {
-
-          router.push(
-            "/subscription-expired"
-          );
-
-          return;
-        }
-
-        setCheckingSubscription(false);
-
-      } catch (error) {
-
-        console.error(error);
-
-        setCheckingSubscription(false);
-
-      }
-
-    }
-
-    checkAccess();
-
-  }, [
-    user,
-    loading,
-    router,
-  ]);
-
-  if (
-    loading ||
-    checkingSubscription
-  ) {
-
-    return (
-
-      <div
-        className="
-          h-screen
-          flex
-          items-center
-          justify-center
-          text-2xl
-          font-bold
-        "
-      >
-
-        جاري التحميل...
-
-      </div>
-
-    );
-
-  }
-
-  return (
-
-    <main
-      className="
-        min-h-screen
-        bg-zinc-100
-        p-6
-      "
-    >
-
-      <div
-        className="
-          max-w-5xl
-          mx-auto
-          space-y-6
-        "
-      >
-
-        <div
-          className="
-            bg-white
-            rounded-2xl
-            p-6
-            shadow
-          "
+        <RoleGuard
+          allowedRoles={[
+            "admin"
+          ]}
         >
 
-          <h1
+          <main
             className="
-              text-3xl
-              font-bold
-              mb-4
+              min-h-screen
+              bg-[#071028]
+              text-white
+              p-6
             "
           >
 
-            نظام المواعيد المطور لأطباء الأسنان 🦷
+            <div
+              className="
+                max-w-[1800px]
+                mx-auto
+              "
+            >
 
-          </h1>
+              <h1
+                className="
+                  text-5xl
+                  font-black
+                  mb-3
+                "
+              >
 
-          <p>
+                لوحة الإدارة
 
-            مرحباً بك
+              </h1>
 
-          </p>
+              <p
+                className="
+                  text-zinc-400
+                  text-xl
+                  mb-10
+                "
+              >
 
-        </div>
+                مرحبًا {
+                  userData?.name
+                }
 
-      </div>
+              </p>
 
-    </main>
+              <div
+                className="
+                  grid
+                  grid-cols-3
+                  gap-5
+                "
+              >
+
+                <Link
+
+                  href="/calendar"
+
+                  className="
+                    rounded-[32px]
+                    bg-[#0d1730]
+                    border
+                    border-white/10
+                    p-8
+                    hover:border-blue-500
+                    transition
+                  "
+                >
+
+                  <div
+                    className="
+                      text-5xl
+                      mb-5
+                    "
+                  >
+
+                    🗓️
+
+                  </div>
+
+                  <h2
+                    className="
+                      text-3xl
+                      font-black
+                      mb-3
+                    "
+                  >
+
+                    الحجوزات
+
+                  </h2>
+
+                </Link>
+
+                <Link
+
+                  href="/doctors"
+
+                  className="
+                    rounded-[32px]
+                    bg-[#0d1730]
+                    border
+                    border-white/10
+                    p-8
+                    hover:border-blue-500
+                    transition
+                  "
+                >
+
+                  <div
+                    className="
+                      text-5xl
+                      mb-5
+                    "
+                  >
+
+                    👨‍⚕️
+
+                  </div>
+
+                  <h2
+                    className="
+                      text-3xl
+                      font-black
+                      mb-3
+                    "
+                  >
+
+                    الأطباء
+
+                  </h2>
+
+                </Link>
+
+                <Link
+
+                  href="/settings"
+
+                  className="
+                    rounded-[32px]
+                    bg-[#0d1730]
+                    border
+                    border-white/10
+                    p-8
+                    hover:border-blue-500
+                    transition
+                  "
+                >
+
+                  <div
+                    className="
+                      text-5xl
+                      mb-5
+                    "
+                  >
+
+                    ⚙️
+
+                  </div>
+
+                  <h2
+                    className="
+                      text-3xl
+                      font-black
+                      mb-3
+                    "
+                  >
+
+                    الإعدادات
+
+                  </h2>
+
+                </Link>
+
+              </div>
+
+            </div>
+
+          </main>
+
+        </RoleGuard>
+
+      }
+
+      {/* DOCTOR */}
+
+      {
+
+        role === "doctor"
+
+        &&
+
+        <RoleGuard
+          allowedRoles={[
+            "doctor"
+          ]}
+        >
+
+          <main
+            className="
+              min-h-screen
+              bg-[#071028]
+              text-white
+              p-6
+            "
+          >
+
+            <div
+              className="
+                max-w-[1800px]
+                mx-auto
+              "
+            >
+
+              <h1
+                className="
+                  text-5xl
+                  font-black
+                  mb-3
+                "
+              >
+
+                لوحة الطبيب
+
+              </h1>
+
+              <p
+                className="
+                  text-zinc-400
+                  text-xl
+                  mb-10
+                "
+              >
+
+                مرحبًا دكتور {
+                  userData?.name
+                }
+
+              </p>
+
+              <div
+                className="
+                  grid
+                  grid-cols-2
+                  gap-5
+                "
+              >
+
+                <Link
+
+                  href="/calendar"
+
+                  className="
+                    rounded-[32px]
+                    bg-[#0d1730]
+                    border
+                    border-white/10
+                    p-8
+                    hover:border-blue-500
+                    transition
+                  "
+                >
+
+                  <div
+                    className="
+                      text-5xl
+                      mb-5
+                    "
+                  >
+
+                    🗓️
+
+                  </div>
+
+                  <h2
+                    className="
+                      text-3xl
+                      font-black
+                      mb-3
+                    "
+                  >
+
+                    الحجوزات
+
+                  </h2>
+
+                </Link>
+
+                <Link
+
+                  href="/patients"
+
+                  className="
+                    rounded-[32px]
+                    bg-[#0d1730]
+                    border
+                    border-white/10
+                    p-8
+                    hover:border-blue-500
+                    transition
+                  "
+                >
+
+                  <div
+                    className="
+                      text-5xl
+                      mb-5
+                    "
+                  >
+
+                    👥
+
+                  </div>
+
+                  <h2
+                    className="
+                      text-3xl
+                      font-black
+                      mb-3
+                    "
+                  >
+
+                    المرضى
+
+                  </h2>
+
+                </Link>
+
+              </div>
+
+            </div>
+
+          </main>
+
+        </RoleGuard>
+
+      }
+
+      {/* SECRETARY */}
+
+      {
+
+        role === "secretary"
+
+        &&
+
+        <RoleGuard
+          allowedRoles={[
+            "secretary"
+          ]}
+        >
+
+          <main
+            className="
+              min-h-screen
+              bg-[#071028]
+              text-white
+              p-6
+            "
+          >
+
+            <div
+              className="
+                max-w-[1800px]
+                mx-auto
+              "
+            >
+
+              <h1
+                className="
+                  text-5xl
+                  font-black
+                  mb-3
+                "
+              >
+
+                لوحة السكرتير
+
+              </h1>
+
+              <p
+                className="
+                  text-zinc-400
+                  text-xl
+                  mb-10
+                "
+              >
+
+                مرحبًا {
+                  userData?.name
+                }
+
+              </p>
+
+              <div
+                className="
+                  grid
+                  grid-cols-2
+                  gap-5
+                "
+              >
+
+                <Link
+
+                  href="/calendar"
+
+                  className="
+                    rounded-[32px]
+                    bg-[#0d1730]
+                    border
+                    border-white/10
+                    p-8
+                    hover:border-blue-500
+                    transition
+                  "
+                >
+
+                  <div
+                    className="
+                      text-5xl
+                      mb-5
+                    "
+                  >
+
+                    🗓️
+
+                  </div>
+
+                  <h2
+                    className="
+                      text-3xl
+                      font-black
+                      mb-3
+                    "
+                  >
+
+                    الحجوزات
+
+                  </h2>
+
+                </Link>
+
+                <Link
+
+                  href="/patients"
+
+                  className="
+                    rounded-[32px]
+                    bg-[#0d1730]
+                    border
+                    border-white/10
+                    p-8
+                    hover:border-blue-500
+                    transition
+                  "
+                >
+
+                  <div
+                    className="
+                      text-5xl
+                      mb-5
+                    "
+                  >
+
+                    👥
+
+                  </div>
+
+                  <h2
+                    className="
+                      text-3xl
+                      font-black
+                      mb-3
+                    "
+                  >
+
+                    المرضى
+
+                  </h2>
+
+                </Link>
+
+              </div>
+
+            </div>
+
+          </main>
+
+        </RoleGuard>
+
+      }
+
+    </AuthGuard>
+
   );
-}
 
+}

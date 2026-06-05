@@ -2,26 +2,46 @@
 
 import {
   useEffect,
-  useState
+  useState,
 } from "react";
 
 import {
   collection,
   onSnapshot,
+  orderBy,
   query,
-  orderBy
 } from "firebase/firestore";
 
 import {
   db
-} from "../../lib/firebase";
+} from "@/lib/firebase";
+
+export type Booking = {
+
+  id:string;
+
+  patientName:string;
+
+  doctorName:string;
+
+  treatment:string;
+
+  status:string;
+
+  time:string;
+
+  duration:number;
+
+  day:string;
+
+};
 
 export default function useBookings(){
 
   const [
     bookings,
     setBookings
-  ] = useState<any[]>([]);
+  ] = useState<Booking[]>([]);
 
   const [
     loading,
@@ -30,20 +50,18 @@ export default function useBookings(){
 
   useEffect(()=>{
 
-    const q =
-      query(
+    const q = query(
 
-        collection(
-          db,
-          "bookings"
-        ),
+      collection(
+        db,
+        "bookings"
+      ),
 
-        orderBy(
-          "createdAt",
-          "desc"
-        )
+      orderBy(
+        "time"
+      )
 
-      );
+    );
 
     const unsubscribe =
       onSnapshot(
@@ -52,32 +70,21 @@ export default function useBookings(){
 
         (snapshot)=>{
 
-          const data:any[] = [];
+          const data:any = [];
 
-          snapshot.forEach((docItem)=>{
+          snapshot.forEach((doc)=>{
 
             data.push({
 
-              id:docItem.id,
+              id:doc.id,
 
-              ...docItem.data()
+              ...doc.data(),
 
             });
 
           });
 
           setBookings(data);
-
-          setLoading(false);
-
-        },
-
-        (error)=>{
-
-          console.error(
-            "Bookings Error:",
-            error
-          );
 
           setLoading(false);
 
@@ -92,8 +99,7 @@ export default function useBookings(){
   return {
 
     bookings,
-
-    loading
+    loading,
 
   };
 

@@ -2,110 +2,217 @@
 
 import {
   useEffect,
-  useState
+  useState,
 } from "react";
 
 import {
+  addDoc,
   collection,
-  query,
-  where,
-  onSnapshot
+  deleteDoc,
+  doc,
+  getDocs,
 } from "firebase/firestore";
 
 import {
-  db
-} from "../../lib/firebase";
+  db,
+} from "@/lib/firebase";
 
-import {
-  useUser
-} from "../context/UserContext";
+type Doctor = {
+
+  id:string;
+
+  name:string;
+
+  email:string;
+
+};
 
 export default function DoctorsPage(){
 
-  const {
-    currentUser
-  } = useUser();
+  const [
+    doctors,
+    setDoctors
+  ] = useState<Doctor[]>([]);
 
   const [
-    bookings,
-    setBookings
-  ] = useState<any[]>([]);
+    name,
+    setName
+  ] = useState("");
+
+  const [
+    email,
+    setEmail
+  ] = useState("");
 
   const [
     loading,
     setLoading
+  ] = useState(false);
+
+  const [
+    pageLoading,
+    setPageLoading
   ] = useState(true);
+
+  async function loadDoctors(){
+
+    try{
+
+      const snapshot =
+        await getDocs(
+          collection(
+            db,
+            "users"
+          )
+        );
+
+      const data:any[] = [];
+
+      snapshot.forEach((docItem)=>{
+
+        const doctor =
+          docItem.data();
+
+        if(
+          doctor.role
+          ===
+          "doctor"
+        ){
+
+          data.push({
+
+            id:docItem.id,
+
+            ...doctor,
+
+          });
+
+        }
+
+      });
+
+      setDoctors(data);
+
+    }catch(error){
+
+      console.error(error);
+
+    }finally{
+
+      setPageLoading(false);
+
+    }
+
+  }
 
   useEffect(()=>{
 
+    loadDoctors();
+
+  },[]);
+
+  async function createDoctor(){
+
     if(
-      !currentUser?.clinicId
+      !name
+      ||
+      !email
     ){
       return;
     }
 
-    const bookingsQuery =
-      query(
+    try{
+
+      setLoading(true);
+
+      await addDoc(
 
         collection(
           db,
-          "bookings"
+          "users"
         ),
 
-        where(
-          "clinicId",
-          "==",
-          currentUser.clinicId
-        )
+        {
 
-      );
+          name,
 
-    const unsubscribe =
-      onSnapshot(
+          email,
 
-        bookingsQuery,
+          role:"doctor",
 
-        (snapshot)=>{
-
-          const data =
-            snapshot.docs.map(
-              (doc)=>({
-
-                id:doc.id,
-
-                ...doc.data()
-
-              })
-            );
-
-          setBookings(
-            data
-          );
-
-          setLoading(false);
+          createdAt:
+            Date.now(),
 
         }
 
       );
 
-    return ()=>unsubscribe();
+      setName("");
+      setEmail("");
 
-  },[
-    currentUser
-  ]);
+      loadDoctors();
 
-  if(loading){
+    }catch(error){
+
+      console.error(error);
+
+    }finally{
+
+      setLoading(false);
+
+    }
+
+  }
+
+  async function removeDoctor(
+    id:string
+  ){
+
+    const confirmDelete =
+      confirm(
+        "حذف الطبيب؟"
+      );
+
+    if(!confirmDelete){
+      return;
+    }
+
+    try{
+
+      await deleteDoc(
+
+        doc(
+          db,
+          "users",
+          id
+        )
+
+      );
+
+      loadDoctors();
+
+    }catch(error){
+
+      console.error(error);
+
+    }
+
+  }
+
+  if(pageLoading){
 
     return(
 
       <main
         className="
           min-h-screen
+          bg-[#071028]
           flex
           items-center
           justify-center
+          text-white
           text-3xl
-          bg-[#f3f3f3]
+          font-black
         "
       >
 
@@ -122,194 +229,264 @@ export default function DoctorsPage(){
     <main
       className="
         min-h-screen
-        bg-[#f3f3f3]
-        p-4
+        bg-[#071028]
+        text-white
+        p-6
         pb-32
       "
     >
 
       <div
         className="
-          bg-[#2146e8]
-          text-white
-          rounded-[35px]
-          p-6
-          mb-6
-          shadow-2xl
+          max-w-6xl
+          mx-auto
         "
       >
 
-        <h1
+        {/* Header */}
+
+        <div
           className="
-            text-4xl
-            font-bold
-            text-right
-            mb-3
+            mb-10
           "
         >
 
-          👨‍⚕️ الطبيب
+          <h1
+            className="
+              text-5xl
+              font-black
+              mb-3
+            "
+          >
 
-        </h1>
+            إدارة الأطباء
 
-        <p
+          </h1>
+
+          <p
+            className="
+              text-zinc-400
+              text-xl
+            "
+          >
+
+            إضافة وإدارة الأطباء
+
+          </p>
+
+        </div>
+
+        {/* Create */}
+
+        <div
           className="
-            text-right
-            text-xl
-            text-blue-100
+            rounded-[32px]
+            bg-[#0d1730]
+            border
+            border-white/10
+            p-6
+            mb-8
           "
         >
 
-          الحجوزات اليومية
+          <div
+            className="
+              grid
+              grid-cols-2
+              gap-5
+              mb-5
+            "
+          >
 
-        </p>
+            <input
 
-      </div>
+              value={name}
 
-      <div
-        className="
-          space-y-5
-        "
-      >
+              onChange={(e)=>
+                setName(
+                  e.target.value
+                )
+              }
 
-        {
+              placeholder="
+                اسم الطبيب
+              "
 
-          bookings.map(
-            (booking:any)=>(
+              className="
+                h-16
+                rounded-3xl
+                bg-[#071028]
+                border
+                border-white/10
+                px-5
+                text-white
+                outline-none
+              "
+            />
 
-              <div
+            <input
 
-                key={booking.id}
+              value={email}
 
-                className="
-                  bg-white
-                  rounded-[35px]
-                  p-5
-                  shadow-2xl
-                "
-              >
+              onChange={(e)=>
+                setEmail(
+                  e.target.value
+                )
+              }
 
-                <div
-                  className="
-                    flex
-                    justify-between
-                    items-center
-                    mb-5
-                  "
-                >
+              placeholder="
+                البريد الإلكتروني
+              "
+
+              className="
+                h-16
+                rounded-3xl
+                bg-[#071028]
+                border
+                border-white/10
+                px-5
+                text-white
+                outline-none
+              "
+            />
+
+          </div>
+
+          <button
+
+            onClick={createDoctor}
+
+            disabled={loading}
+
+            className="
+              w-full
+              h-16
+              rounded-3xl
+              bg-[#2146e8]
+              hover:bg-[#3257ff]
+              transition
+              text-xl
+              font-black
+              disabled:opacity-50
+            "
+          >
+
+            {
+
+              loading
+              ?
+              "جاري الإنشاء..."
+              :
+              "إضافة طبيب"
+
+            }
+
+          </button>
+
+        </div>
+
+        {/* Doctors */}
+
+        <div
+          className="
+            grid
+            gap-5
+          "
+        >
+
+          {
+
+            doctors.map(
+              (doctor)=>{
+
+                return(
 
                   <div
+
+                    key={doctor.id}
+
                     className="
-                      bg-[#2146e8]
-                      text-white
-                      px-4
-                      py-2
-                      rounded-full
-                      font-bold
+                      rounded-[32px]
+                      bg-[#0d1730]
+                      border
+                      border-white/10
+                      p-6
                     "
                   >
 
-                    {
-                      booking.status
-                    }
+                    <div
+                      className="
+                        flex
+                        items-center
+                        justify-between
+                      "
+                    >
+
+                      <div>
+
+                        <h2
+                          className="
+                            text-3xl
+                            font-black
+                            mb-2
+                          "
+                        >
+
+                          👨‍⚕️ {
+                            doctor.name
+                          }
+
+                        </h2>
+
+                        <p
+                          className="
+                            text-zinc-400
+                          "
+                        >
+
+                          {
+                            doctor.email
+                          }
+
+                        </p>
+
+                      </div>
+
+                      <button
+
+                        onClick={()=>
+                          removeDoctor(
+                            doctor.id
+                          )
+                        }
+
+                        className="
+                          h-12
+                          px-5
+                          rounded-2xl
+                          bg-red-500
+                          hover:bg-red-600
+                          transition
+                          font-black
+                        "
+                      >
+
+                        حذف
+
+                      </button>
+
+                    </div>
 
                   </div>
 
-                  <div
-                    className="
-                      text-2xl
-                      font-bold
-                      text-[#2146e8]
-                    "
-                  >
+                );
 
-                    ⏰ {
-                      booking.time
-                    }
-
-                  </div>
-
-                </div>
-
-                <div
-                  className="
-                    grid
-                    gap-4
-                  "
-                >
-
-                  <div
-                    className="
-                      bg-gray-100
-                      rounded-2xl
-                      p-4
-                      text-lg
-                      text-right
-                    "
-                  >
-
-                    👤 {
-                      booking.patientName
-                    }
-
-                  </div>
-
-                  <div
-                    className="
-                      bg-gray-100
-                      rounded-2xl
-                      p-4
-                      text-lg
-                      text-right
-                    "
-                  >
-
-                    📞 {
-                      booking.phone
-                    }
-
-                  </div>
-
-                  <div
-                    className="
-                      bg-gray-100
-                      rounded-2xl
-                      p-4
-                      text-lg
-                      text-right
-                    "
-                  >
-
-                    🦷 {
-                      booking.bookingType
-                    }
-
-                  </div>
-
-                  <div
-                    className="
-                      bg-gray-100
-                      rounded-2xl
-                      p-4
-                      text-lg
-                      text-right
-                    "
-                  >
-
-                    📅 {
-                      booking.date
-                    }
-
-                  </div>
-
-                </div>
-
-              </div>
-
+              }
             )
-          )
 
-        }
+          }
+
+        </div>
 
       </div>
 

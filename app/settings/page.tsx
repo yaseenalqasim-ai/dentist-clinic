@@ -2,140 +2,171 @@
 
 import {
   useEffect,
-  useState
+  useState,
 } from "react";
 
 import {
+  collection,
   doc,
-  getDoc,
-  updateDoc
+  getDocs,
+  setDoc,
 } from "firebase/firestore";
 
 import {
-  db
-} from "../../lib/firebase";
+  signOut,
+} from "firebase/auth";
 
 import {
-  useUser
-} from "../context/UserContext";
+  useRouter,
+} from "next/navigation";
+
+import {
+  db,
+  auth,
+} from "@/lib/firebase";
+
+type Treatment = {
+  id:string;
+  name:string;
+  duration:number;
+};
 
 export default function SettingsPage(){
 
-  const {
-    currentUser
-  } = useUser();
+  const router =
+    useRouter();
 
   const [
-    loading,
-    setLoading
-  ] = useState(true);
+    doctors,
+    setDoctors
+  ] = useState<any[]>([]);
+
+  const [
+    selectedDoctor,
+    setSelectedDoctor
+  ] = useState("");
+
+  const [
+    treatments,
+    setTreatments
+  ] = useState<Treatment[]>([
+    {
+      id:"cleaning",
+      name:"تنظيف",
+      duration:30,
+    },
+
+    {
+      id:"whitening",
+      name:"تبييض الأسنان",
+      duration:120,
+    },
+
+    {
+      id:"extraction",
+      name:"قلع",
+      duration:45,
+    },
+
+    {
+      id:"ortho",
+      name:"تقويم",
+      duration:60,
+    },
+
+  ]);
 
   const [
     saving,
     setSaving
   ] = useState(false);
 
-  const [
-    clinicName,
-    setClinicName
-  ] = useState("");
-
-  const [
-    whatsapp,
-    setWhatsapp
-  ] = useState("");
-
-  const [
-    address,
-    setAddress
-  ] = useState("");
-
-  const [
-    workStart,
-    setWorkStart
-  ] = useState("");
-
-  const [
-    workEnd,
-    setWorkEnd
-  ] = useState("");
-
   useEffect(()=>{
 
-    async function loadClinic(){
+    async function loadDoctors(){
 
-      if(
-        !currentUser?.clinicId
-      ){
-        return;
-      }
-
-      try{
-
-        const clinicRef =
-          doc(
+      const querySnapshot =
+        await getDocs(
+          collection(
             db,
-            "clinics",
-            currentUser.clinicId
-          );
+            "users"
+          )
+        );
 
-        const clinicSnap =
-          await getDoc(
-            clinicRef
-          );
+      const doctorsData:any[] = [];
+
+      querySnapshot.forEach((docItem)=>{
+
+        const data =
+          docItem.data();
 
         if(
-          clinicSnap.exists()
+          data.role === "doctor"
         ){
 
-          const data:any =
-            clinicSnap.data();
+          doctorsData.push({
 
-          setClinicName(
-            data.name || ""
-          );
+            id:docItem.id,
 
-          setWhatsapp(
-            data.whatsapp || ""
-          );
+            ...data,
 
-          setAddress(
-            data.address || ""
-          );
-
-          setWorkStart(
-            data.workStart || ""
-          );
-
-          setWorkEnd(
-            data.workEnd || ""
-          );
+          });
 
         }
 
-      }catch(error){
+      });
 
-        console.error(error);
+      setDoctors(doctorsData);
 
-      }finally{
+      if(
+        doctorsData.length > 0
+      ){
 
-        setLoading(false);
+        setSelectedDoctor(
+          doctorsData[0].id
+        );
 
       }
 
     }
 
-    loadClinic();
+    loadDoctors();
 
-  },[
-    currentUser
-  ]);
+  },[]);
+
+  function updateDuration(
+    treatmentId:string,
+    duration:number
+  ){
+
+    setTreatments((prev)=>
+
+      prev.map((treatment)=>{
+
+        if(
+          treatment.id
+          ===
+          treatmentId
+        ){
+
+          return {
+            ...treatment,
+            duration,
+          };
+
+        }
+
+        return treatment;
+
+      })
+
+    );
+
+  }
 
   async function saveSettings(){
 
-    if(
-      !currentUser?.clinicId
-    ){
+    if(!selectedDoctor){
       return;
     }
 
@@ -143,42 +174,23 @@ export default function SettingsPage(){
 
       setSaving(true);
 
-      await updateDoc(
+      await setDoc(
 
         doc(
           db,
-          "clinics",
-          currentUser.clinicId
+          "doctorSettings",
+          selectedDoctor
         ),
 
         {
-
-          name:
-            clinicName,
-
-          whatsapp,
-
-          address,
-
-          workStart,
-
-          workEnd
-
+          treatments,
         }
 
-      );
-
-      alert(
-        "تم حفظ الإعدادات"
       );
 
     }catch(error){
 
       console.error(error);
-
-      alert(
-        "حدث خطأ"
-      );
 
     }finally{
 
@@ -188,26 +200,11 @@ export default function SettingsPage(){
 
   }
 
-  if(loading){
+  async function logout(){
 
-    return(
+    await signOut(auth);
 
-      <main
-        className="
-          min-h-screen
-          flex
-          items-center
-          justify-center
-          text-3xl
-          bg-[#f3f3f3]
-        "
-      >
-
-        جاري التحميل...
-
-      </main>
-
-    );
+    router.push("/login");
 
   }
 
@@ -216,184 +213,286 @@ export default function SettingsPage(){
     <main
       className="
         min-h-screen
-        bg-[#f3f3f3]
-        p-4
+        bg-[#071028]
+        text-white
+        p-6
         pb-32
       "
     >
 
       <div
         className="
-          bg-[#2146e8]
-          text-white
-          rounded-[35px]
-          p-6
-          mb-6
-          shadow-2xl
+          max-w-5xl
+          mx-auto
         "
       >
 
-        <h1
+        {/* Header */}
+
+        <div
           className="
-            text-4xl
-            font-bold
-            text-right
-            mb-3
+            mb-10
           "
         >
 
-          ⚙️ الإعدادات
+          <h1
+            className="
+              text-5xl
+              font-black
+              mb-3
+            "
+          >
 
-        </h1>
+            إعدادات العلاجات
 
-        <p
+          </h1>
+
+          <p
+            className="
+              text-zinc-400
+              text-xl
+            "
+          >
+
+            تحديد مدة كل علاج لكل دكتور
+
+          </p>
+
+        </div>
+
+        {/* Doctor Select */}
+
+        <div
           className="
-            text-right
-            text-xl
-            text-blue-100
+            mb-8
           "
         >
 
-          إعدادات العيادة
+          <select
 
-        </p>
+            value={selectedDoctor}
 
-      </div>
+            onChange={(e)=>
+              setSelectedDoctor(
+                e.target.value
+              )
+            }
 
-      <div
-        className="
-          bg-white
-          rounded-[35px]
-          p-5
-          shadow-2xl
-          space-y-5
-        "
-      >
+            className="
+              w-full
+              h-16
+              rounded-3xl
+              bg-[#0d1730]
+              border
+              border-white/10
+              px-5
+              text-white
+              outline-none
+            "
+          >
 
-        <InputCard
-          label="اسم العيادة"
-          value={clinicName}
-          setValue={setClinicName}
-          placeholder="اسم العيادة"
-        />
+            {
 
-        <InputCard
-          label="رقم الواتساب"
-          value={whatsapp}
-          setValue={setWhatsapp}
-          placeholder="07xxxxxxxxx"
-        />
+              doctors.map(
+                (doctor)=>(
 
-        <InputCard
-          label="العنوان"
-          value={address}
-          setValue={setAddress}
-          placeholder="عنوان العيادة"
-        />
+                  <option
+                    key={doctor.id}
+                    value={doctor.id}
+                  >
 
-        <InputCard
-          label="بداية الدوام"
-          value={workStart}
-          setValue={setWorkStart}
-          placeholder="09:00"
-        />
+                    {
+                      doctor.name
+                    }
 
-        <InputCard
-          label="نهاية الدوام"
-          value={workEnd}
-          setValue={setWorkEnd}
-          placeholder="06:00"
-        />
+                  </option>
+
+                )
+              )
+
+            }
+
+          </select>
+
+        </div>
+
+        {/* Treatments */}
+
+        <div
+          className="
+            grid
+            gap-5
+          "
+        >
+
+          {
+
+            treatments.map(
+              (treatment)=>{
+
+                return(
+
+                  <div
+
+                    key={treatment.id}
+
+                    className="
+                      rounded-[32px]
+                      bg-[#0d1730]
+                      border
+                      border-white/10
+                      p-6
+                    "
+                  >
+
+                    <div
+                      className="
+                        flex
+                        items-center
+                        justify-between
+                      "
+                    >
+
+                      <div>
+
+                        <h2
+                          className="
+                            text-2xl
+                            font-black
+                            mb-2
+                          "
+                        >
+
+                          {
+                            treatment.name
+                          }
+
+                        </h2>
+
+                        <p
+                          className="
+                            text-zinc-500
+                          "
+                        >
+
+                          مدة الجلسة بالدقائق
+
+                        </p>
+
+                      </div>
+
+                      <input
+
+                        type="number"
+
+                        min={5}
+
+                        value={
+                          treatment.duration
+                        }
+
+                        onChange={(e)=>
+                          updateDuration(
+
+                            treatment.id,
+
+                            Number(
+                              e.target.value
+                            )
+
+                          )
+                        }
+
+                        className="
+                          w-32
+                          h-14
+                          rounded-2xl
+                          bg-[#071028]
+                          border
+                          border-white/10
+                          px-4
+                          text-center
+                          text-2xl
+                          font-black
+                          outline-none
+                        "
+                      />
+
+                    </div>
+
+                  </div>
+
+                );
+
+              }
+            )
+
+          }
+
+        </div>
+
+        {/* Save */}
 
         <button
 
           onClick={saveSettings}
 
+          disabled={saving}
+
           className="
+            mt-10
             w-full
             h-16
-            bg-[#2146e8]
-            text-white
             rounded-3xl
-            text-2xl
-            font-bold
+            bg-[#2146e8]
+            hover:bg-[#3257ff]
+            transition
+            text-white
+            text-xl
+            font-black
+            disabled:opacity-50
           "
         >
 
           {
 
             saving
-
             ?
-
             "جاري الحفظ..."
-
             :
-
-            "💾 حفظ الإعدادات"
+            "حفظ الإعدادات"
 
           }
+
+        </button>
+
+        {/* Logout */}
+
+        <button
+
+          onClick={logout}
+
+          className="
+            mt-5
+            w-full
+            h-16
+            rounded-3xl
+            bg-red-500
+            hover:bg-red-600
+            transition
+            text-white
+            text-xl
+            font-black
+          "
+        >
+
+          تسجيل الخروج
 
         </button>
 
       </div>
 
     </main>
-
-  );
-
-}
-
-function InputCard({
-  label,
-  value,
-  setValue,
-  placeholder
-}:any){
-
-  return(
-
-    <div>
-
-      <div
-        className="
-          text-right
-          text-lg
-          font-bold
-          mb-3
-        "
-      >
-
-        {label}
-
-      </div>
-
-      <input
-
-        value={value}
-
-        onChange={(e)=>
-          setValue(
-            e.target.value
-          )
-        }
-
-        placeholder={placeholder}
-
-        className="
-          w-full
-          h-16
-          rounded-2xl
-          border
-          border-gray-300
-          px-4
-          text-right
-          text-lg
-          outline-none
-        "
-      />
-
-    </div>
 
   );
 

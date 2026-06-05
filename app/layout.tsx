@@ -4,7 +4,9 @@ import "./globals.css";
 
 import Link from "next/link";
 
-import { usePathname } from "next/navigation";
+import {
+  usePathname,
+} from "next/navigation";
 
 import {
   House,
@@ -14,19 +16,10 @@ import {
   Settings,
 } from "lucide-react";
 
-import {
-  AuthProvider,
-  useAuth,
-} from "@/app/context/AuthContext";
-
-function BottomNavigation() {
+function BottomNavbar(){
 
   const pathname =
     usePathname();
-
-  const {
-    role,
-  } = useAuth();
 
   const hideNavbar =
 
@@ -40,111 +33,45 @@ function BottomNavigation() {
 
     pathname === "/unauthorized";
 
-  if (hideNavbar) {
+  const navItems = [
+
+    {
+      name:"الرئيسية",
+      href:"/",
+      icon:House,
+    },
+
+    {
+      name:"الحجوزات",
+      href:"/calendar",
+      icon:CalendarDays,
+    },
+
+    {
+      name:"المرضى",
+      href:"/patients",
+      icon:Users,
+    },
+
+    {
+      name:"الأطباء",
+      href:"/doctors",
+      icon:UserRoundCog,
+    },
+
+    {
+      name:"الإعدادات",
+      href:"/settings",
+      icon:Settings,
+    },
+
+  ];
+
+  if(hideNavbar){
     return null;
   }
 
-  let navItems:any[] = [];
-
-  if (
-    role === "doctor"
-  ) {
-
-    navItems = [
-
-      {
-        name: "الرئيسية",
-        href: "/",
-        icon: House,
-      },
-
-      {
-        name: "الحجوزات",
-        href: "/calendar",
-        icon: CalendarDays,
-      },
-
-      {
-        name: "المرضى",
-        href: "/patients",
-        icon: Users,
-      },
-
-      {
-        name: "الإعدادات",
-        href: "/settings",
-        icon: Settings,
-      },
-
-    ];
-
-  } else if (
-    role === "secretary"
-  ) {
-
-    navItems = [
-
-      {
-        name: "الرئيسية",
-        href: "/",
-        icon: House,
-      },
-
-      {
-        name: "الحجوزات",
-        href: "/calendar",
-        icon: CalendarDays,
-      },
-
-      {
-        name: "المرضى",
-        href: "/patients",
-        icon: Users,
-      },
-
-      {
-        name: "الأطباء",
-        href: "/doctors",
-        icon: UserRoundCog,
-      },
-
-      {
-        name: "الإعدادات",
-        href: "/settings",
-        icon: Settings,
-      },
-
-    ];
-
-  } else if (
-    role === "admin"
-  ) {
-
-    navItems = [
-
-      {
-        name: "الرئيسية",
-        href: "/",
-        icon: House,
-      },
-
-      {
-        name: "الأطباء",
-        href: "/doctors",
-        icon: UserRoundCog,
-      },
-
-      {
-        name: "الإعدادات",
-        href: "/settings",
-        icon: Settings,
-      },
-
-    ];
-
-  }
-
-  return (
+  return(
 
     <nav
       className="
@@ -152,33 +79,27 @@ function BottomNavigation() {
         bottom-0
         left-0
         right-0
-        bg-white
+        bg-[#0d1730]
         border-t
-        shadow-2xl
+        border-white/10
+        backdrop-blur-xl
         z-50
       "
     >
 
       <div
-        className={`
+        className="
           grid
-          ${
-            navItems.length === 5
-            ? "grid-cols-5"
-            : navItems.length === 4
-            ? "grid-cols-4"
-            : "grid-cols-3"
-          }
-        `}
+          grid-cols-5
+        "
       >
 
         {
 
-          navItems.map((item:any)=>{
+          navItems.map((item)=>{
 
             const active =
-              pathname ===
-              item.href;
+              pathname === item.href;
 
             const Icon =
               item.icon;
@@ -186,7 +107,9 @@ function BottomNavigation() {
             return(
 
               <Link
+
                 key={item.href}
+
                 href={item.href}
 
                 className={`
@@ -201,23 +124,23 @@ function BottomNavigation() {
                   ${
                     active
                     ?
-                    "text-[#2146e8]"
+                    "text-[#4b6bff]"
                     :
-                    "text-gray-500"
+                    "text-zinc-500"
                   }
 
                 `}
               >
 
                 <Icon
-                  size={28}
+                  size={26}
                   strokeWidth={2.5}
                 />
 
                 <span
                   className="
-                    text-sm
-                    font-bold
+                    text-xs
+                    font-black
                     mt-1
                   "
                 >
@@ -244,11 +167,11 @@ function BottomNavigation() {
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}:{
+  children:React.ReactNode;
+}){
 
-  return (
+  return(
 
     <html
       lang="ar"
@@ -257,26 +180,22 @@ export default function RootLayout({
 
       <body
         className="
-          bg-[#f4f4f4]
+          bg-[#071028]
           min-h-screen
         "
       >
 
-        <AuthProvider>
+        <div
+          className="
+            pb-28
+          "
+        >
 
-          <div
-            className="
-              pb-28
-            "
-          >
+          {children}
 
-            {children}
+        </div>
 
-          </div>
-
-          <BottomNavigation />
-
-        </AuthProvider>
+        <BottomNavbar />
 
       </body>
 

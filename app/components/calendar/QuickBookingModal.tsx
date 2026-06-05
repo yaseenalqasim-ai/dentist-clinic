@@ -1,39 +1,87 @@
 "use client";
 
 import {
-  useState
+  useEffect,
+  useState,
 } from "react";
 
+import {
+  addDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
+
+import {
+  db,
+} from "@/lib/firebase";
+
 type Props = {
+
   open:boolean;
+
   onClose:()=>void;
 
-  onCreateBooking:(booking:any)=>void;
+  bookings:any[];
+
 };
 
-const treatments = [
+type Treatment = {
+
+  id:string;
+
+  name:string;
+
+  duration:number;
+
+};
+
+const treatments:Treatment[] = [
 
   {
-    id:"cleaning",
-    name:"تنظيف",
+    id:"1",
+    name:"فحص",
     duration:30,
   },
 
   {
-    id:"whitening",
-    name:"تبييض الأسنان",
-    duration:120,
-  },
-
-  {
-    id:"extraction",
-    name:"قلع",
+    id:"2",
+    name:"تنظيف",
     duration:45,
   },
 
   {
-    id:"ortho",
+    id:"3",
+    name:"تبييض الأسنان",
+    duration:60,
+  },
+
+  {
+    id:"4",
     name:"تقويم",
+    duration:60,
+  },
+
+  {
+    id:"5",
+    name:"زراعة",
+    duration:90,
+  },
+
+  {
+    id:"6",
+    name:"قلع",
+    duration:30,
+  },
+
+  {
+    id:"7",
+    name:"حشوة",
+    duration:45,
+  },
+
+  {
+    id:"8",
+    name:"علاج عصب",
     duration:60,
   },
 
@@ -42,7 +90,7 @@ const treatments = [
 export default function QuickBookingModal({
   open,
   onClose,
-  onCreateBooking,
+  bookings,
 }:Props){
 
   const [
@@ -51,80 +99,258 @@ export default function QuickBookingModal({
   ] = useState("");
 
   const [
-    selectedTreatment,
-    setSelectedTreatment
-  ] = useState<any>(
-    treatments[0]
-  );
-
-  const [
-    startTime,
-    setStartTime
-  ] = useState("09:00");
-
-  const [
-    selectedDay,
-    setSelectedDay
-  ] = useState("الأحد");
+    doctorId,
+    setDoctorId
+  ] = useState("");
 
   const [
     doctorName,
     setDoctorName
-  ] = useState("د. أحمد");
+  ] = useState("");
 
-  if(!open){
-    return null;
+  const [
+    day,
+    setDay
+  ] = useState("الأحد");
+
+  const [
+    time,
+    setTime
+  ] = useState("09:00");
+
+  const [
+    treatment,
+    setTreatment
+  ] = useState("");
+
+  const [
+    duration,
+    setDuration
+  ] = useState(30);
+
+  const [
+    doctors,
+    setDoctors
+  ] = useState<any[]>([]);
+
+  const [
+    loading,
+    setLoading
+  ] = useState(false);
+
+  function convertToMinutes(
+    time:string
+  ){
+
+    const [
+      hours,
+      minutes
+    ] = time.split(":");
+
+    return (
+      Number(hours) * 60
+      +
+      Number(minutes)
+    );
+
   }
 
-  function createBooking(){
+  useEffect(()=>{
+
+    async function loadDoctors(){
+
+      const snapshot =
+        await getDocs(
+          collection(
+            db,
+            "users"
+          )
+        );
+
+      const doctorsData:any[] = [];
+
+      snapshot.forEach((docItem)=>{
+
+        const data =
+          docItem.data();
+
+        if(
+          data.role === "doctor"
+        ){
+
+          doctorsData.push({
+
+            id:docItem.id,
+
+            ...data,
+
+          });
+
+        }
+
+      });
+
+      setDoctors(doctorsData);
+
+    }
+
+    if(open){
+      loadDoctors();
+    }
+
+  },[open]);
+
+  useEffect(()=>{
+
+    const selectedTreatment =
+      treatments.find(
+        (item)=>
+          item.name === treatment
+      );
+
+    if(selectedTreatment){
+
+      setDuration(
+        selectedTreatment.duration
+      );
+
+    }
+
+  },[
+    treatment,
+  ]);
+
+  async function createBooking(){
 
     if(
       !patientName
+      ||
+      !doctorId
+      ||
+      !treatment
     ){
       return;
     }
 
-    const booking = {
+    try{
 
-      id:
-        Date.now().toString(),
+      setLoading(true);
 
-      patientName,
+      const bookingConflict =
+        bookings.find((booking)=>{
 
-      time:startTime,
+          if(
+            booking.doctorId
+            !==
+            doctorId
+          ){
+            return false;
+          }
 
-      status:"booked",
+          if(
+            booking.day
+            !==
+            day
+          ){
+            return false;
+          }
 
-      treatment:
-        selectedTreatment.name,
+          const newStart =
+            convertToMinutes(time);
 
-      doctorName,
+          const newEnd =
+            newStart + duration;
 
-      duration:
-        selectedTreatment.duration,
+          const oldStart =
+            convertToMinutes(
+              booking.time
+            );
 
-      day:selectedDay,
+          const oldEnd =
+            oldStart
+            +
+            booking.duration;
 
-    };
+          return(
 
-    onCreateBooking(
-      booking
-    );
+            newStart < oldEnd
 
-    setPatientName("");
+            &&
 
-    setStartTime("09:00");
+            newEnd > oldStart
 
-    setSelectedDay("الأحد");
+          );
 
-    setDoctorName("د. أحمد");
+        });
 
-    setSelectedTreatment(
-      treatments[0]
-    );
+      if(bookingConflict){
 
-    onClose();
+        alert(
+          "يوجد حجز متعارض مع هذا الموعد"
+        );
 
+        setLoading(false);
+
+        return;
+
+      }
+
+      await addDoc(
+
+        collection(
+          db,
+          "bookings"
+        ),
+
+        {
+
+          patientName,
+
+          doctorId,
+
+          doctorName,
+
+          treatment,
+
+          duration,
+
+          day,
+
+          time,
+
+          status:"booked",
+
+          createdAt:
+            Date.now(),
+
+        }
+
+      );
+
+      onClose();
+
+      setPatientName("");
+      setDoctorId("");
+      setDoctorName("");
+      setTreatment("");
+      setDuration(30);
+      setDay("الأحد");
+      setTime("09:00");
+
+    }catch(error){
+
+      console.error(error);
+
+    }finally{
+
+      setLoading(false);
+
+    }
+
+  }
+
+  if(!open){
+    return null;
   }
 
   return(
@@ -133,12 +359,17 @@ export default function QuickBookingModal({
       className="
         fixed
         inset-0
-        z-[200]
+        z-[100]
+
         bg-black/70
+        backdrop-blur-md
+
         flex
         items-center
         justify-center
-        p-4
+
+        p-3
+        md:p-6
       "
     >
 
@@ -146,49 +377,99 @@ export default function QuickBookingModal({
         className="
           w-full
           max-w-2xl
-          rounded-[40px]
-          bg-[#111c38]
+
+          max-h-[95vh]
+          overflow-y-auto
+
+          rounded-[38px]
+
+          bg-gradient-to-b
+          from-[#0d1730]
+          to-[#091427]
+
           border
           border-white/10
-          p-8
+
+          shadow-[0_20px_80px_rgba(0,0,0,0.45)]
+
+          p-5
+          md:p-8
         "
       >
 
-        {/* Header */}
+        {/* HEADER */}
 
         <div
           className="
             flex
-            items-center
+            items-start
             justify-between
+
             mb-8
           "
         >
 
-          <div>
+          <div
+            className="
+              flex
+              items-center
+              gap-4
+            "
+          >
 
-            <h2
+            <div
               className="
-                text-4xl
-                font-black
-                text-white
-                mb-2
+                w-14
+                h-14
+
+                rounded-2xl
+
+                bg-gradient-to-br
+                from-[#2948ff]
+                to-[#4d6cff]
+
+                flex
+                items-center
+                justify-center
+
+                text-2xl
+
+                shadow-xl
               "
             >
 
-              حجز جديد
+              🦷
 
-            </h2>
+            </div>
 
-            <p
-              className="
-                text-zinc-400
-              "
-            >
+            <div>
 
-              إنشاء موعد بسرعة
+              <h2
+                className="
+                  text-white
+                  text-[34px]
+                  font-black
+                  leading-none
+                "
+              >
 
-            </p>
+                حجز جديد
+
+              </h2>
+
+              <p
+                className="
+                  text-zinc-400
+                  text-sm
+                  mt-2
+                "
+              >
+
+                إنشاء موعد جديد للمريض
+
+              </p>
+
+            </div>
 
           </div>
 
@@ -197,8 +478,19 @@ export default function QuickBookingModal({
             onClick={onClose}
 
             className="
-              text-zinc-400
-              text-3xl
+              w-12
+              h-12
+
+              rounded-2xl
+
+              bg-white/5
+
+              hover:bg-white/10
+
+              transition-all
+
+              text-white
+              text-xl
             "
           >
 
@@ -208,150 +500,310 @@ export default function QuickBookingModal({
 
         </div>
 
-        {/* Form */}
+        {/* FORM */}
 
         <div
           className="
             grid
-            gap-6
+            gap-5
           "
         >
 
-          {/* Patient */}
+          {/* PATIENT */}
 
-          <div>
+          <input
 
-            <label
-              className="
-                block
-                text-white
-                mb-3
-                font-bold
-              "
-            >
+            value={patientName}
 
+            onChange={(e)=>
+              setPatientName(
+                e.target.value
+              )
+            }
+
+            placeholder="
               اسم المريض
+            "
 
-            </label>
+            className="
+              h-16
 
-            <input
+              rounded-[24px]
 
-              value={patientName}
+              bg-[#071028]
 
-              onChange={(e)=>
-                setPatientName(
-                  e.target.value
-                )
-              }
+              border
+              border-white/10
 
-              placeholder="
-                أدخل اسم المريض
-              "
+              px-5
 
-              className="
-                w-full
-                h-16
-                rounded-2xl
-                bg-[#0d1730]
-                border
-                border-white/10
-                px-5
-                text-white
-                outline-none
-              "
-            />
+              text-white
+              placeholder:text-zinc-500
 
-          </div>
+              outline-none
 
-          {/* Doctor */}
+              focus:border-blue-500/50
+              focus:ring-4
+              focus:ring-blue-500/10
 
-          <div>
+              transition-all
+            "
+          />
 
-            <label
-              className="
-                block
-                text-white
-                mb-3
-                font-bold
-              "
-            >
+          {/* DOCTOR + TREATMENT */}
 
-              الطبيب
-
-            </label>
+          <div
+            className="
+              grid
+              md:grid-cols-2
+              gap-5
+            "
+          >
 
             <select
 
-              value={doctorName}
+              value={doctorId}
+
+              onChange={(e)=>{
+
+                const selected =
+                  doctors.find(
+                    doctor =>
+                      doctor.id
+                      ===
+                      e.target.value
+                  );
+
+                setDoctorId(
+                  e.target.value
+                );
+
+                setDoctorName(
+                  selected?.name || ""
+                );
+
+              }}
+
+              className="
+                h-16
+
+                rounded-[24px]
+
+                bg-[#071028]
+
+                border
+                border-white/10
+
+                px-5
+
+                text-white
+
+                outline-none
+
+                focus:border-blue-500/50
+                focus:ring-4
+                focus:ring-blue-500/10
+              "
+            >
+
+              <option value="">
+                اختر الطبيب
+              </option>
+
+              {
+
+                doctors.map(
+                  (doctor)=>(
+
+                    <option
+                      key={doctor.id}
+                      value={doctor.id}
+                    >
+
+                      {
+                        doctor.name
+                      }
+
+                    </option>
+
+                  )
+                )
+
+              }
+
+            </select>
+
+            <select
+
+              value={treatment}
 
               onChange={(e)=>
-                setDoctorName(
+                setTreatment(
                   e.target.value
                 )
               }
 
               className="
-                w-full
                 h-16
-                rounded-2xl
-                bg-[#0d1730]
+
+                rounded-[24px]
+
+                bg-[#071028]
+
                 border
                 border-white/10
+
                 px-5
+
                 text-white
+
                 outline-none
+
+                focus:border-blue-500/50
+                focus:ring-4
+                focus:ring-blue-500/10
               "
             >
 
-              <option>
-                د. أحمد
+              <option value="">
+                اختر العلاج
               </option>
 
-              <option>
-                د. محمد
-              </option>
+              {
+
+                treatments.map((item)=>{
+
+                  return(
+
+                    <option
+                      key={item.id}
+                      value={item.name}
+                    >
+
+                      {item.name}
+
+                    </option>
+
+                  );
+
+                })
+
+              }
 
             </select>
 
           </div>
 
-          {/* Day */}
+          {/* DURATION */}
 
-          <div>
+          <div
+            className="
+              rounded-[28px]
 
-            <label
+              bg-blue-500/10
+
+              border
+              border-blue-500/20
+
+              p-5
+
+              flex
+              items-center
+              justify-between
+            "
+          >
+
+            <div>
+
+              <p
+                className="
+                  text-zinc-400
+                  text-sm
+                  mb-2
+                "
+              >
+
+                مدة الجلسة
+
+              </p>
+
+              <h3
+                className="
+                  text-white
+                  text-[30px]
+                  font-black
+                  leading-none
+                "
+              >
+
+                {duration} دقيقة
+
+              </h3>
+
+            </div>
+
+            <div
               className="
-                block
-                text-white
-                mb-3
-                font-bold
+                w-16
+                h-16
+
+                rounded-3xl
+
+                bg-blue-500/20
+
+                flex
+                items-center
+                justify-center
+
+                text-3xl
               "
             >
 
-              اليوم
+              ⏱
 
-            </label>
+            </div>
+
+          </div>
+
+          {/* DAY + TIME */}
+
+          <div
+            className="
+              grid
+              md:grid-cols-2
+              gap-5
+            "
+          >
 
             <select
 
-              value={selectedDay}
+              value={day}
 
               onChange={(e)=>
-                setSelectedDay(
+                setDay(
                   e.target.value
                 )
               }
 
               className="
-                w-full
                 h-16
-                rounded-2xl
-                bg-[#0d1730]
+
+                rounded-[24px]
+
+                bg-[#071028]
+
                 border
                 border-white/10
+
                 px-5
+
                 text-white
+
                 outline-none
+
+                focus:border-blue-500/50
+                focus:ring-4
+                focus:ring-blue-500/10
               "
             >
 
@@ -377,222 +829,90 @@ export default function QuickBookingModal({
 
             </select>
 
-          </div>
-
-          {/* Treatment */}
-
-          <div>
-
-            <label
-              className="
-                block
-                text-white
-                mb-3
-                font-bold
-              "
-            >
-
-              العلاج
-
-            </label>
-
-            <select
-
-              value={
-                selectedTreatment.id
-              }
-
-              onChange={(e)=>{
-
-                const treatment =
-                  treatments.find(
-                    t =>
-                      t.id
-                      ===
-                      e.target.value
-                  );
-
-                setSelectedTreatment(
-                  treatment
-                );
-
-              }}
-
-              className="
-                w-full
-                h-16
-                rounded-2xl
-                bg-[#0d1730]
-                border
-                border-white/10
-                px-5
-                text-white
-                outline-none
-              "
-            >
-
-              {
-
-                treatments.map(
-                  (treatment)=>(
-
-                    <option
-                      key={treatment.id}
-                      value={treatment.id}
-                    >
-
-                      {
-                        treatment.name
-                      }
-
-                    </option>
-
-                  )
-                )
-
-              }
-
-            </select>
-
-          </div>
-
-          {/* Time */}
-
-          <div>
-
-            <label
-              className="
-                block
-                text-white
-                mb-3
-                font-bold
-              "
-            >
-
-              وقت البداية
-
-            </label>
-
             <input
 
               type="time"
 
-              value={startTime}
+              value={time}
 
               onChange={(e)=>
-                setStartTime(
+                setTime(
                   e.target.value
                 )
               }
 
               className="
-                w-full
                 h-16
-                rounded-2xl
-                bg-[#0d1730]
+
+                rounded-[24px]
+
+                bg-[#071028]
+
                 border
                 border-white/10
+
                 px-5
+
                 text-white
+
                 outline-none
+
+                focus:border-blue-500/50
+                focus:ring-4
+                focus:ring-blue-500/10
               "
             />
 
           </div>
 
-          {/* Duration */}
-
-          <div
-            className="
-              rounded-3xl
-              bg-blue-500/10
-              border
-              border-blue-500/20
-              p-5
-            "
-          >
-
-            <p
-              className="
-                text-blue-300
-                mb-2
-              "
-            >
-
-              مدة الجلسة
-
-            </p>
-
-            <h3
-              className="
-                text-4xl
-                font-black
-                text-white
-              "
-            >
-
-              {
-                selectedTreatment.duration
-              }
-
-              {" "}
-              دقيقة
-
-            </h3>
-
-          </div>
-
-          {/* Actions */}
-
-          <div
-            className="
-              flex
-              gap-4
-              pt-4
-            "
-          >
-
-            <button
-              onClick={onClose}
-              className="
-                flex-1
-                h-16
-                rounded-2xl
-                bg-zinc-700
-                hover:bg-zinc-600
-                transition
-                text-white
-                font-black
-              "
-            >
-
-              إلغاء
-
-            </button>
-
-            <button
-
-              onClick={createBooking}
-
-              className="
-                flex-1
-                h-16
-                rounded-2xl
-                bg-blue-600
-                hover:bg-blue-700
-                transition
-                text-white
-                font-black
-              "
-            >
-
-              إنشاء الحجز
-
-            </button>
-
-          </div>
-
         </div>
+
+        {/* CTA */}
+
+        <button
+
+          onClick={createBooking}
+
+          disabled={loading}
+
+          className="
+            mt-8
+
+            w-full
+            h-16
+
+            rounded-[24px]
+
+            bg-gradient-to-r
+            from-[#2948ff]
+            to-[#4166ff]
+
+            hover:scale-[1.01]
+
+            transition-all
+            duration-300
+
+            shadow-[0_10px_30px_rgba(41,72,255,0.35)]
+
+            text-white
+            text-[18px]
+            font-black
+
+            disabled:opacity-50
+          "
+        >
+
+          {
+
+            loading
+            ?
+            "جاري إنشاء الحجز..."
+            :
+            "إنشاء الحجز"
+
+          }
+
+        </button>
 
       </div>
 
