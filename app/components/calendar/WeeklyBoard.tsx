@@ -23,13 +23,9 @@ export default function WeeklyBoard({
 
   return(
 
-    <div
-      className="
-        w-full
-      "
-    >
+    <div className="w-full">
 
-      {/* MOBILE SLIDER */}
+      {/* MOBILE */}
 
       <div
         className="
@@ -38,13 +34,14 @@ export default function WeeklyBoard({
           flex
           gap-4
 
-          overflow-x-auto
+          overflow-x-scroll
+
           snap-x
           snap-mandatory
 
-          pb-4
+          pb-6
 
-          scrollbar-hide
+          scroll-smooth
         "
       >
 
@@ -67,7 +64,9 @@ export default function WeeklyBoard({
                 key={day}
 
                 className="
-                  min-w-[92%]
+                  min-w-[88vw]
+                  max-w-[88vw]
+
                   snap-center
 
                   rounded-[34px]
@@ -87,7 +86,7 @@ export default function WeeklyBoard({
 
                 <div
                   className="
-                    h-[88px]
+                    h-[90px]
 
                     px-5
 
@@ -120,18 +119,13 @@ export default function WeeklyBoard({
                     🗓️
                   </div>
 
-                  <div
-                    className="
-                      text-right
-                    "
-                  >
+                  <div className="text-right">
 
                     <h2
                       className="
                         text-white
-                        text-[34px]
+                        text-[32px]
                         font-black
-                        leading-none
                       "
                     >
 
@@ -143,7 +137,6 @@ export default function WeeklyBoard({
                       className="
                         text-white/70
                         text-sm
-                        mt-1
                       "
                     >
 
@@ -167,7 +160,7 @@ export default function WeeklyBoard({
                     flex-col
                     gap-4
 
-                    min-h-[550px]
+                    min-h-[500px]
                   "
                 >
 
@@ -183,7 +176,7 @@ export default function WeeklyBoard({
                       className="
                         flex-1
 
-                        rounded-[28px]
+                        rounded-[24px]
 
                         border
                         border-dashed
@@ -194,7 +187,6 @@ export default function WeeklyBoard({
                         justify-center
 
                         text-zinc-500
-                        text-lg
                       "
                     >
 
@@ -274,13 +266,11 @@ export default function WeeklyBoard({
                 "
               >
 
-                {/* HEADER */}
-
                 <div
                   className="
-                    h-[95px]
+                    h-[90px]
 
-                    px-6
+                    px-5
 
                     bg-gradient-to-r
                     from-[#3157ff]
@@ -304,25 +294,18 @@ export default function WeeklyBoard({
                       flex
                       items-center
                       justify-center
-
-                      text-2xl
                     "
                   >
                     🗓️
                   </div>
 
-                  <div
-                    className="
-                      text-right
-                    "
-                  >
+                  <div className="text-right">
 
                     <h2
                       className="
                         text-white
-                        text-[32px]
+                        text-[30px]
                         font-black
-                        leading-none
                       "
                     >
 
@@ -334,7 +317,6 @@ export default function WeeklyBoard({
                       className="
                         text-white/70
                         text-sm
-                        mt-1
                       "
                     >
 
@@ -347,8 +329,6 @@ export default function WeeklyBoard({
                   </div>
 
                 </div>
-
-                {/* BODY */}
 
                 <div
                   className="
@@ -374,7 +354,7 @@ export default function WeeklyBoard({
                       className="
                         flex-1
 
-                        rounded-[28px]
+                        rounded-[24px]
 
                         border
                         border-dashed
@@ -385,7 +365,6 @@ export default function WeeklyBoard({
                         justify-center
 
                         text-zinc-500
-                        text-lg
                       "
                     >
 
