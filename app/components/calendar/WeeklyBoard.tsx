@@ -4,9 +4,7 @@ import BookingCard
 from "./BookingCard";
 
 type Props = {
-
   bookings:any[];
-
 };
 
 const days = [
@@ -23,114 +21,30 @@ export default function WeeklyBoard({
   bookings,
 }:Props){
 
-  const noResults =
-    bookings.length === 0;
-
-  if(noResults){
-
-    return(
-
-      <div
-        className="
-          w-full
-
-          min-h-[60vh]
-
-          flex
-          items-center
-          justify-center
-        "
-      >
-
-        <div
-          className="
-            w-full
-            max-w-xl
-
-            bg-[#091427]
-
-            border
-            border-white/10
-
-            rounded-[40px]
-
-            p-10
-
-            text-center
-
-            shadow-[0_10px_40px_rgba(0,0,0,0.35)]
-          "
-        >
-
-          <div
-            className="
-              text-7xl
-              mb-6
-            "
-          >
-
-            🔍
-
-          </div>
-
-          <h2
-            className="
-              text-white
-              text-[34px]
-              font-black
-              mb-4
-            "
-          >
-
-            لا توجد نتائج
-
-          </h2>
-
-          <p
-            className="
-              text-zinc-500
-              text-lg
-              leading-loose
-            "
-          >
-
-            لم يتم العثور على أي حجوزات
-            مطابقة لعملية البحث الحالية
-
-          </p>
-
-        </div>
-
-      </div>
-
-    );
-
-  }
-
   return(
 
     <div
       className="
         w-full
-
-        overflow-x-auto
-
-        pb-40
-
-        scrollbar-hide
       "
     >
 
+      {/* MOBILE SLIDER */}
+
       <div
         className="
+          md:hidden
+
           flex
           gap-4
-          md:gap-6
 
+          overflow-x-auto
           snap-x
           snap-mandatory
 
-          min-w-max
+          pb-4
+
+          scrollbar-hide
         "
       >
 
@@ -153,27 +67,17 @@ export default function WeeklyBoard({
                 key={day}
 
                 className="
-
+                  min-w-[92%]
                   snap-center
 
-                  w-[92vw]
-                  md:w-[340px]
+                  rounded-[34px]
 
-                  max-w-[340px]
-
-                  bg-[#0c1830]
+                  bg-[#0d1730]
 
                   border
                   border-white/10
 
-                  rounded-[34px]
-
                   overflow-hidden
-
-                  flex
-                  flex-col
-
-                  shadow-[0_10px_40px_rgba(0,0,0,0.35)]
 
                   flex-shrink-0
                 "
@@ -183,84 +87,71 @@ export default function WeeklyBoard({
 
                 <div
                   className="
-                    sticky
-                    top-0
-                    z-20
-
-                    bg-gradient-to-r
-                    from-[#2948ff]
-                    to-[#375dff]
+                    h-[88px]
 
                     px-5
-                    py-5
 
-                    border-b
-                    border-white/10
+                    bg-gradient-to-r
+                    from-[#3157ff]
+                    to-[#4469ff]
+
+                    flex
+                    items-center
+                    justify-between
                   "
                 >
 
                   <div
                     className="
+                      w-14
+                      h-14
+
+                      rounded-2xl
+
+                      bg-white/10
+
                       flex
                       items-center
-                      justify-between
+                      justify-center
+
+                      text-2xl
+                    "
+                  >
+                    🗓️
+                  </div>
+
+                  <div
+                    className="
+                      text-right
                     "
                   >
 
-                    <div
+                    <h2
                       className="
                         text-white
+                        text-[34px]
+                        font-black
+                        leading-none
                       "
                     >
 
-                      <h2
-                        className="
-                          text-[28px]
-                          font-black
-                          leading-none
-                        "
-                      >
+                      {day}
 
-                        {day}
+                    </h2>
 
-                      </h2>
-
-                      <p
-                        className="
-                          text-blue-100/70
-                          text-sm
-                          mt-2
-                        "
-                      >
-
-                        {
-                          dayBookings.length
-                        } حجوزات
-
-                      </p>
-
-                    </div>
-
-                    <div
+                    <p
                       className="
-                        w-12
-                        h-12
-
-                        rounded-2xl
-
-                        bg-white/10
-
-                        flex
-                        items-center
-                        justify-center
-
-                        text-xl
+                        text-white/70
+                        text-sm
+                        mt-1
                       "
                     >
 
-                      📅
+                      {
+                        dayBookings.length
+                      } حجوزات
 
-                    </div>
+                    </p>
 
                   </div>
 
@@ -270,31 +161,29 @@ export default function WeeklyBoard({
 
                 <div
                   className="
-                    flex-1
-
                     p-4
 
                     flex
                     flex-col
                     gap-4
 
-                    overflow-y-auto
-
-                    max-h-[72vh]
+                    min-h-[550px]
                   "
                 >
 
                   {
 
-                    dayBookings.length === 0
+                    dayBookings.length
+                    ===
+                    0
 
                     ?
 
                     <div
                       className="
-                        h-[220px]
+                        flex-1
 
-                        rounded-3xl
+                        rounded-[28px]
 
                         border
                         border-dashed
@@ -305,7 +194,198 @@ export default function WeeklyBoard({
                         justify-center
 
                         text-zinc-500
+                        text-lg
+                      "
+                    >
+
+                      لا توجد حجوزات
+
+                    </div>
+
+                    :
+
+                    dayBookings.map(
+                      (booking)=>(
+
+                        <BookingCard
+
+                          key={booking.id}
+
+                          booking={booking}
+
+                        />
+
+                      )
+                    )
+
+                  }
+
+                </div>
+
+              </div>
+
+            );
+
+          })
+
+        }
+
+      </div>
+
+      {/* DESKTOP */}
+
+      <div
+        className="
+          hidden
+          md:grid
+
+          grid-cols-5
+          gap-5
+        "
+      >
+
+        {
+
+          days.map((day)=>{
+
+            const dayBookings =
+              bookings.filter(
+                booking =>
+                  booking.day
+                  ===
+                  day
+              );
+
+            return(
+
+              <div
+
+                key={day}
+
+                className="
+                  rounded-[34px]
+
+                  bg-[#0d1730]
+
+                  border
+                  border-white/10
+
+                  overflow-hidden
+                "
+              >
+
+                {/* HEADER */}
+
+                <div
+                  className="
+                    h-[95px]
+
+                    px-6
+
+                    bg-gradient-to-r
+                    from-[#3157ff]
+                    to-[#4469ff]
+
+                    flex
+                    items-center
+                    justify-between
+                  "
+                >
+
+                  <div
+                    className="
+                      w-14
+                      h-14
+
+                      rounded-2xl
+
+                      bg-white/10
+
+                      flex
+                      items-center
+                      justify-center
+
+                      text-2xl
+                    "
+                  >
+                    🗓️
+                  </div>
+
+                  <div
+                    className="
+                      text-right
+                    "
+                  >
+
+                    <h2
+                      className="
+                        text-white
+                        text-[32px]
+                        font-black
+                        leading-none
+                      "
+                    >
+
+                      {day}
+
+                    </h2>
+
+                    <p
+                      className="
+                        text-white/70
                         text-sm
+                        mt-1
+                      "
+                    >
+
+                      {
+                        dayBookings.length
+                      } حجوزات
+
+                    </p>
+
+                  </div>
+
+                </div>
+
+                {/* BODY */}
+
+                <div
+                  className="
+                    p-4
+
+                    flex
+                    flex-col
+                    gap-4
+
+                    min-h-[700px]
+                  "
+                >
+
+                  {
+
+                    dayBookings.length
+                    ===
+                    0
+
+                    ?
+
+                    <div
+                      className="
+                        flex-1
+
+                        rounded-[28px]
+
+                        border
+                        border-dashed
+                        border-white/10
+
+                        flex
+                        items-center
+                        justify-center
+
+                        text-zinc-500
+                        text-lg
                       "
                     >
 
