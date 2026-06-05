@@ -114,7 +114,7 @@ export default function CalendarPage(){
         const text =
           search.toLowerCase();
 
-        return(
+        const matchesSearch =
 
           booking.patientName
           ?.toLowerCase()
@@ -130,15 +130,41 @@ export default function CalendarPage(){
 
           booking.doctorName
           ?.toLowerCase()
-          .includes(text)
+          .includes(text);
 
+        if(!booking.date){
+
+          return matchesSearch;
+
+        }
+
+        const bookingDate =
+          new Date(booking.date);
+
+        const sameMonth =
+
+          bookingDate.getMonth()
+          ===
+          currentDate.getMonth()
+
+          &&
+
+          bookingDate.getFullYear()
+          ===
+          currentDate.getFullYear();
+
+        return(
+          matchesSearch
+          &&
+          sameMonth
         );
 
       });
 
     },[
       bookings,
-      search
+      search,
+      currentDate
     ]);
 
   const weeklyStats =
@@ -213,7 +239,6 @@ export default function CalendarPage(){
       <main
         className="
           min-h-screen
-
           bg-[#071028]
 
           flex
@@ -339,7 +364,7 @@ export default function CalendarPage(){
 
             <button
 
-              onClick={nextMonth}
+              onClick={prevMonth}
 
               className="
                 w-12
@@ -359,7 +384,7 @@ export default function CalendarPage(){
               "
             >
 
-              <ChevronLeft size={24} />
+              <ChevronRight size={24} />
 
             </button>
 
@@ -384,7 +409,8 @@ export default function CalendarPage(){
               <h2
                 className="
                   text-white
-                  text-[28px]
+                  text-[24px]
+                  md:text-[28px]
                   font-black
                 "
               >
@@ -397,7 +423,7 @@ export default function CalendarPage(){
 
             <button
 
-              onClick={prevMonth}
+              onClick={nextMonth}
 
               className="
                 w-12
@@ -417,7 +443,7 @@ export default function CalendarPage(){
               "
             >
 
-              <ChevronRight size={24} />
+              <ChevronLeft size={24} />
 
             </button>
 
@@ -557,7 +583,7 @@ function StatCard({
 
         shadow-[0_10px_30px_rgba(0,0,0,0.25)]
 
-        min-h-[105px]
+        min-h-[100px]
 
         flex
         flex-col
@@ -578,7 +604,7 @@ function StatCard({
         className="
           text-zinc-400
 
-          text-[12px]
+          text-[11px]
           md:text-sm
 
           text-right
@@ -595,7 +621,7 @@ function StatCard({
         className="
           text-white
 
-          text-[38px]
+          text-[32px]
           md:text-[52px]
 
           leading-none
