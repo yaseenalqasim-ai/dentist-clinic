@@ -1,26 +1,18 @@
 "use client";
 
-import Link
-from "next/link";
+import Link from "next/link";
 
 import {
   usePathname,
 } from "next/navigation";
 
 import {
-
   House,
-
   CalendarDays,
-
   Users,
-
   UserRoundCog,
-
   Settings,
-
   BarChart3,
-
 } from "lucide-react";
 
 import {
@@ -39,10 +31,6 @@ export default function BottomNav(){
   const hideNavbar =
 
     pathname === "/login"
-
-    ||
-
-    pathname === "/create-user"
 
     ||
 
@@ -155,12 +143,6 @@ export default function BottomNav(){
       },
 
       {
-        name:"الإحصائيات",
-        href:"/reports",
-        icon:BarChart3,
-      },
-
-      {
         name:"الإعدادات",
         href:"/settings",
         icon:Settings,
@@ -179,97 +161,74 @@ export default function BottomNav(){
         left-0
         right-0
 
-        z-[90]
-
-        px-3
-        pb-3
-
-        pointer-events-none
+        z-[100]
       "
     >
 
-      <nav
-        className="
-          max-w-2xl
-          mx-auto
+      {/* BACKDROP */}
 
-          bg-[#0d1730]/90
+      <div
+        className="
+          absolute
+          inset-0
+
+          bg-[#081120]/90
 
           backdrop-blur-2xl
 
-          border
+          border-t
           border-white/10
+        "
+      />
 
-          rounded-[30px]
+      {/* NAV */}
 
-          shadow-[0_10px_40px_rgba(0,0,0,0.45)]
+      <nav
+        className="
+          relative
 
-          pointer-events-auto
+          h-[88px]
+
+          px-2
+
+          flex
+          items-center
+          justify-around
         "
       >
 
-        <div
-          className={`
+        {
 
-            grid
+          navItems.map((item:any)=>{
 
-            ${
-              navItems.length === 5
+            const active =
+              pathname ===
+              item.href;
 
-              ?
+            const Icon =
+              item.icon;
 
-              "grid-cols-5"
+            return(
 
-              :
+              <Link
 
-              navItems.length === 4
+                key={item.href}
 
-              ?
+                href={item.href}
 
-              "grid-cols-4"
+                className="
+                  flex
+                  flex-col
+                  items-center
+                  justify-center
 
-              :
+                  flex-1
 
-              "grid-cols-3"
+                  relative
+                "
+              >
 
-            }
-
-          `}
-        >
-
-          {
-
-            navItems.map((item:any)=>{
-
-              const active =
-                pathname ===
-                item.href;
-
-              const Icon =
-                item.icon;
-
-              return(
-
-                <Link
-
-                  key={item.href}
-
-                  href={item.href}
-
-                  className="
-                    relative
-
-                    flex
-                    flex-col
-
-                    items-center
-                    justify-center
-
-                    py-3
-
-                    transition-all
-                  "
-                >
+                <>
 
                   {
 
@@ -278,16 +237,17 @@ export default function BottomNav(){
                       <div
                         className="
                           absolute
-                          inset-x-3
-                          top-2
-                          bottom-2
 
-                          rounded-2xl
+                          top-1
 
-                          bg-blue-500/15
+                          w-14
+                          h-1.5
 
-                          border
-                          border-blue-500/20
+                          rounded-full
+
+                          bg-[#4b6fff]
+
+                          shadow-[0_0_20px_rgba(75,111,255,0.9)]
                         "
                       />
 
@@ -296,78 +256,91 @@ export default function BottomNav(){
                   }
 
                   <div
-                    className="
-                      relative
-                      z-10
+                    className={`
+
+                      w-14
+                      h-14
+
+                      rounded-[18px]
 
                       flex
-                      flex-col
-
                       items-center
-                    "
-                  >
+                      justify-center
 
-                    <Icon
+                      transition-all
+                      duration-300
 
-                      size={22}
-
-                      strokeWidth={2.5}
-
-                      className={
-
+                      ${
                         active
 
                         ?
 
-                        "text-blue-400"
+                        `
+                        bg-gradient-to-br
+                        from-[#3257ff]
+                        to-[#5271ff]
+
+                        text-white
+
+                        shadow-[0_15px_35px_rgba(61,99,255,0.45)]
+                        `
+
+                        :
+
+                        `
+                        text-zinc-500
+                        `
+                      }
+
+                    `}
+                  >
+
+                    <Icon
+                      size={24}
+                      strokeWidth={2.6}
+                    />
+
+                  </div>
+
+                  <span
+                    className={`
+
+                      text-[12px]
+
+                      mt-1
+
+                      font-bold
+
+                      transition-all
+
+                      ${
+                        active
+
+                        ?
+
+                        "text-[#4b6fff]"
 
                         :
 
                         "text-zinc-500"
-
                       }
 
-                    />
+                    `}
+                  >
 
-                    <span
-                      className={`
+                    {item.name}
 
-                        text-[11px]
-                        font-black
+                  </span>
 
-                        mt-1
+                </>
 
-                        ${
-                          active
+              </Link>
 
-                          ?
+            );
 
-                          "text-white"
+          })
 
-                          :
-
-                          "text-zinc-500"
-
-                        }
-
-                      `}
-                    >
-
-                      {item.name}
-
-                    </span>
-
-                  </div>
-
-                </Link>
-
-              );
-
-            })
-
-          }
-
-        </div>
+        }
 
       </nav>
 
