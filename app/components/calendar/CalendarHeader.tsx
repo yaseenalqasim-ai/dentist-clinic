@@ -1,11 +1,8 @@
 "use client";
 
 type Props = {
-
   search:string;
-
-  setSearch:(value:string)=>void;
-
+  setSearch:any;
 };
 
 export default function CalendarHeader({
@@ -17,88 +14,81 @@ export default function CalendarHeader({
 
     <div
       className="
-        w-full
-
-        mb-8
-
-        flex
-        flex-col
-        lg:flex-row
-
-        lg:items-center
-        lg:justify-between
-
-        gap-5
-
-        bg-[#091427]
+        rounded-[34px]
 
         border
         border-white/10
 
-        rounded-[36px]
+        bg-[#091427]
 
-        px-5
-        md:px-8
+        p-5
+        md:p-7
 
-        py-6
-
-        shadow-[0_10px_40px_rgba(0,0,0,0.35)]
+        mb-6
       "
     >
 
-      {/* RIGHT */}
+      {/* TOP */}
 
       <div
         className="
           flex
           items-center
+          justify-between
+
           gap-4
+
+          mb-5
         "
       >
 
         <div
           className="
-            w-14
-            h-14
+            w-20
+            h-20
 
-            rounded-2xl
+            md:w-24
+            md:h-24
+
+            rounded-[28px]
 
             bg-gradient-to-br
-            from-[#2948ff]
-            to-[#4f6bff]
+            from-[#3d63ff]
+            to-[#4b6fff]
 
             flex
             items-center
             justify-center
 
-            text-3xl
+            text-4xl
 
-            shadow-xl
+            shadow-[0_15px_35px_rgba(61,99,255,0.35)]
+
+            flex-shrink-0
           "
         >
-
           🗓️
-
         </div>
 
         <div
           className="
             text-right
+            flex-1
           "
         >
 
           <h1
             className="
-              text-[34px]
-              md:text-[42px]
+              text-white
+
+              text-[42px]
+              md:text-[64px]
 
               leading-none
 
               font-black
 
-              text-white
-
-              tracking-tight
+              mb-2
             "
           >
 
@@ -109,11 +99,9 @@ export default function CalendarHeader({
           <p
             className="
               text-zinc-400
-              text-sm
-              md:text-[15px]
 
-              mt-2
-              font-medium
+              text-[16px]
+              md:text-[22px]
             "
           >
 
@@ -125,132 +113,108 @@ export default function CalendarHeader({
 
       </div>
 
-      {/* LEFT */}
+      {/* SEARCH */}
 
       <div
         className="
-          flex
-          flex-col
-          md:flex-row
-
-          items-stretch
-          md:items-center
-
-          gap-4
+          relative
+          mb-4
         "
       >
 
-        {/* SEARCH */}
+        <input
 
-        <div
+          value={search}
+
+          onChange={(e)=>
+            setSearch(
+              e.target.value
+            )
+          }
+
+          placeholder="ابحث عن مريض أو علاج..."
+
           className="
             w-full
-            md:w-[320px]
 
-            bg-[#0d1a31]
+            h-[72px]
+
+            rounded-[24px]
+
+            bg-[#0d1730]
 
             border
             border-white/10
 
-            rounded-2xl
+            pr-6
+            pl-16
 
-            px-5
-            h-14
+            text-white
+            text-[20px]
 
-            flex
-            items-center
-            gap-3
+            outline-none
+
+            focus:border-blue-500/50
+
+            transition-all
           "
-        >
-
-          <span
-            className="
-              text-zinc-500
-              text-lg
-            "
-          >
-
-            🔍
-
-          </span>
-
-          <input
-
-            value={search}
-
-            onChange={(e)=>
-              setSearch(
-                e.target.value
-              )
-            }
-
-            placeholder="
-              ابحث عن مريض أو علاج...
-            "
-
-            className="
-              bg-transparent
-              outline-none
-
-              text-white
-              placeholder:text-zinc-500
-
-              w-full
-            "
-          />
-
-        </div>
-
-        {/* MONTH */}
+        />
 
         <div
           className="
-            bg-[#0d1a31]
+            absolute
 
-            border
-            border-white/10
+            left-5
+            top-1/2
+            -translate-y-1/2
 
-            rounded-2xl
-
-            px-6
-            h-14
-
-            flex
-            flex-col
-            items-center
-            justify-center
-
-            text-center
-
-            min-w-[140px]
+            text-3xl
           "
         >
-
-          <p
-            className="
-              text-zinc-500
-              text-[10px]
-              mb-1
-            "
-          >
-
-            الشهر الحالي
-
-          </p>
-
-          <h3
-            className="
-              text-white
-              text-sm
-              font-black
-            "
-          >
-
-            يونيو 2026
-
-          </h3>
-
+          🔍
         </div>
+
+      </div>
+
+      {/* MONTH */}
+
+      <div
+        className="
+          h-[92px]
+
+          rounded-[28px]
+
+          border
+          border-white/10
+
+          bg-[#0d1730]
+
+          flex
+          flex-col
+          items-center
+          justify-center
+        "
+      >
+
+        <p
+          className="
+            text-zinc-500
+            text-sm
+            mb-1
+          "
+        >
+          الشهر الحالي
+        </p>
+
+        <h2
+          className="
+            text-white
+            text-[26px]
+            font-black
+          "
+        >
+          يونيو 2026
+        </h2>
 
       </div>
 

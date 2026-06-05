@@ -23,25 +23,29 @@ export default function WeeklyBoard({
 
   return(
 
-    <div className="w-full">
+    <div
+      className="
+        w-full
 
-      {/* MOBILE */}
+        overflow-x-auto
+
+        pb-6
+
+        scrollbar-thin
+        scrollbar-thumb-blue-500/40
+        scrollbar-track-transparent
+      "
+    >
 
       <div
         className="
-          md:hidden
-
           flex
           gap-4
 
-          overflow-x-scroll
+          md:grid
+          md:grid-cols-5
 
-          snap-x
-          snap-mandatory
-
-          pb-6
-
-          scroll-smooth
+          md:min-w-0
         "
       >
 
@@ -64,21 +68,27 @@ export default function WeeklyBoard({
                 key={day}
 
                 className="
-                  min-w-[88vw]
-                  max-w-[88vw]
+                  min-w-[82vw]
+                  max-w-[82vw]
 
-                  snap-center
+                  md:min-w-0
+                  md:max-w-none
 
-                  rounded-[34px]
+                  md:w-full
 
                   bg-[#0d1730]
+
+                  rounded-[34px]
 
                   border
                   border-white/10
 
                   overflow-hidden
 
-                  flex-shrink-0
+                  flex
+                  flex-col
+
+                  shadow-[0_15px_50px_rgba(0,0,0,0.35)]
                 "
               >
 
@@ -86,13 +96,11 @@ export default function WeeklyBoard({
 
                 <div
                   className="
-                    h-[90px]
-
-                    px-5
-
                     bg-gradient-to-r
-                    from-[#3157ff]
-                    to-[#4469ff]
+                    from-[#3257ff]
+                    to-[#4d6dff]
+
+                    p-5
 
                     flex
                     items-center
@@ -102,10 +110,10 @@ export default function WeeklyBoard({
 
                   <div
                     className="
-                      w-14
-                      h-14
+                      w-16
+                      h-16
 
-                      rounded-2xl
+                      rounded-[20px]
 
                       bg-white/10
 
@@ -113,19 +121,29 @@ export default function WeeklyBoard({
                       items-center
                       justify-center
 
-                      text-2xl
+                      text-3xl
                     "
                   >
                     🗓️
                   </div>
 
-                  <div className="text-right">
+                  <div
+                    className="
+                      text-right
+                    "
+                  >
 
                     <h2
                       className="
                         text-white
-                        text-[32px]
+
+                        text-[26px]
+
                         font-black
+
+                        leading-none
+
+                        mb-2
                       "
                     >
 
@@ -136,7 +154,8 @@ export default function WeeklyBoard({
                     <p
                       className="
                         text-white/70
-                        text-sm
+
+                        text-[14px]
                       "
                     >
 
@@ -154,13 +173,13 @@ export default function WeeklyBoard({
 
                 <div
                   className="
-                    p-4
+                    p-3
+
+                    min-h-[420px]
 
                     flex
                     flex-col
                     gap-4
-
-                    min-h-[500px]
                   "
                 >
 
@@ -170,207 +189,33 @@ export default function WeeklyBoard({
                     ===
                     0
 
-                    ?
+                    ? (
 
-                    <div
-                      className="
-                        flex-1
+                      <div
+                        className="
+                          flex-1
 
-                        rounded-[24px]
+                          rounded-[28px]
 
-                        border
-                        border-dashed
-                        border-white/10
+                          border-2
+                          border-dashed
+                          border-white/5
 
-                        flex
-                        items-center
-                        justify-center
+                          flex
+                          items-center
+                          justify-center
 
-                        text-zinc-500
-                      "
-                    >
+                          text-zinc-600
+                          text-xl
+                          font-bold
+                        "
+                      >
 
-                      لا توجد حجوزات
+                        لا توجد حجوزات
 
-                    </div>
+                      </div>
 
-                    :
-
-                    dayBookings.map(
-                      (booking)=>(
-
-                        <BookingCard
-
-                          key={booking.id}
-
-                          booking={booking}
-
-                        />
-
-                      )
                     )
-
-                  }
-
-                </div>
-
-              </div>
-
-            );
-
-          })
-
-        }
-
-      </div>
-
-      {/* DESKTOP */}
-
-      <div
-        className="
-          hidden
-          md:grid
-
-          grid-cols-5
-          gap-5
-        "
-      >
-
-        {
-
-          days.map((day)=>{
-
-            const dayBookings =
-              bookings.filter(
-                booking =>
-                  booking.day
-                  ===
-                  day
-              );
-
-            return(
-
-              <div
-
-                key={day}
-
-                className="
-                  rounded-[34px]
-
-                  bg-[#0d1730]
-
-                  border
-                  border-white/10
-
-                  overflow-hidden
-                "
-              >
-
-                <div
-                  className="
-                    h-[90px]
-
-                    px-5
-
-                    bg-gradient-to-r
-                    from-[#3157ff]
-                    to-[#4469ff]
-
-                    flex
-                    items-center
-                    justify-between
-                  "
-                >
-
-                  <div
-                    className="
-                      w-14
-                      h-14
-
-                      rounded-2xl
-
-                      bg-white/10
-
-                      flex
-                      items-center
-                      justify-center
-                    "
-                  >
-                    🗓️
-                  </div>
-
-                  <div className="text-right">
-
-                    <h2
-                      className="
-                        text-white
-                        text-[30px]
-                        font-black
-                      "
-                    >
-
-                      {day}
-
-                    </h2>
-
-                    <p
-                      className="
-                        text-white/70
-                        text-sm
-                      "
-                    >
-
-                      {
-                        dayBookings.length
-                      } حجوزات
-
-                    </p>
-
-                  </div>
-
-                </div>
-
-                <div
-                  className="
-                    p-4
-
-                    flex
-                    flex-col
-                    gap-4
-
-                    min-h-[700px]
-                  "
-                >
-
-                  {
-
-                    dayBookings.length
-                    ===
-                    0
-
-                    ?
-
-                    <div
-                      className="
-                        flex-1
-
-                        rounded-[24px]
-
-                        border
-                        border-dashed
-                        border-white/10
-
-                        flex
-                        items-center
-                        justify-center
-
-                        text-zinc-500
-                      "
-                    >
-
-                      لا توجد حجوزات
-
-                    </div>
 
                     :
 
