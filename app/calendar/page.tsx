@@ -434,28 +434,31 @@ export default function CalendarPage(){
                 setBookingModal(true)
               }
 
-              className="
-                h-16
+             className="
+  h-16
 
-                px-7
+  w-full
+  md:w-auto
 
-                rounded-[24px]
+  px-7
 
-                bg-gradient-to-r
-                from-[#2948ff]
-                to-[#3d63ff]
+  rounded-[26px]
 
-                shadow-[0_10px_30px_rgba(41,72,255,0.35)]
+  bg-gradient-to-r
+  from-[#3257ff]
+  to-[#4f6dff]
 
-                hover:scale-[1.02]
+  shadow-[0_15px_35px_rgba(50,87,255,0.35)]
 
-                transition-all
-                duration-300
+  hover:scale-[1.02]
 
-                text-white
-                text-[17px]
-                font-black
-              "
+  transition-all
+  duration-300
+
+  text-white
+  text-[18px]
+  font-black
+"
             >
 
               + حجز جديد

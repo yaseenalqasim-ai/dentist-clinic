@@ -31,8 +31,13 @@ export default function WeeklyBoard({
 
         pb-6
 
+        snap-x
+        snap-mandatory
+
+        scroll-smooth
+
         scrollbar-thin
-        scrollbar-thumb-blue-500/40
+        scrollbar-thumb-blue-500/30
         scrollbar-track-transparent
       "
     >
@@ -68,8 +73,10 @@ export default function WeeklyBoard({
                 key={day}
 
                 className="
-                  min-w-[82vw]
-                  max-w-[82vw]
+                  snap-center
+
+                  min-w-[84vw]
+                  max-w-[84vw]
 
                   md:min-w-0
                   md:max-w-none
@@ -78,7 +85,7 @@ export default function WeeklyBoard({
 
                   bg-[#0d1730]
 
-                  rounded-[34px]
+                  rounded-[36px]
 
                   border
                   border-white/10
@@ -88,7 +95,7 @@ export default function WeeklyBoard({
                   flex
                   flex-col
 
-                  shadow-[0_15px_50px_rgba(0,0,0,0.35)]
+                  shadow-[0_20px_60px_rgba(0,0,0,0.35)]
                 "
               >
 
@@ -98,7 +105,7 @@ export default function WeeklyBoard({
                   className="
                     bg-gradient-to-r
                     from-[#3257ff]
-                    to-[#4d6dff]
+                    to-[#5271ff]
 
                     p-5
 
@@ -113,7 +120,7 @@ export default function WeeklyBoard({
                       w-16
                       h-16
 
-                      rounded-[20px]
+                      rounded-[22px]
 
                       bg-white/10
 
@@ -122,6 +129,8 @@ export default function WeeklyBoard({
                       justify-center
 
                       text-3xl
+
+                      shadow-inner
                     "
                   >
                     🗓️
@@ -137,7 +146,7 @@ export default function WeeklyBoard({
                       className="
                         text-white
 
-                        text-[26px]
+                        text-[30px]
 
                         font-black
 
@@ -155,7 +164,9 @@ export default function WeeklyBoard({
                       className="
                         text-white/70
 
-                        text-[14px]
+                        text-[15px]
+
+                        font-medium
                       "
                     >
 
@@ -175,7 +186,7 @@ export default function WeeklyBoard({
                   className="
                     p-3
 
-                    min-h-[420px]
+                    min-h-[430px]
 
                     flex
                     flex-col
