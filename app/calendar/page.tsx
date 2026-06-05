@@ -14,6 +14,10 @@ import {
 } from "firebase/firestore";
 
 import {
+  Plus,
+} from "lucide-react";
+
+import {
   db,
 } from "@/lib/firebase";
 
@@ -160,8 +164,6 @@ export default function CalendarPage(){
       filteredBookings
     ]);
 
-  /* LOADING */
-
   if(loading){
 
     return(
@@ -170,184 +172,22 @@ export default function CalendarPage(){
         className="
           min-h-screen
           bg-[#071028]
-
-          p-4
-          md:p-6
+          flex
+          items-center
+          justify-center
+          text-white
+          text-3xl
+          font-black
         "
       >
 
-        <div
-          className="
-            max-w-[1900px]
-            mx-auto
-          "
-        >
-
-          {/* HEADER */}
-
-          <div
-            className="
-              h-[140px]
-
-              rounded-[36px]
-
-              bg-[#091427]
-
-              border
-              border-white/10
-
-              animate-pulse
-
-              mb-8
-            "
-          />
-
-          {/* STATS */}
-
-          <div
-            className="
-              grid
-
-              grid-cols-1
-              sm:grid-cols-3
-
-              gap-4
-
-              mb-8
-            "
-          >
-
-            {
-
-              Array.from({
-                length:3
-              }).map((_,i)=>(
-
-                <div
-
-                  key={i}
-
-                  className="
-                    h-[130px]
-
-                    rounded-[30px]
-
-                    bg-[#091427]
-
-                    border
-                    border-white/10
-
-                    animate-pulse
-                  "
-                />
-
-              ))
-
-            }
-
-          </div>
-
-          {/* BOARD */}
-
-          <div
-            className="
-              flex
-              gap-5
-
-              overflow-hidden
-            "
-          >
-
-            {
-
-              Array.from({
-                length:4
-              }).map((_,i)=>(
-
-                <div
-
-                  key={i}
-
-                  className="
-                    w-[320px]
-
-                    rounded-[34px]
-
-                    bg-[#091427]
-
-                    border
-                    border-white/10
-
-                    flex-shrink-0
-
-                    overflow-hidden
-                  "
-                >
-
-                  <div
-                    className="
-                      h-[90px]
-
-                      bg-blue-500/20
-
-                      animate-pulse
-                    "
-                  />
-
-                  <div
-                    className="
-                      p-4
-
-                      flex
-                      flex-col
-                      gap-4
-                    "
-                  >
-
-                    {
-
-                      Array.from({
-                        length:3
-                      }).map((_,x)=>(
-
-                        <div
-
-                          key={x}
-
-                          className="
-                            h-[170px]
-
-                            rounded-[28px]
-
-                            bg-[#0d1730]
-
-                            animate-pulse
-                          "
-                        />
-
-                      ))
-
-                    }
-
-                  </div>
-
-                </div>
-
-              ))
-
-            }
-
-          </div>
-
-        </div>
+        جاري تحميل الحجوزات...
 
       </main>
 
     );
 
   }
-
-  /* PAGE */
 
   return(
 
@@ -358,17 +198,46 @@ export default function CalendarPage(){
           min-h-screen
           bg-[#071028]
           text-white
-
           px-3
           md:px-6
-
           pt-4
-          pb-36
+          pb-40
         "
       >
 
+        {/* BACKGROUND */}
+
         <div
           className="
+            fixed
+            top-[-150px]
+            left-[-150px]
+            w-[400px]
+            h-[400px]
+            rounded-full
+            bg-blue-500/10
+            blur-[120px]
+            pointer-events-none
+          "
+        />
+
+        <div
+          className="
+            fixed
+            bottom-[-200px]
+            right-[-150px]
+            w-[400px]
+            h-[400px]
+            rounded-full
+            bg-indigo-500/10
+            blur-[140px]
+            pointer-events-none
+          "
+        />
+
+        <div
+          className="
+            relative
             max-w-[1900px]
             mx-auto
           "
@@ -389,13 +258,10 @@ export default function CalendarPage(){
           <div
             className="
               grid
-
               grid-cols-1
               sm:grid-cols-3
-
               gap-4
-
-              mb-7
+              mb-6
             "
           >
 
@@ -418,55 +284,6 @@ export default function CalendarPage(){
 
           </div>
 
-          {/* ADD BUTTON */}
-
-          <div
-            className="
-              flex
-              justify-end
-              mb-7
-            "
-          >
-
-            <button
-
-              onClick={()=>
-                setBookingModal(true)
-              }
-
-             className="
-  h-16
-
-  w-full
-  md:w-auto
-
-  px-7
-
-  rounded-[26px]
-
-  bg-gradient-to-r
-  from-[#3257ff]
-  to-[#4f6dff]
-
-  shadow-[0_15px_35px_rgba(50,87,255,0.35)]
-
-  hover:scale-[1.02]
-
-  transition-all
-  duration-300
-
-  text-white
-  text-[18px]
-  font-black
-"
-            >
-
-              + حجز جديد
-
-            </button>
-
-          </div>
-
           {/* BOARD */}
 
           <WeeklyBoard
@@ -474,6 +291,43 @@ export default function CalendarPage(){
           />
 
         </div>
+
+        {/* FLOATING BUTTON */}
+
+        <button
+
+          onClick={()=>
+            setBookingModal(true)
+          }
+
+          className="
+            fixed
+            bottom-28
+            right-5
+            z-[90]
+            w-[72px]
+            h-[72px]
+            rounded-full
+            bg-gradient-to-br
+            from-[#3257ff]
+            to-[#5271ff]
+            shadow-[0_20px_50px_rgba(50,87,255,0.45)]
+            flex
+            items-center
+            justify-center
+            hover:scale-110
+            active:scale-95
+            transition-all
+            duration-300
+          "
+        >
+
+          <Plus
+            size={34}
+            strokeWidth={3}
+          />
+
+        </button>
 
         {/* MODAL */}
 
@@ -511,33 +365,22 @@ function StatCard({
     <div
       className={`
 
-        rounded-[30px]
+        rounded-[32px]
 
         p-6
 
-        shadow-[0_10px_40px_rgba(0,0,0,0.35)]
-
         border
+
+        backdrop-blur-xl
+
+        shadow-[0_15px_50px_rgba(0,0,0,0.35)]
 
         ${
           green
-
-          ?
-
-          "bg-emerald-500/10 border-emerald-500/20"
-
-          :
-
-          red
-
-          ?
-
-          "bg-red-500/10 border-red-500/20"
-
-          :
-
-          "bg-[#091427] border-white/10"
-
+            ? "bg-emerald-500/10 border-emerald-500/20"
+            : red
+            ? "bg-red-500/10 border-red-500/20"
+            : "bg-[#091427] border-white/10"
         }
 
       `}
@@ -558,9 +401,9 @@ function StatCard({
       <h2
         className="
           text-white
-          text-[42px]
-          font-black
+          text-[52px]
           leading-none
+          font-black
         "
       >
 
