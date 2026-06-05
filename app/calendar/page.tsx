@@ -14,6 +14,8 @@ import {
 } from "firebase/firestore";
 
 import {
+  ChevronLeft,
+  ChevronRight,
   Plus,
 } from "lucide-react";
 
@@ -54,6 +56,11 @@ export default function CalendarPage(){
     search,
     setSearch
   ] = useState("");
+
+  const [
+    currentDate,
+    setCurrentDate
+  ] = useState(new Date());
 
   useEffect(()=>{
 
@@ -164,6 +171,41 @@ export default function CalendarPage(){
       filteredBookings
     ]);
 
+  const monthName =
+    currentDate.toLocaleDateString(
+      "ar-EG",
+      {
+        month:"long",
+        year:"numeric",
+      }
+    );
+
+  function nextMonth(){
+
+    const next =
+      new Date(currentDate);
+
+    next.setMonth(
+      next.getMonth() + 1
+    );
+
+    setCurrentDate(next);
+
+  }
+
+  function prevMonth(){
+
+    const prev =
+      new Date(currentDate);
+
+    prev.setMonth(
+      prev.getMonth() - 1
+    );
+
+    setCurrentDate(prev);
+
+  }
+
   if(loading){
 
     return(
@@ -171,10 +213,13 @@ export default function CalendarPage(){
       <main
         className="
           min-h-screen
+
           bg-[#071028]
+
           flex
           items-center
           justify-center
+
           text-white
           text-3xl
           font-black
@@ -196,10 +241,14 @@ export default function CalendarPage(){
       <main
         className="
           min-h-screen
+
           bg-[#071028]
+
           text-white
+
           px-3
           md:px-6
+
           pt-4
           pb-40
         "
@@ -210,13 +259,19 @@ export default function CalendarPage(){
         <div
           className="
             fixed
+
             top-[-150px]
             left-[-150px]
+
             w-[400px]
             h-[400px]
+
             rounded-full
+
             bg-blue-500/10
+
             blur-[120px]
+
             pointer-events-none
           "
         />
@@ -224,13 +279,19 @@ export default function CalendarPage(){
         <div
           className="
             fixed
+
             bottom-[-200px]
             right-[-150px]
+
             w-[400px]
             h-[400px]
+
             rounded-full
+
             bg-indigo-500/10
+
             blur-[140px]
+
             pointer-events-none
           "
         />
@@ -238,6 +299,7 @@ export default function CalendarPage(){
         <div
           className="
             relative
+
             max-w-[1900px]
             mx-auto
           "
@@ -253,31 +315,140 @@ export default function CalendarPage(){
 
           />
 
+          {/* MONTH NAVIGATION */}
+
+          <div
+            className="
+              mb-5
+
+              rounded-[28px]
+
+              bg-[#091427]
+
+              border
+              border-white/10
+
+              px-4
+              py-4
+
+              flex
+              items-center
+              justify-between
+            "
+          >
+
+            <button
+
+              onClick={nextMonth}
+
+              className="
+                w-12
+                h-12
+
+                rounded-2xl
+
+                bg-white/5
+
+                flex
+                items-center
+                justify-center
+
+                hover:bg-white/10
+
+                transition-all
+              "
+            >
+
+              <ChevronLeft size={24} />
+
+            </button>
+
+            <div
+              className="
+                text-center
+              "
+            >
+
+              <p
+                className="
+                  text-zinc-500
+                  text-sm
+                  mb-1
+                "
+              >
+
+                الشهر الحالي
+
+              </p>
+
+              <h2
+                className="
+                  text-white
+                  text-[28px]
+                  font-black
+                "
+              >
+
+                {monthName}
+
+              </h2>
+
+            </div>
+
+            <button
+
+              onClick={prevMonth}
+
+              className="
+                w-12
+                h-12
+
+                rounded-2xl
+
+                bg-white/5
+
+                flex
+                items-center
+                justify-center
+
+                hover:bg-white/10
+
+                transition-all
+              "
+            >
+
+              <ChevronRight size={24} />
+
+            </button>
+
+          </div>
+
           {/* STATS */}
 
           <div
             className="
               grid
-              grid-cols-1
-              sm:grid-cols-3
-              gap-4
-              mb-6
+              grid-cols-3
+
+              gap-3
+
+              mb-5
             "
           >
 
             <StatCard
-              title="إجمالي الحجوزات"
+              title="الكل"
               value={weeklyStats.total}
             />
 
             <StatCard
-              title="الحجوزات المكتملة"
+              title="مكتملة"
               value={weeklyStats.completed}
               green
             />
 
             <StatCard
-              title="الحجوزات الملغية"
+              title="ملغية"
               value={weeklyStats.cancelled}
               red
             />
@@ -302,21 +473,31 @@ export default function CalendarPage(){
 
           className="
             fixed
+
             bottom-28
             right-5
+
             z-[90]
+
             w-[72px]
             h-[72px]
+
             rounded-full
+
             bg-gradient-to-br
             from-[#3257ff]
             to-[#5271ff]
+
             shadow-[0_20px_50px_rgba(50,87,255,0.45)]
+
             flex
             items-center
             justify-center
+
             hover:scale-110
+
             active:scale-95
+
             transition-all
             duration-300
           "
@@ -365,15 +546,22 @@ function StatCard({
     <div
       className={`
 
-        rounded-[32px]
+        rounded-[24px]
 
-        p-6
+        px-3
+        py-4
 
         border
 
         backdrop-blur-xl
 
-        shadow-[0_15px_50px_rgba(0,0,0,0.35)]
+        shadow-[0_10px_30px_rgba(0,0,0,0.25)]
+
+        min-h-[105px]
+
+        flex
+        flex-col
+        justify-between
 
         ${
           green
@@ -388,9 +576,14 @@ function StatCard({
 
       <p
         className="
-          text-zinc-500
-          text-sm
-          mb-3
+          text-zinc-400
+
+          text-[12px]
+          md:text-sm
+
+          text-right
+
+          font-medium
         "
       >
 
@@ -401,9 +594,15 @@ function StatCard({
       <h2
         className="
           text-white
-          text-[52px]
+
+          text-[38px]
+          md:text-[52px]
+
           leading-none
+
           font-black
+
+          text-left
         "
       >
 
